@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <script>try{var __p=JSON.parse(localStorage.getItem("polymess_prefs")||"{}"),__t=__p.theme||"auto";if(__t==="auto")__t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=__t}catch(e){}</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f2347">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PolyMess">
 <title>PolyMess</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -160,8 +167,15 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 @media(max-width:1020px){:root{--listw:280px}}
 /* Mobile */
 @media(max-width:900px){
- #app,#app.noinfo{grid-template-columns:1fr;position:fixed;inset:0}
- .rail,.info{display:none}
+ #app,#app.noinfo{grid-template-columns:1fr;position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100dvh)}
+ html,body{overflow:hidden;overscroll-behavior:none}
+ input,textarea{font-size:16px!important}
+ .rail{display:none}
+ .info{display:none}
+ #app.mobinfo .info{display:block;position:fixed;left:0;right:0;top:0;bottom:0;width:auto;max-width:none;z-index:45;box-shadow:none;padding-top:64px}
+ #app.mobinfo .info .back{display:block;position:absolute;left:14px;top:14px}
+ .ch .av,.ch .n{cursor:pointer}
+ #chSub:after{content:' ›'}
  .list{border-right:none}
  #app.inchat .list{display:none}
  #app:not(.inchat) .chat{display:none}
@@ -222,7 +236,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
    <div class="ch">
     <button class="back" id="backBtn">‹</button>
     <div class="av" id="chAv" style="width:42px;height:42px;font-size:15px"></div>
-    <div><div class="n" id="chName"></div><div class="s" id="chSub"></div></div>
+    <div id="chInfo"><div class="n" id="chName"></div><div class="s" id="chSub"></div></div>
     <span class="sp"></span><button class="ibtn" id="infoBtn" title="Informations sur la conversation" aria-label="Informations">ⓘ</button>
    </div>
    <div class="msgs" id="msgs"></div>
@@ -347,7 +361,7 @@ async function onNewMsg(m){
     if(prefs.sound&&(document.hidden||S.cur!==c.id))beep();
     if(prefs.notif&&document.hidden&&'Notification' in window&&Notification.permission==='granted'){
       const who=c.members.find(x=>x.id===m.sender_id)?.display_name||'Nouveau message';
-      try{new Notification(c.is_group?`${c.name} · ${who}`:who,{body:m.content.slice(0,140),tag:c.id})}catch(e){}
+      showNotif(c.is_group?`${c.name} · ${who}`:who,m.content.slice(0,140),c.id);
     }
   }
   if(S.msgs[c.id]&&!S.msgs[c.id].some(x=>x.id===m.id))S.msgs[c.id].push(m);
@@ -406,6 +420,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 });
 
 async function openConv(id){
+  if(innerWidth<=900&&!$('app').classList.contains('inchat'))pushPM('chat');
   S.cur=id;$('app').classList.add('inchat');
   renderAll();
   if(!S.msgs[id]){
@@ -418,7 +433,7 @@ async function openConv(id){
   const c=S.convs.find(x=>x.id===id);if(c&&c.unread)markRead(id);
   if(window.innerWidth>900)$('txt').focus();
 }
-$('backBtn').onclick=()=>{S.cur=null;$('app').classList.remove('inchat');renderAll()};
+$('backBtn').onclick=()=>{if(curPM==='chat')history.back();else closeChat()};
 
 function renderChat(){
   const c=S.convs.find(x=>x.id===S.cur);
@@ -431,12 +446,14 @@ function renderChat(){
   renderMsgs(true);renderInfo(c);applyInfo();
 }
 function renderInfo(c){
+  const back='<button class="back" id="infoBack" aria-label="Retour">‹</button>';
   const mem=c.members.map(p=>`<div class="mem"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div>${esc(p.display_name)}${p.id===S.me.id?' <span style="color:var(--mut)">(toi)</span>':''}</div></div>`).join('');
-  $('info').innerHTML=`<div class="av" style="background:${c.color}">${c.is_group?'👥':esc(initials(c.name))}</div>
+  $('info').innerHTML=`${back}<div class="av" style="background:${c.color}">${c.is_group?'👥':esc(initials(c.name))}</div>
    <h3>${esc(c.name)}</h3><p>${c.is_group?`Groupe · ${c.members.length} membres`:'Discussion privée'}</p>
    <div class="sec"><h4>${c.is_group?'Membres':'Informations'}</h4>${c.is_group?mem:`<div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div>`}</div>
    <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>${esc(S.email)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
   const l=$('infoLogout');if(l)l.onclick=logout;
+  $('infoBack').onclick=()=>{if(curPM==='info')history.back();else hideMobInfo()};
 }
 function renderMsgs(scroll){
   const c=S.convs.find(x=>x.id===S.cur);if(!c)return;
@@ -528,7 +545,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.5';
+const APP_VERSION='2026-11-07.6';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -550,7 +567,9 @@ async function checkUpdate(manual){
   }catch(e){return 'err'}
 }
 setInterval(checkUpdate,5*60*1000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();refreshAll()}});
+addEventListener('online',refreshAll);
+addEventListener('pageshow',e=>{if(e.persisted)refreshAll()});
 setTimeout(checkUpdate,3000);
 
 
@@ -702,7 +721,10 @@ async function openSettings(tab){
     },
     about(b){
       b.innerHTML=`<div style="text-align:center;padding:14px 0 18px"><div class="logo" style="margin:0 auto 10px">P</div><b style="font-size:20px">PolyMess</b><div class="hint2">Version ${esc(APP_VERSION)}</div></div>
-       <button class="sbtn ghost" id="aChk" style="width:100%">Vérifier les mises à jour</button><div id="am"></div>`;
+       <button class="sbtn ghost" id="aChk" style="width:100%">Vérifier les mises à jour</button><div id="am"></div>
+       <div class="h5">Installer l’application</div>
+       ${isStandalone()?'<div class="hint2">PolyMess est déjà installée sur cet appareil.</div>':installEv?'<button class="sbtn ghost" id="aInst" style="width:100%">Installer PolyMess</button>':isIOS()?'<div class="hint2">Sur iPhone : touche le bouton Partager de Safari, puis « Sur l’écran d’accueil ».</div>':'<div class="hint2">Dans ton navigateur, utilise « Installer l’application » (menu ⋮ ou icône dans la barre d’adresse).</div>'}`;
+      const ib=$('aInst');if(ib)ib.onclick=async()=>{installEv.prompt();try{await installEv.userChoice}catch(e){}installEv=null;views.about(b)};
       $('aChk').onclick=async()=>{
         $('aChk').disabled=true;note('am','Vérification…','ok');
         const r=await checkUpdate(true);
@@ -722,6 +744,71 @@ async function openSettings(tab){
   };
   shell();
 }
+
+
+/* ---------- MOBILE : navigation, clavier, rafraîchissement, installation ---------- */
+let curPM=null;
+function pushPM(k){if(innerWidth<=900){history.pushState({pm:k},'');curPM=k}}
+function hideMobInfo(){$('app').classList.remove('mobinfo')}
+function closeChat(){S.cur=null;$('app').classList.remove('inchat');hideMobInfo();renderAll()}
+function showMobInfo(){
+  if(innerWidth>900||!S.cur)return;
+  renderInfo(S.convs.find(x=>x.id===S.cur));
+  $('app').classList.add('mobinfo');pushPM('info');
+}
+['chAv','chInfo'].forEach(id=>$(id).onclick=showMobInfo);
+addEventListener('popstate',()=>{
+  const st=history.state?.pm||null,was=curPM;curPM=st;
+  // un volet ouvert (menu, réglages…) : le retour le ferme et on reste où on était
+  if($('modalHost').firstChild||!$('menu').classList.contains('hidden')){
+    $('modalHost').innerHTML='';$('menu').classList.add('hidden');
+    if(was){history.pushState({pm:was},'');curPM=was}
+    return;
+  }
+  if(st==='info')return;
+  hideMobInfo();
+  if(st!=='chat'&&S.cur&&$('app').classList.contains('inchat'))closeChat();
+});
+
+// clavier : l'appli suit la zone réellement visible (iPhone notamment)
+function fitVV(){
+  const v=window.visualViewport;if(!v)return;
+  const st=document.documentElement.style;
+  st.setProperty('--vvh',v.height+'px');st.setProperty('--vvt',v.offsetTop+'px');
+  if(document.activeElement===$('txt')&&S.cur){const m=$('msgs');m.scrollTop=m.scrollHeight}
+}
+if(window.visualViewport){visualViewport.addEventListener('resize',fitVV);visualViewport.addEventListener('scroll',fitVV);fitVV()}
+
+// messages manqués : on recharge tout au retour dans l'appli
+let lastRef=0;
+async function refreshAll(){
+  if(!S.me||Date.now()-lastRef<4000)return;
+  lastRef=Date.now();
+  try{
+    await loadConvs();
+    if(S.cur){
+      const {data}=await sb.from('messages').select('id,conversation_id,sender_id,content,created_at').eq('conversation_id',S.cur).order('created_at',{ascending:false}).limit(200);
+      if(data)S.msgs[S.cur]=data.reverse();
+      const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(S.cur);
+    }
+    renderAll();
+    if(S.chan&&S.chan.state!=='joined'&&S.chan.state!=='joining')subscribe();
+  }catch(e){}
+}
+
+// notifications : via le service worker quand c'est possible
+async function showNotif(title,body,tag){
+  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png',badge:'icon-192.png'});return}}catch(e){}
+  try{new Notification(title,{body,tag,icon:'icon-192.png'})}catch(e){}
+}
+
+// installation sur l'écran d'accueil
+let installEv=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEv=e});
+addEventListener('appinstalled',()=>{installEv=null});
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ---------- INIT ---------- */
 (async()=>{
