@@ -27,6 +27,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .fld{display:block;margin-bottom:12px}
 .fld span{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:5px}
 .fld input{width:100%;background:#f2f3f9;border-radius:12px;padding:12px 14px;font-size:15px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fld input:focus{box-shadow:0 0 0 2px var(--p)}
 .btn-p{width:100%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:700;padding:13px;border-radius:12px;margin-top:6px}
 .btn-p:disabled{opacity:.6}
@@ -136,8 +137,11 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
   <div class="brand"><div class="logo">P</div><h1>PolyMess</h1></div>
   <p class="sub" id="authSub">Connecte-toi pour discuter.</p>
   <div id="signupOnly" class="hidden">
-   <label class="fld"><span>Nom affiché</span><input id="fDisplay" maxlength="40" placeholder="Julien"></label>
-   <label class="fld"><span>Pseudo (lettres, chiffres, . et _)</span><input id="fUser" maxlength="24" placeholder="julien.l" autocapitalize="none"></label>
+   <div class="two">
+    <label class="fld"><span>Prénom</span><input id="fFirst" maxlength="40" autocomplete="given-name" placeholder="Julien"></label>
+    <label class="fld"><span>Nom</span><input id="fLast" maxlength="40" autocomplete="family-name" placeholder="Lespes"></label>
+   </div>
+   <label class="fld"><span>Date de naissance</span><input id="fBirth" type="date" min="1900-01-01" autocomplete="bday"></label>
   </div>
   <label class="fld"><span>E-mail</span><input id="fMail" type="email" required autocomplete="email" placeholder="toi@exemple.fr"></label>
   <label class="fld"><span>Mot de passe</span><input id="fPass" type="password" required minlength="6" autocomplete="current-password" placeholder="6 caractères minimum"></label>
@@ -194,7 +198,7 @@ const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const S={me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false};
+const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false};
 const COLORS=['#6c63ff','#e8618c','#4aa3f0','#34b46c','#f6b84b','#f0795b','#3cc4c4','#8a63e6'];
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const colorOf=(id,c)=>c||COLORS[[...String(id)].reduce((a,ch)=>a+ch.charCodeAt(0),0)%COLORS.length];
@@ -218,11 +222,13 @@ $('authForm').onsubmit=async e=>{
   $('authBtn').disabled=true;$('authMsg').innerHTML='';
   try{
     if(S.signup){
-      const username=$('fUser').value.trim().toLowerCase();
-      const display_name=$('fDisplay').value.trim()||username;
-      if(!/^[a-z0-9_.]{3,24}$/.test(username)){authMsg('Pseudo invalide : 3 à 24 caractères (a-z, 0-9, . et _).','err');return}
-      const {data,error}=await sb.auth.signUp({email,password,options:{data:{username,display_name}}});
-      if(error){authMsg(error.message,'err');return}
+      const first_name=$('fFirst').value.trim(),last_name=$('fLast').value.trim(),birth_date=$('fBirth').value;
+      if(!first_name){authMsg('Indique ton prénom.','err');return}
+      if(!last_name){authMsg('Indique ton nom.','err');return}
+      const bd=new Date(birth_date+'T00:00:00');
+      if(!birth_date||isNaN(bd)||bd>new Date()||bd<new Date('1900-01-01T00:00:00')){authMsg('Indique une date de naissance valide.','err');return}
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{first_name,last_name,birth_date}}});
+      if(error){authMsg(/already registered/i.test(error.message)?'Cette adresse e-mail est déjà utilisée.':error.message,'err');return}
       if(!data.session){authMsg('Compte créé. Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.','ok');setAuthMode(false)}
     }else{
       const {error}=await sb.auth.signInWithPassword({email,password});
@@ -245,7 +251,7 @@ sb.auth.onAuthStateChange((ev,session)=>{
 async function boot(user){
   const {data:prof,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
   if(error||!prof){authMsg('Profil introuvable : '+(error?.message||''),'err');return}
-  S.me=prof;
+  S.me=prof;S.email=user.email||'';
   $('auth').classList.add('hidden');$('app').classList.remove('hidden');
   await loadConvs();
   subscribe();
@@ -258,7 +264,7 @@ async function loadConvs(){
   const ids=mine.map(m=>m.conversation_id);
   if(!ids.length){S.convs=[];return}
   const [{data:mem},{data:recent}]=await Promise.all([
-    sb.from('conversation_members').select('conversation_id,user_id,profiles(id,username,display_name,color)').in('conversation_id',ids),
+    sb.from('conversation_members').select('conversation_id,user_id,profiles(id,username,display_name,first_name,last_name,color)').in('conversation_id',ids),
     sb.from('messages').select('id,conversation_id,sender_id,content,created_at').in('conversation_id',ids).order('created_at',{ascending:false}).limit(400)
   ]);
   const byConv={};
@@ -366,15 +372,15 @@ function renderChat(){
   if(!c){$('info').innerHTML='';return}
   $('chAv').style.background=c.color;$('chAv').textContent=c.is_group?'👥':initials(c.name);
   $('chName').textContent=c.name;
-  $('chSub').textContent=c.is_group?`${c.members.length} membres`:('@'+(c.other?.username||''));
+  $('chSub').textContent=c.is_group?`${c.members.length} membres`:'Discussion privée';
   renderMsgs(true);renderInfo(c);
 }
 function renderInfo(c){
-  const mem=c.members.map(p=>`<div class="mem"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div>${esc(p.display_name)}${p.id===S.me.id?' <span style="color:var(--mut)">(toi)</span>':''}<div style="font-size:12px;color:var(--mut)">@${esc(p.username)}</div></div></div>`).join('');
+  const mem=c.members.map(p=>`<div class="mem"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div>${esc(p.display_name)}${p.id===S.me.id?' <span style="color:var(--mut)">(toi)</span>':''}</div></div>`).join('');
   $('info').innerHTML=`<div class="av" style="background:${c.color}">${c.is_group?'👥':esc(initials(c.name))}</div>
-   <h3>${esc(c.name)}</h3><p>${c.is_group?`Groupe · ${c.members.length} membres`:'@'+esc(c.other?.username||'')}</p>
-   <div class="sec"><h4>${c.is_group?'Membres':'Informations'}</h4>${c.is_group?mem:`<div class="row"><span>Pseudo</span>@${esc(c.other?.username||'')}</div><div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div>`}</div>
-   <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>@${esc(S.me.username)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
+   <h3>${esc(c.name)}</h3><p>${c.is_group?`Groupe · ${c.members.length} membres`:'Discussion privée'}</p>
+   <div class="sec"><h4>${c.is_group?'Membres':'Informations'}</h4>${c.is_group?mem:`<div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div>`}</div>
+   <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>${esc(S.email)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
   const l=$('infoLogout');if(l)l.onclick=logout;
 }
 function renderMsgs(scroll){
@@ -424,14 +430,14 @@ function openNew(){
     <h3>Nouvelle discussion <button class="x" id="mx">✕</button></h3>
     <div class="mode"><button class="tab on" data-m="direct">Message</button><button class="tab" data-m="group">Groupe</button></div>
     <input class="hidden fld" id="gName" placeholder="Nom du groupe" maxlength="60" style="background:#f2f3f9;border-radius:12px;padding:11px 14px;margin-bottom:8px;width:100%">
-    <input class="search" id="uq" placeholder="🔍 Chercher par pseudo ou nom…" style="margin-top:0">
+    <input class="search" id="uq" placeholder="🔍 Chercher par nom ou prénom…" style="margin-top:0">
     <div class="res" id="res"><div class="empty">Tape au moins 2 caractères.</div></div>
     <button class="btn-p hidden" id="go">Créer le groupe</button>
   </div></div>`;
   const close=()=>host.innerHTML='';
   $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
   const drawRes=()=>{
-    $('res').innerHTML=found.length?found.map(p=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div><b>${esc(p.display_name)}</b><small>@${esc(p.username)}</small></div>${mode==='group'?`<span class="chk ${sel.has(p.id)?'on':''}">${sel.has(p.id)?'✓':''}</span>`:''}</button>`).join(''):`<div class="empty">Aucun utilisateur trouvé.</div>`;
+    $('res').innerHTML=found.length?found.map(p=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div><b>${esc(p.display_name)}</b></div>${mode==='group'?`<span class="chk ${sel.has(p.id)?'on':''}">${sel.has(p.id)?'✓':''}</span>`:''}</button>`).join(''):`<div class="empty">Aucun utilisateur trouvé.</div>`;
     $('go').classList.toggle('hidden',mode!=='group');
     $('go').textContent=sel.size?`Créer le groupe (${sel.size})`:'Créer le groupe';
   };
@@ -440,10 +446,10 @@ function openNew(){
     mode=t.dataset.m;$('gName').classList.toggle('hidden',mode!=='group');if(found.length||$('uq').value)drawRes();else $('go').classList.toggle('hidden',mode!=='group');
   });
   $('uq').oninput=e=>{
-    clearTimeout(timer);const v=e.target.value.trim().toLowerCase().replace(/[%,()]/g,'');
+    clearTimeout(timer);const v=e.target.value.trim().toLowerCase().replace(/[%,()*]/g,'');
     if(v.length<2){found=[];$('res').innerHTML='<div class="empty">Tape au moins 2 caractères.</div>';return}
     timer=setTimeout(async()=>{
-      const {data}=await sb.from('profiles').select('id,username,display_name,color').neq('id',S.me.id).or(`username.ilike.%${v}%,display_name.ilike.%${v}%`).limit(20);
+      const {data}=await sb.from('profiles').select('id,display_name,first_name,last_name,color').neq('id',S.me.id).or(`display_name.ilike.%${v}%,first_name.ilike.%${v}%,last_name.ilike.%${v}%`).limit(20);
       found=data||[];drawRes();
     },250);
   };
@@ -467,7 +473,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.1';
+const APP_VERSION='2026-11-07.2';
 let updShown=false;
 async function checkUpdate(){
   if(location.protocol==='file:'||updShown)return;
