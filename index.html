@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--p:#6c63ff;--p2:#7f78ff;--ink:#1c2033;--mut:#7a809c;--line:#eceef5;--bg:#f7f8fc;--rail:#1f2347;--ok:#34b46c;--red:#ff5d73;--card:#fff;--soft:#f2f3f9;--page:#eef0f6;--hov:#fafaff;--hov2:#f6f6fd;--sel:#f1f0ff;--pill:#e9ebf5;--line2:#f0f1f7;--chk:#cfd3e6;--tabtx:#6a7094;--toast:#1c2033;color-scheme:light}
+:root{--listw:340px;--p:#6c63ff;--p2:#7f78ff;--ink:#1c2033;--mut:#7a809c;--line:#eceef5;--bg:#f7f8fc;--rail:#1f2347;--ok:#34b46c;--red:#ff5d73;--card:#fff;--soft:#f2f3f9;--page:#eef0f6;--hov:#fafaff;--hov2:#f6f6fd;--sel:#f1f0ff;--pill:#e9ebf5;--line2:#f0f1f7;--chk:#cfd3e6;--tabtx:#6a7094;--toast:#1c2033;color-scheme:light}
 html[data-theme=dark]{color-scheme:dark;--ink:#e8eaf6;--mut:#9aa0bb;--line:#2a2f55;--line2:#252a4d;--bg:#12152b;--card:#1b1f3d;--soft:#262b52;--page:#0d1022;--hov:#20254a;--hov2:#232850;--sel:#2a2a5e;--pill:#262b52;--chk:#464c7a;--tabtx:#aab0d6;--toast:#343a72}
 ::placeholder{color:var(--mut);opacity:.8}
 html,body{height:100%}
@@ -40,7 +40,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .msg.err{background:#ffeef0;color:#c9304a}.msg.ok{background:#e9f8f0;color:#1f8a52}
 
 /* App */
-#app{height:100%;display:grid;grid-template-columns:76px 340px 1fr 300px;background:var(--card);overflow:hidden}
+#app{height:100%;display:grid;grid-template-columns:76px var(--listw) 1fr 300px;background:var(--card);overflow:hidden}
 .rail{background:var(--rail);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:14px}
 .rail .logo{margin-bottom:8px;width:42px;height:42px;font-size:19px}
 .ric{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#a8aed6;font-size:20px;position:relative}
@@ -146,15 +146,28 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .dz{margin-top:26px;padding:16px;border:1px solid #ffc9d0;border-radius:14px}
 .dz p{font-size:13px;color:var(--mut);margin:6px 0 12px;line-height:1.45}
 .sbody .msg{margin:10px 0}
+/* Fiche du contact : masquable, en volet sur fenêtre moyenne */
+#app.noinfo{grid-template-columns:76px var(--listw) 1fr}
+#app.noinfo .info{display:none}
+.ch .sp{flex:1}
+#infoBtn{font-size:20px;color:var(--mut);font-weight:700}
+#infoBtn:hover{color:var(--p)}
+@media(max-width:1399px){
+ :root{--listw:300px}
+ #app{grid-template-columns:76px var(--listw) 1fr}
+ .info{position:fixed;right:0;top:0;bottom:0;width:320px;max-width:calc(100vw - 20px);z-index:40;background:var(--card);box-shadow:-10px 0 40px rgba(20,24,50,.28)}
+}
+@media(max-width:1020px){:root{--listw:280px}}
 /* Mobile */
 @media(max-width:900px){
- #app{grid-template-columns:1fr;position:fixed;inset:0}
+ #app,#app.noinfo{grid-template-columns:1fr;position:fixed;inset:0}
  .rail,.info{display:none}
  .list{border-right:none}
  #app.inchat .list{display:none}
  #app:not(.inchat) .chat{display:none}
  .back{display:block}
  .meav.mob{display:flex}
+ #infoBtn{display:none}
  #menu{left:auto;right:12px;top:64px;bottom:auto}
  .two{grid-template-columns:1fr 1fr}
  .m{max-width:84%}
@@ -210,6 +223,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
     <button class="back" id="backBtn">‹</button>
     <div class="av" id="chAv" style="width:42px;height:42px;font-size:15px"></div>
     <div><div class="n" id="chName"></div><div class="s" id="chSub"></div></div>
+    <span class="sp"></span><button class="ibtn" id="infoBtn" title="Informations sur la conversation" aria-label="Informations">ⓘ</button>
    </div>
    <div class="msgs" id="msgs"></div>
    <form class="comp" id="comp">
@@ -410,11 +424,11 @@ function renderChat(){
   const c=S.convs.find(x=>x.id===S.cur);
   $('blank').classList.toggle('hidden',!!c);
   $('chatBox').classList.toggle('hidden',!c);
-  if(!c){$('info').innerHTML='';return}
+  if(!c){$('info').innerHTML='';applyInfo();return}
   $('chAv').style.background=c.color;$('chAv').textContent=c.is_group?'👥':initials(c.name);
   $('chName').textContent=c.name;
   $('chSub').textContent=c.is_group?`${c.members.length} membres`:'Discussion privée';
-  renderMsgs(true);renderInfo(c);
+  renderMsgs(true);renderInfo(c);applyInfo();
 }
 function renderInfo(c){
   const mem=c.members.map(p=>`<div class="mem"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div>${esc(p.display_name)}${p.id===S.me.id?' <span style="color:var(--mut)">(toi)</span>':''}</div></div>`).join('');
@@ -514,7 +528,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.4';
+const APP_VERSION='2026-11-07.5';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -556,6 +570,19 @@ function beep(){try{
   o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.26);
 }catch(e){}}
 
+S.infoOverlay=false;
+function applyInfo(){
+  const wide=innerWidth>=1400;
+  const open=!!S.cur&&(wide?prefs.infoWide!==false:S.infoOverlay);
+  $('app').classList.toggle('noinfo',!open);
+}
+$('infoBtn').onclick=e=>{
+  e.stopPropagation();
+  if(innerWidth>=1400){prefs.infoWide=prefs.infoWide===false;savePrefs()}else S.infoOverlay=!S.infoOverlay;
+  applyInfo();
+};
+addEventListener('resize',applyInfo);
+
 function renderMe(){
   if(!S.me)return;
   const bg=colorOf(S.me.id,S.me.color),t=initials(S.me.display_name);
@@ -570,8 +597,11 @@ function toggleMenu(){
   $('mOut').onclick=()=>{m.classList.add('hidden');logout()};
 }
 ['meBtn','meBtnM'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();toggleMenu()});
-document.addEventListener('click',e=>{if(!e.target.closest('#menu'))$('menu').classList.add('hidden')});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('menu').classList.add('hidden');$('modalHost').innerHTML=''}});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#menu'))$('menu').classList.add('hidden');
+  if(S.infoOverlay&&innerWidth<1400&&!e.target.closest('.info')&&!e.target.closest('#infoBtn')){S.infoOverlay=false;applyInfo()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('menu').classList.add('hidden');$('modalHost').innerHTML='';if(S.infoOverlay){S.infoOverlay=false;applyInfo()}}});
 
 async function openSettings(tab){
   const host=$('modalHost');
