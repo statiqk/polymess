@@ -303,6 +303,15 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
 .tab .mini{margin-right:5px;vertical-align:-2px;color:inherit}
 .tg b .mini{margin-right:6px;color:var(--p);width:16px;height:16px}
 .conv .p i .mini{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+
+/* zone d'écriture v2 */
+.comp textarea{background:var(--soft);border-radius:15px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--line);caret-color:var(--p)}
+html[data-theme=dark] .comp textarea{caret-color:#9a90ff;box-shadow:inset 0 0 0 1px rgba(150,140,255,.18)}
+.send{transition:transform .1s,background .15s,box-shadow .15s}
+.send:not(:disabled){background:linear-gradient(135deg,#4b3fd6,#6a5cff);box-shadow:0 6px 16px rgba(75,63,214,.4)}
+.send:not(:disabled):active{transform:scale(.92)}
+.send:disabled{opacity:1;background:var(--soft);box-shadow:none}.send:disabled .ico{stroke:var(--mut)}
+@media(max-width:900px){.comp:focus-within{margin-bottom:6px}}
 </style>
 </head>
 <body>
@@ -361,7 +370,7 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
    <form class="comp" id="comp">
     <button type="button" class="clip" id="clipBtn" title="Joindre un fichier" aria-label="Joindre un fichier"><svg class="ico " viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4"/></svg></button>
     <input type="file" id="file" class="hidden" accept="image/*,.pdf,.txt,.zip,.doc,.docx,.xls,.xlsx,.pptx">
-    <textarea id="txt" rows="1" placeholder="Écrire un message…" maxlength="4000"></textarea>
+    <textarea id="txt" rows="1" enterkeyhint="send" placeholder="Écrire un message…" maxlength="4000"></textarea>
     <button class="send" id="sendBtn" type="submit" disabled aria-label="Envoyer"><svg class="ico " viewBox="0 0 24 24"><path d="M20.5 3.5L10.5 13.5"/><path d="M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z"/></svg></button>
    </form>
   </div>
@@ -808,7 +817,7 @@ const txt=$('txt');
 const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeight,120)+'px';$('sendBtn').disabled=!txt.value.trim()&&!S.att};
 let lastTypeSent=0;
 txt.oninput=()=>{fit();if(tReady&&tch&&txt.value&&!S.edit&&Date.now()-lastTypeSent>2500){lastTypeSent=Date.now();tch.send({type:'broadcast',event:'typing',payload:{uid:S.me.id}})}};
-txt.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&window.innerWidth>900){e.preventDefault();$('comp').requestSubmit()}};
+txt.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('comp').requestSubmit()}};
 async function doEdit(content){
   const id=S.edit.id,m=(S.msgs[S.cur]||[]).find(x=>x.id===id);
   if(!content)return;
@@ -946,7 +955,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.15';
+const APP_VERSION='2026-11-07.16';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
