@@ -12,6 +12,21 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PolyMess">
 <title>PolyMess</title>
+<meta name="description" content="PolyMess, ta messagerie instantanée : écris à ceux qui comptent.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PolyMess">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="PolyMess · Messagerie instantanée">
+<meta property="og:description" content="Écris à ceux qui comptent. Crée ton compte en quelques secondes.">
+<meta property="og:url" content="https://statiqk.github.io/polymess/">
+<meta property="og:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PolyMess : écris à ceux qui comptent">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PolyMess · Messagerie instantanée">
+<meta name="twitter:description" content="Écris à ceux qui comptent. Crée ton compte en quelques secondes.">
+<meta name="twitter:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
@@ -513,6 +528,16 @@ html[data-theme=dark] .act .sel .ic2{background:rgba(120,110,255,.3);color:#d6d3
 #auth.up .afgw{display:none}
 @media(max-height:760px){.astack{display:none}}
 @media(min-width:700px){.aw{padding-top:max(40px,6vh)}}
+
+/* ===== Inviter un ami ===== */
+.mlr.inv{background:linear-gradient(100deg,#ece9ff,#fff1ee)}.mlr.inv .mib{background:linear-gradient(135deg,#4b3fd6,#7a6cff);color:#fff}
+.mlr.inv b{display:flex;flex-direction:column;gap:1px;text-align:left}.mlr.inv b small{font-size:12.5px;font-weight:500;color:var(--mut)}
+html[data-theme=dark] .mlr.inv{background:linear-gradient(100deg,#2a2660,#3a2650)}
+.invb{display:flex;align-items:center;gap:12px;width:100%;margin:10px 0 4px;padding:12px 14px;border-radius:18px;background:linear-gradient(100deg,#4b3fd6,#7a5cff);color:#fff;text-align:left;box-shadow:0 10px 24px rgba(75,63,214,.3)}
+.invb:active{transform:scale(.98)}
+.invb .ic{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex:none}
+.invb b{display:block;font-size:16px}.invb span.s{display:block;font-size:12.5px;opacity:.85;font-weight:500;margin-top:1px}
+.flash{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1d1a4b;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:99;max-width:86%;text-align:center}
 </style>
 </head>
 <body>
@@ -1193,15 +1218,24 @@ function startPresence(){
 
 /* ---------- NOUVELLE DISCUSSION ---------- */
 $('newBtn').onclick=()=>openNew();
+const SHARE_URL='https://statiqk.github.io/polymess/';
+function flash(t){const d=document.createElement('div');d.className='flash';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+async function inviteFriend(){
+  const data={title:'PolyMess',text:'Rejoins-moi sur PolyMess, ma messagerie. Crée ton compte ici :',url:SHARE_URL};
+  if(navigator.share){try{await navigator.share(data);return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(data.text+' '+data.url);flash('Lien copié, colle-le dans un message.')}catch(e){flash(SHARE_URL)}
+}
 function openNew(){
   let found=[],timer;
   const host=$('modalHost'),mob=isMob();
   const field=`<div class="nsf">${ico('search','ms')}<input id="uq" placeholder="Nom ou prénom…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
+  const inv=`<button type="button" class="invb" id="invb"><span class="ic">${ico('share')}</span><div><b>Inviter un ami</b><span class="s">Il n’est pas encore sur PolyMess ?</span></div></button>`;
   host.innerHTML=mob
-   ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}<div class="res" id="res"></div></div></div>`
-   :`<div class="ov" id="ov"><div class="modal"><h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>${field}<div class="res" id="res"></div></div></div>`;
+   ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}${inv}<div class="res" id="res"></div></div></div>`
+   :`<div class="ov" id="ov"><div class="modal"><h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>${field}${inv}<div class="res" id="res"></div></div></div>`;
   const close=()=>host.innerHTML='';
   $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
+  $('invb').onclick=inviteFriend;
   const row=(p,sub)=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div class="pt"><b>${hl(p.display_name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div><span class="wr">${ico('chat')}Écrire</span></button>`;
   let q='';
   const hl=n=>{const t=esc(n||'');if(q.length<2)return t;const i=(n||'').toLowerCase().indexOf(q);return i<0?t:esc(n.slice(0,i))+'<mark>'+esc(n.slice(i,i+q.length))+'</mark>'+esc(n.slice(i+q.length))};
@@ -1237,7 +1271,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.31';
+const APP_VERSION='2026-11-07.32';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1580,6 +1614,7 @@ async function openSettings(tab){
       const inst=isStandalone()?'<div class="hint2">PolyMess est déjà installée sur cet appareil.</div>':installEv?'<button class="sbtn ghost" id="aInst" style="width:100%">Installer PolyMess</button>':iosNew?`<div class="steps"><div><span class="n">1</span>Touche ${ico('share','sh')} <b>Partager</b> dans Safari</div><div><span class="n">2</span>Choisis ${ico('addsq','sh')} <b>Sur l’écran d’accueil</b></div><div><span class="n">3</span>Touche <b>Ajouter</b></div></div>`:'<div class="hint2">Dans ton navigateur, utilise « Installer l’application » (menu ⋮ ou icône dans la barre d’adresse).</div>';
       const links=[['info','Aide et contact','help'],['flag','Signaler un problème','report'],['shield','Confidentialité des données','privacy'],['file','Mentions légales','legal'],['download','Exporter mes données','export']];
       b.innerHTML=`<div style="text-align:center;padding:14px 0 18px"><div class="logo" style="margin:0 auto 10px">P</div><b style="font-size:20px">PolyMess</b><div class="hint2">${esc(vtxt)}</div></div>
+       <div class="mgrp" style="margin-bottom:12px"><button type="button" class="mlr inv" id="aInv"><span class="mib">${ico('share')}</span><b>Inviter un ami<small>Envoie le lien de PolyMess</small></b>${ico('down','chv')}</button></div>
        <button class="sbtn ghost" id="aChk" style="width:100%">Vérifier les mises à jour</button><div id="am"></div>
        <div class="h5">${iosNew?'Installer sur iPhone':'Installer l’application'}</div>${inst}
        <div class="h5">Aide et informations</div>
@@ -1594,7 +1629,8 @@ async function openSettings(tab){
         else if(r==='local')note('am','Vérification indisponible quand le fichier est ouvert en local.','err');
         else note('am','Impossible de vérifier : vérifie ta connexion.','err');
       };
-      b.querySelectorAll('.mlr').forEach(x=>x.onclick=()=>aboutPage(x.dataset.k,b));
+      b.querySelectorAll('.mlr[data-k]').forEach(x=>x.onclick=()=>aboutPage(x.dataset.k,b));
+      $('aInv').onclick=inviteFriend;
     }
   };
   let page=isMob()&&tab?tab:null;
