@@ -430,6 +430,21 @@ html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
 
 .hlogo{width:30px;height:30px;background:url(logo-bubble.png?v=1) center/contain no-repeat;flex:none;display:inline-block}
 .lh h2 .hlft{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+
+@media(max-width:900px){
+.tbar{padding:6px 8px max(6px,calc(env(safe-area-inset-bottom) - 14px));border-top:0;background:rgba(246,245,253,.82);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+html[data-theme=dark] .tbar{background:rgba(28,28,58,.8)}
+.tbar button{gap:3px;font-size:11.5px}
+.tic{position:relative;width:58px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.tbar button.s .tic{background:rgba(75,63,214,.16)}
+html[data-theme=dark] .tbar button.s{color:#8f84ff}
+.tbar button.s .tic .ico{fill:currentColor;fill-opacity:.2}
+.tbar .tic .ico .f{fill:currentColor;fill-opacity:1}
+.tbd{position:absolute;top:-4px;right:5px;min-width:18px;height:18px;border-radius:9px;background:#ff5a4d;color:#fff;font-size:11px;font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 0 0 2px var(--card)}
+.tbph{width:28px;height:28px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--mut)}
+.tbar button.s .tbph{box-shadow:0 0 0 2px var(--p)}
+.tbar button.s .tic:has(.tbph){background:none}
+}
 </style>
 </head>
 <body>
@@ -470,7 +485,7 @@ html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
   <div class="convs" id="convs"></div>
-  <nav class="tbar"><button class="s" id="tbMsgs"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg>Messages</button><button id="tbMe"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg>Moi</button></nav>
+  <nav class="tbar"><button class="s" id="tbMsgs"><span class="tic"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><em class="tbd hidden" id="tbBadge"></em></span>Messages</button><button id="tbMe"><span class="tic" id="tbMeIc"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg></span>Moi</button></nav>
  </div>
 
  <div class="chat" id="chat">
@@ -698,6 +713,7 @@ function renderList(){
   });
   const tot=S.convs.reduce((a,c)=>a+c.unread,0);
   const rb=$('railBadge');rb.textContent=tot;rb.classList.toggle('hidden',!tot);
+  const tb=$('tbBadge');tb.textContent=tot>99?'99+':tot;tb.classList.toggle('hidden',!tot);
   document.title=(tot?`(${tot}) `:'')+'PolyMess';
   try{if(navigator.setAppBadge){tot?navigator.setAppBadge(tot):navigator.clearAppBadge()}}catch(e){}
   if(!list.length){
@@ -1098,7 +1114,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.27';
+const APP_VERSION='2026-11-07.28';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1158,10 +1174,14 @@ $('infoBtn').onclick=e=>{
 };
 addEventListener('resize',applyInfo);
 
+const TBUSER=`<svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg>`;
 function renderMe(){
   if(!S.me)return;
   const bg=colorOf(S.me.id,S.me.color),t=initials(S.me.display_name);
   ['meBtn','meBtnM'].forEach(id=>{const e=$(id);e.style.background=avBg(bg,S.me.avatar_path);e.textContent=S.me.avatar_path?'':t});
+  const ti=$('tbMeIc');
+  if(S.me.avatar_path){ti.innerHTML='<span class="tbph" style="background:'+avBg(esc(bg),S.me.avatar_path)+'"></span>';ti.classList.add('ph')}
+  else if(ti.classList.contains('ph')){ti.classList.remove('ph');ti.innerHTML=TBUSER}
 }
 const isMob=()=>innerWidth<=900;
 function confirmLogout(){
