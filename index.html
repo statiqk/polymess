@@ -550,7 +550,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.7';
+const APP_VERSION='2026-11-07.8';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -846,7 +846,8 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEv=e});
 addEventListener('appinstalled',()=>{installEv=null});
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
+navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ---------- INIT ---------- */
 (async()=>{
