@@ -445,6 +445,12 @@ html[data-theme=dark] .tbar button.s{color:#8f84ff}
 .tbar button.s .tbph{box-shadow:0 0 0 2px var(--p)}
 .tbar button.s .tic:has(.tbph){background:none}
 }
+
+@media(max-width:900px){
+.tbar button.s .tic{background:rgba(75,63,214,.15)}
+html[data-theme=dark] .tbar button.s .tic{background:rgba(120,110,255,.22)}
+.tbar button.s .tic:has(.tbph){background:none}
+}
 </style>
 </head>
 <body>
@@ -1114,7 +1120,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.28';
+const APP_VERSION='2026-11-07.29';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
