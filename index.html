@@ -291,6 +291,18 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
  #sbar{padding:8px 10px}
 }
 .logo{background:url(icon-192.png?v=2) center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:0 6px 16px rgba(60,40,160,.22)!important}
+
+/* icônes v2 */
+.ico .f{fill:currentColor;stroke:none}.ico{stroke-width:1.8}
+.ric .ico{width:24px;height:24px}
+.back{display:none;padding:0}.back .ico,.back .ico{width:22px;height:22px;display:block;margin:auto}
+.modal .x{display:flex;align-items:center;justify-content:center}.modal .x .ico{width:20px;height:20px}
+.bar .bi button .ico{width:15px;height:15px;display:block;margin:auto}
+.tk{display:inline-flex;vertical-align:-3px;margin-left:2px}.tk .ico{width:15px;height:15px;stroke-width:2.2}
+.empty .big{width:34px;height:34px;margin-bottom:8px;opacity:.7}
+.tab .mini{margin-right:5px;vertical-align:-2px;color:inherit}
+.tg b .mini{margin-right:6px;color:var(--p);width:16px;height:16px}
+.conv .p i .mini{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
 </style>
 </head>
 <body>
@@ -319,7 +331,7 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
 <div id="app" class="hidden">
  <div class="rail">
   <div class="logo">P</div>
-  <div class="ric on">💬<span class="b hidden" id="railBadge"></span></div>
+  <div class="ric on"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><span class="b hidden" id="railBadge"></span></div>
   <div class="sp"></div>
   <button class="meav" id="meBtn" title="Mon compte"></button>
  </div>
@@ -331,26 +343,26 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
   <div class="convs" id="convs"></div>
-  <nav class="tbar"><button class="s" id="tbMsgs"><svg class="ico " viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.7 7L4 20l1-5A8 8 0 1121 12z"/></svg>Messages</button><button id="tbMe"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>Moi</button></nav>
+  <nav class="tbar"><button class="s" id="tbMsgs"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg>Messages</button><button id="tbMe"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg>Moi</button></nav>
  </div>
 
  <div class="chat" id="chat">
   <div class="blank" id="blank"><div class="logo">P</div><b style="color:var(--ink);font-size:18px">Bienvenue sur PolyMess</b><span>Choisis une conversation ou démarre-en une avec le bouton +</span></div>
   <div class="hidden" id="chatBox" style="display:flex;flex-direction:column;flex:1;min-height:0">
    <div class="ch">
-    <button class="back" id="backBtn">‹</button>
+    <button class="back" id="backBtn"><svg class="ico " viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
     <div class="av" id="chAv" style="width:42px;height:42px;font-size:15px"></div>
     <div id="chInfo"><div class="n" id="chName"></div><div class="s" id="chSub"></div></div>
-    <span class="sp"></span><button class="ibtn" id="srchBtn" title="Rechercher dans la conversation" aria-label="Rechercher"><svg class="ico " viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button><button class="ibtn" id="infoBtn" title="Informations sur la conversation" aria-label="Informations" style="margin-left:8px"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5"/></svg></button>
+    <span class="sp"></span><button class="ibtn" id="srchBtn" title="Rechercher dans la conversation" aria-label="Rechercher"><svg class="ico " viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4L20 20"/></svg></button><button class="ibtn" id="infoBtn" title="Informations sur la conversation" aria-label="Informations" style="margin-left:8px"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".7" class="f"/></svg></button>
    </div>
-   <div id="sbar" class="hidden"><input id="sq" placeholder="Rechercher dans la conversation…" autocomplete="off"><span id="scnt"></span><button class="ibtn" id="sPrev" aria-label="Plus ancien"><svg class="ico " viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button class="ibtn" id="sNext" aria-label="Plus récent"><svg class="ico " viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button class="ibtn" id="sX" aria-label="Fermer"><svg class="ico " viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+   <div id="sbar" class="hidden"><input id="sq" placeholder="Rechercher dans la conversation…" autocomplete="off"><span id="scnt"></span><button class="ibtn" id="sPrev" aria-label="Plus ancien"><svg class="ico " viewBox="0 0 24 24"><path d="M6 14.5l6-6 6 6"/></svg></button><button class="ibtn" id="sNext" aria-label="Plus récent"><svg class="ico " viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button><button class="ibtn" id="sX" aria-label="Fermer"><svg class="ico " viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
    <div class="msgs" id="msgs"></div>
    <div class="bar hidden" id="bar"></div>
    <form class="comp" id="comp">
-    <button type="button" class="clip" id="clipBtn" title="Joindre un fichier" aria-label="Joindre un fichier"><svg class="ico " viewBox="0 0 24 24"><path d="M21 12l-8.5 8.5a5 5 0 01-7-7L14 5a3.3 3.3 0 014.7 4.7L10 18.4a1.7 1.7 0 01-2.4-2.4L15 8.6"/></svg></button>
+    <button type="button" class="clip" id="clipBtn" title="Joindre un fichier" aria-label="Joindre un fichier"><svg class="ico " viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4"/></svg></button>
     <input type="file" id="file" class="hidden" accept="image/*,.pdf,.txt,.zip,.doc,.docx,.xls,.xlsx,.pptx">
     <textarea id="txt" rows="1" placeholder="Écrire un message…" maxlength="4000"></textarea>
-    <button class="send" id="sendBtn" type="submit" disabled aria-label="Envoyer"><svg class="ico " viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="send" id="sendBtn" type="submit" disabled aria-label="Envoyer"><svg class="ico " viewBox="0 0 24 24"><path d="M20.5 3.5L10.5 13.5"/><path d="M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z"/></svg></button>
    </form>
   </div>
  </div>
@@ -369,7 +381,7 @@ const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const ICONS={"search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-4-4\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8h.01M11 12h1v5\"/>", "clip": "<path d=\"M21 12l-8.5 8.5a5 5 0 01-7-7L14 5a3.3 3.3 0 014.7 4.7L10 18.4a1.7 1.7 0 01-2.4-2.4L15 8.6\"/>", "send": "<path d=\"M5 12h14M13 6l6 6-6 6\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "bell": "<path d=\"M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0\"/>", "bellOff": "<path d=\"M18 8a6 6 0 00-9.3-5M6 8c0 7-3 9-3 9h13M13.7 21a2 2 0 01-3.4 0M3 3l18 18\"/>", "star": "<path d=\"M12 17l-5 3 1.5-5.5L4 10.5l5.7-.3L12 5l2.3 5.2 5.7.3-4.5 4L17 20z\"/>", "reply": "<path d=\"M9 14L4 9l5-5M4 9h10a6 6 0 016 6v2\"/>", "copy": "<rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\"/><path d=\"M5 15V6a2 2 0 012-2h9\"/>", "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4\"/>", "trash": "<path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/>", "gear": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1\"/>", "out": "<path d=\"M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9\"/>", "chat": "<path d=\"M21 12a8 8 0 01-11.7 7L4 20l1-5A8 8 0 1121 12z\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0116 0\"/>", "file": "<path d=\"M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5\"/>", "close": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "up": "<path d=\"M6 15l6-6 6 6\"/>", "down": "<path d=\"M6 9l6 6 6-6\"/>"};
+const ICONS={"chat": "<path d=\"M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z\"/><circle cx=\"8.4\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"12\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"15.6\" cy=\"11\" r=\".9\" class=\"f\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.6\"/><path d=\"M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.4 15.4L20 20\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"8.8\"/><path d=\"M12 11v5.5\"/><circle cx=\"12\" cy=\"7.8\" r=\".7\" class=\"f\"/>", "back": "<path d=\"M14.5 5.5L8 12l6.5 6.5\"/>", "close": "<path d=\"M6.5 6.5l11 11M17.5 6.5l-11 11\"/>", "up": "<path d=\"M6 14.5l6-6 6 6\"/>", "down": "<path d=\"M6 9.5l6 6 6-6\"/>", "sliders": "<path d=\"M4 7h8M18 7h2M4 17h2M12 17h8\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"9\" cy=\"17\" r=\"2.2\"/>", "clip": "<path d=\"M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4\"/>", "send": "<path d=\"M20.5 3.5L10.5 13.5\"/><path d=\"M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z\"/>", "tick": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>", "ticks": "<path d=\"M2.5 12.5L7 17l8.5-9.5\"/><path d=\"M10.5 15.5l1.5 1.5L21.5 7.5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5v4.7l3 1.8\"/>", "reply": "<path d=\"M9.5 6L4 11.5 9.5 17\"/><path d=\"M4 11.5h9.5a6.5 6.5 0 016.5 6.5v1\"/>", "copy": "<rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M5 15V7a2 2 0 012-2h8\"/>", "edit": "<path d=\"M4 20l1-4.5L16.3 4.2a2.1 2.1 0 013 3L8 18.5 4 20z\"/><path d=\"M14.5 6l3 3\"/>", "trash": "<path d=\"M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5M14 11v5\"/>", "pin": "<path d=\"M9 4h6l-1 5 3 3v1.5H7V12l3-3-1-5z\"/><path d=\"M12 13.5V20\"/>", "bell": "<path d=\"M6 16v-5.5a6 6 0 0112 0V16l1.5 2h-15L6 16z\"/><path d=\"M10 21h4\"/>", "bellOff": "<path d=\"M8.2 4.7A6 6 0 0118 10.5V16l1.5 2H9M6 9.5V16l-1.5 2H6\"/><path d=\"M10 21h4M4 4l16 16\"/>", "file": "<path d=\"M14 3.5H7.5a2 2 0 00-2 2v13a2 2 0 002 2h9a2 2 0 002-2V8L14 3.5z\"/><path d=\"M14 3.5V8h4.5M9 13h6M9 16.5h4\"/>", "image": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"3\"/><circle cx=\"9\" cy=\"10\" r=\"1.6\"/><path d=\"M4 17l5-4.5 4 3.5 3-2.5 4 3.5\"/>", "out": "<path d=\"M10 20.5H6.5a2 2 0 01-2-2v-13a2 2 0 012-2H10\"/><path d=\"M15.5 16.5L20 12l-4.5-4.5M20 12H9.5\"/>", "mail": "<rect x=\"3.5\" y=\"6\" width=\"17\" height=\"12\" rx=\"3\"/><path d=\"M4.5 8.5L12 13.5l7.5-5\"/>", "shield": "<path d=\"M12 3.5l7 2.5v5.5c0 4.3-2.8 7.4-7 9-4.2-1.6-7-4.7-7-9V6l7-2.5z\"/><path d=\"M9 12l2.2 2.2L15.5 10\"/>", "moon": "<path d=\"M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z\"/>", "smile": "<path d=\"M20.5 12.5A8.5 8.5 0 1111 3.5\"/><path d=\"M8.3 13.5c.8 1.4 2 2.1 3.2 2.1s2.4-.7 3.2-2.1\"/><circle cx=\"8.6\" cy=\"9.8\" r=\".8\" class=\"f\"/><circle cx=\"13.4\" cy=\"9.8\" r=\".8\" class=\"f\"/><path d=\"M18 2.5v5M15.5 5h5\"/>", "volume": "<path d=\"M4 9.5h3.5L12 5.5v13l-4.5-4H4z\"/><path d=\"M15.8 9a4 4 0 010 6M18.6 6.4a8 8 0 010 11.2\"/>", "wave": "<path d=\"M5 18.5V8.5a2 2 0 014 0V13M9 13V6.5a2 2 0 014 0V13M13 13V7.5a2 2 0 014 0V14.5a6 6 0 01-6 6h-.5a6.5 6.5 0 01-5-2.4\"/>"};
 const ico=(n,c='')=>`<svg class="ico ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
 const MCOLS='id,conversation_id,sender_id,content,created_at,reply_to,att_path,att_name,att_type,att_size,edited_at,deleted_at';
 const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false,sq:null,react:{},online:new Set(),reply:null,edit:null,att:null,urls:{},typing:null};
@@ -565,8 +577,8 @@ function renderList(){
     const prev=c.last?((c.last.sender_id===S.me.id?'Toi : ':'')+prevText(c.last)):'Nouvelle conversation';
     return `<button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
       <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on':''}" style="background:${c.color}">${esc(initials(c.name))}</div>
-      <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.pinned?ico('star','mini'):''}${c.muted?ico('bellOff','mini'):''}${c.last?fmtList(c.last.created_at):''}</span></div>
-      <div class="p"><i>${esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button>`;
+      <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.pinned?ico('pin','mini'):''}${c.muted?ico('bellOff','mini'):''}${c.last?fmtList(c.last.created_at):''}</span></div>
+      <div class="p"><i>${c.last&&!c.last.deleted_at&&c.last.att_path?(c.last.sender_id===S.me.id?'Toi : ':'')+ico((c.last.att_type||'').startsWith('image/')?'image':'file','mini')+esc((c.last.att_type||'').startsWith('image/')?'Photo':(c.last.att_name||'Fichier'))+(c.last.content?' '+esc(c.last.content):''):esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button>`;
   }).join('');
 }
 $('convs').onclick=e=>{const b=e.target.closest('.conv');if(b)openConv(b.dataset.id)};
@@ -617,14 +629,14 @@ async function setFlag(c,k,v){
 }
 function closeInfoPanel(){if(curPM==='info')history.back();else hideMobInfo();S.infoOverlay=false;applyInfo()}
 function renderInfo(c){
-  const back='<button class="back" id="infoBack" aria-label="Retour">‹</button>';
+  const back=`<button class="back" id="infoBack" aria-label="Retour">${ico('back')}</button>`;
   const media=(S.msgs[c.id]||[]).filter(m=>m.att_path&&m.att_path!=='local'&&!m.deleted_at).reverse();
   c._mc=media.length;
   const imgs=media.filter(m=>(m.att_type||'').startsWith('image/')).slice(0,9),files=media.filter(m=>!(m.att_type||'').startsWith('image/')).slice(0,5);
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
   $('info').innerHTML=`${back}<div class="av${on?' on':''}" id="infoAv" style="background:${c.color}">${esc(initials(c.name))}</div>
    <h3>${esc(c.name)}</h3><p class="st" id="infoSt">${esc(subText(c,false)||'Discussion privée')}</p>
-   <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('star')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
+   <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
    ${media.length?`<div class="sec"><h4>Photos et fichiers · ${media.length}</h4>${imgs.length?`<div class="mgrid">${imgs.map(m=>`<img class="th" alt="${esc(m.att_name||'')}" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'image')}"${cachedUrl(m.att_path)?` src="${esc(cachedUrl(m.att_path))}"`:''}>`).join('')}</div>`:''}${files.map(m=>`<div class="frow" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>${fmtSize(m.att_size)}</small></div></div>`).join('')}</div>`:''}
    <div class="sec"><h4>Informations</h4><div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div></div>
    <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>${esc(S.email)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
@@ -678,10 +690,10 @@ function renderMsgs(scroll){
     const rs=rx[m.id]||[];let rh='';
     if(rs.length){const g={};rs.forEach(r=>{(g[r.emoji]??=[]).push(r.user_id)});
       rh=`<div class="rxs">${Object.entries(g).map(([e,u])=>`<button class="rx ${u.includes(S.me.id)?'mine':''}" data-e="${e}" data-id="${esc(m.id)}">${e}${u.length>1?' '+u.length:''}</button>`).join('')}</div>`}
-    const tick=mine?(m.pending?' …':(isRead(c,m)?' <b class="rd">✓✓</b>':' ✓')):'';
+    const tick=mine?(m.pending?` <span class="tk">${ico('clock')}</span>`:(isRead(c,m)?` <span class="tk rd">${ico('ticks')}</span>`:` <span class="tk">${ico('tick')}</span>`)):'';
     html+=`<div class="m ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${q}${att}${m.content?esc(m.content):''}${rh}<small>${m.edited_at?'modifié · ':''}${fmtTime(m.created_at)}${tick}</small></div>`;
   }
-  el.innerHTML=html||`<div class="empty">Dis bonjour 👋</div>`;
+  el.innerHTML=html||`<div class="empty">${ico('wave','big')}<br>Dis bonjour</div>`;
   if(c._mc!==undefined&&(list.filter(x=>x.att_path&&x.att_path!=='local'&&!x.deleted_at).length!==c._mc))renderInfo(c);
   stick=near||scroll===true;
   if(scroll&&(near||scroll===true))el.scrollTop=el.scrollHeight;
@@ -741,9 +753,9 @@ function startReply(m){
 function startEdit(m){S.reply=null;S.att=null;S.edit={id:m.id};txt.value=m.content;renderBar();txt.focus()}
 function renderBar(){
   const b=$('bar');let h='';
-  if(S.edit)h+=`<div class="bi"><div><b>Modifier le message</b></div><button type="button" data-x="edit" aria-label="Annuler">✕</button></div>`;
-  if(S.reply)h+=`<div class="bi"><div><b>Répondre à ${esc(S.reply.who)}</b><span>${esc(S.reply.text)}</span></div><button type="button" data-x="reply" aria-label="Annuler">✕</button></div>`;
-  if(S.att)h+=`<div class="bi"><div><b>${S.att.isImg?'Photo':'Fichier'}</b><span>${esc(S.att.name)} · ${fmtSize(S.att.blob.size)}</span></div><button type="button" data-x="att" aria-label="Retirer">✕</button></div>`;
+  if(S.edit)h+=`<div class="bi"><div><b>Modifier le message</b></div><button type="button" data-x="edit" aria-label="Annuler">${ico('close')}</button></div>`;
+  if(S.reply)h+=`<div class="bi"><div><b>Répondre à ${esc(S.reply.who)}</b><span>${esc(S.reply.text)}</span></div><button type="button" data-x="reply" aria-label="Annuler">${ico('close')}</button></div>`;
+  if(S.att)h+=`<div class="bi"><div><b>${S.att.isImg?'Photo':'Fichier'}</b><span>${esc(S.att.name)} · ${fmtSize(S.att.blob.size)}</span></div><button type="button" data-x="att" aria-label="Retirer">${ico('close')}</button></div>`;
   b.innerHTML=h;b.classList.toggle('hidden',!h);fit();
 }
 $('bar').onclick=e=>{
@@ -907,7 +919,7 @@ function openNew(){
   let found=[],timer;
   const host=$('modalHost');
   host.innerHTML=`<div class="ov" id="ov"><div class="modal">
-    <h3>Nouvelle discussion <button class="x" id="mx">✕</button></h3>
+    <h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>
     <input class="search" id="uq" placeholder="Chercher par nom ou prénom…" style="margin-top:0">
     <div class="res" id="res"><div class="empty">Tape au moins 2 caractères.</div></div>
   </div></div>`;
@@ -934,7 +946,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.14';
+const APP_VERSION='2026-11-07.15';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1002,7 +1014,7 @@ function renderMe(){
 function toggleMenu(){
   const m=$('menu');
   if(!m.classList.contains('hidden')){m.classList.add('hidden');return}
-  m.innerHTML=`<div class="mh"><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div><button id="mSet">${ico('gear')}Réglages</button><button id="mOut" class="mo-out">${ico('out')}Se déconnecter</button>`;
+  m.innerHTML=`<div class="mh"><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div><button id="mSet">${ico('sliders')}Réglages</button><button id="mOut" class="mo-out">${ico('out')}Se déconnecter</button>`;
   m.classList.remove('hidden');
   $('mSet').onclick=()=>{m.classList.add('hidden');openSettings()};
   $('mOut').onclick=()=>{m.classList.add('hidden');logout()};
@@ -1020,6 +1032,7 @@ async function openSettings(tab){
   let cur=tab||'profil',color=S.me.color||colorOf(S.me.id),birth='';
   try{const {data}=await sb.from('profile_private').select('birth_date').eq('id',S.me.id).maybeSingle();birth=data?.birth_date||''}catch(e){}
   const close=()=>host.innerHTML='';
+  const TABICO={profil:'user',compte:'mail',notif:'bell',privacy:'shield',theme:'moon',about:'info'};
   const tabs=[['profil','Profil'],['compte','Compte'],['notif','Notifications'],['privacy','Confidentialité'],['theme','Apparence'],['about','À propos']];
   const note=(id,t,k)=>{$(id).innerHTML=t?`<div class="msg ${k}">${esc(t)}</div>`:''};
   const validDate=v=>{const d=new Date(v+'T00:00:00');return !!v&&!isNaN(d)&&d<=new Date()&&d>=new Date('1900-01-01T00:00:00')};
@@ -1094,7 +1107,7 @@ async function openSettings(tab){
     },
     notif(b){
       const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':Notification.permission==='denied'?'Bloquées dans les réglages du navigateur.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
-      b.innerHTML=`<div class="tg"><div><b>Son à la réception</b><div class="hint2">Un bip quand un message arrive dans une autre conversation ou quand l’onglet est en arrière-plan.</div></div><button type="button" class="sw2 ${prefs.sound?'on':''}" id="tSound" aria-label="Son"></button></div>
+      b.innerHTML=`<div class="tg"><div><b>${ico('volume','mini')}Son à la réception</b><div class="hint2">Un bip quand un message arrive dans une autre conversation ou quand l’onglet est en arrière-plan.</div></div><button type="button" class="sw2 ${prefs.sound?'on':''}" id="tSound" aria-label="Son"></button></div>
        <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet. ${esc(perm)}</div></div><button type="button" class="sw2 ${prefs.notif?'on':''}" id="tNotif" aria-label="Notifications"></button></div>
        <div class="tg"><div><b>Réactions à mes messages</b><div class="hint2">Une alerte quand quelqu’un réagit avec un emoji à l’un de tes messages.</div></div><button type="button" class="sw2 ${S.me.notify_reactions!==false?'on':''}" id="tReact" aria-label="Réactions"></button></div>
        <button class="sbtn ghost" id="tTest" style="margin-top:14px">Envoyer une notification de test</button><div id="nm"></div>`;
@@ -1126,7 +1139,7 @@ async function openSettings(tab){
     },
     privacy(b){
       b.innerHTML=`<div class="tg"><div><b>Statut en ligne</b><div class="hint2">Montre quand tu es en ligne et ta dernière connexion. Si tu le désactives, tu ne vois pas non plus celui des autres.</div></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="tPres" aria-label="Statut en ligne"></button></div>
-       <div class="hint2" style="margin-top:12px">Les confirmations de lecture (✓✓) restent actives dans les conversations.</div>`;
+       <div class="hint2" style="margin-top:12px">Les confirmations de lecture (doubles coches) restent actives dans les conversations.</div>`;
       $('tPres').onclick=()=>{prefs.presence=!statusOn();savePrefs();$('tPres').classList.toggle('on',statusOn());startPresence();updateSub();renderList()};
     },
     theme(b){
@@ -1153,7 +1166,7 @@ async function openSettings(tab){
     }
   };
   const shell=()=>{
-    host.innerHTML=`<div class="ov" id="ov"><div class="modal set"><h3>Réglages <button class="x" id="mx">✕</button></h3><div class="stabs">${tabs.map(([k,l])=>`<button class="tab ${k===cur?'on':''}" data-t="${k}">${l}</button>`).join('')}</div><div class="sbody" id="sbody"></div></div></div>`;
+    host.innerHTML=`<div class="ov" id="ov"><div class="modal set"><h3>Réglages <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3><div class="stabs">${tabs.map(([k,l])=>`<button class="tab ${k===cur?'on':''}" data-t="${k}">${ico(TABICO[k],'mini')}${l}</button>`).join('')}</div><div class="sbody" id="sbody"></div></div></div>`;
     $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
     host.querySelectorAll('.stabs .tab').forEach(x=>x.onclick=()=>{cur=x.dataset.t;shell()});
     views[cur]($('sbody'));
