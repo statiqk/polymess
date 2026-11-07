@@ -451,6 +451,22 @@ html[data-theme=dark] .tbar button.s{color:#8f84ff}
 html[data-theme=dark] .tbar button.s .tic{background:rgba(120,110,255,.22)}
 .tbar button.s .tic:has(.tbph){background:none}
 }
+
+/* fiche contact v2 */
+.info p.st{color:var(--mut);font-weight:600;margin:4px 0 18px}.info p.st.live{color:#1f9d5c}
+html[data-theme=dark] .info p.st.live{color:#4cd08a}
+.act{display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:0 4px;margin-bottom:6px}
+.act button{display:flex;flex-direction:column;align-items:center}
+.act .ic2{margin:0 0 7px}
+.act .sel .ic2{background:rgba(120,110,255,.3);color:var(--p)}
+html[data-theme=dark] .act .sel .ic2{background:rgba(120,110,255,.3);color:#d6d3ff}
+.info .row span{color:var(--tabtx)}
+.info .sec h4{color:var(--mut)}
+@media(max-width:900px){
+.info{padding-top:16px}
+#app.mobinfo .info .back{border-radius:50%;width:42px;height:42px}
+.info .av{margin-top:6px}
+}
 </style>
 </head>
 <body>
@@ -786,13 +802,14 @@ function renderInfo(c){
   c._mc=media.length;
   const imgs=media.filter(m=>(m.att_type||'').startsWith('image/')).slice(0,9),files=media.filter(m=>!(m.att_type||'').startsWith('image/')).slice(0,5);
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
+  const seenLong=statusOn()&&c.other?.last_seen_at?fmtSeenLong(c.other.last_seen_at):'';
+  const stTxt=subText(c,false)||'Discussion privée';
   $('info').innerHTML=`${back}<div class="av${on?' on':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
-   <h3>${esc(c.name)}</h3><p class="st" id="infoSt">${esc(subText(c,false)||'Discussion privée')}</p>
+   <h3>${esc(c.name)}</h3><p class="st${stTxt==='En ligne'?' live':''}" id="infoSt">${esc(stTxt)}</p>
    <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
+   <div class="sec"><h4>Informations</h4><div class="row"><span>Nom</span>${esc([c.other?.first_name,c.other?.last_name].filter(Boolean).join(' ')||c.name)}</div>${seenLong?`<div class="row"><span>Vu pour la dernière fois</span>${esc(seenLong)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div></div>
    ${media.length?`<div class="sec"><h4>Photos et fichiers · ${media.length}</h4>${imgs.length?`<div class="mgrid">${imgs.map(m=>`<img class="th" alt="${esc(m.att_name||'')}" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'image')}"${cachedUrl(m.att_path)?` src="${esc(cachedUrl(m.att_path))}"`:''}>`).join('')}</div>`:''}${files.map(m=>`<div class="frow" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>${fmtSize(m.att_size)}</small></div></div>`).join('')}</div>`:''}
-   <div class="sec"><h4>Informations</h4><div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div></div>
-   <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>${esc(S.email)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
-  const l=$('infoLogout');if(l)l.onclick=askLogout;
+`;
   $('infoBack').onclick=()=>{if(curPM==='info')history.back();else hideMobInfo()};
   $('aSearch').onclick=()=>{closeInfoPanel();setTimeout(openSearch,60)};
   $('aMute').onclick=()=>setFlag(c,'muted',!c.muted);
@@ -800,6 +817,12 @@ function renderInfo(c){
   $('info').querySelectorAll('img.th').forEach(im=>im.onclick=()=>{if(im.src)openLightbox(im.dataset.path,im.dataset.name,im.src)});
   $('info').querySelectorAll('.frow').forEach(r=>r.onclick=()=>downloadFile(r.dataset.path,r.dataset.name));
   hydrateImgs();
+}
+function fmtSeenLong(d){
+  const x=new Date(d),n=new Date(),y=new Date(n);y.setDate(n.getDate()-1);const t=fmtTime(d);
+  if(x.toDateString()===n.toDateString())return 'Aujourd’hui, '+t;
+  if(x.toDateString()===y.toDateString())return 'Hier, '+t;
+  return x.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+', '+t;
 }
 const RX=['👍','❤️','😂','😮','😢','🙏'];
 const fmtSize=n=>!n?'':n<1024*1024?Math.max(1,Math.round(n/1024))+' Ko':(n/1048576).toFixed(1).replace('.',',')+' Mo';
@@ -1057,7 +1080,7 @@ function updateSub(){
   $('chSub').textContent=t||'Discussion privée';
   $('chSub').classList.toggle('live',t==='En ligne'||t==='écrit…');
   $('chAv').classList.toggle('on',!!on);
-  const e=$('infoSt');if(e)e.textContent=subText(c,false)||'Discussion privée';
+  const e=$('infoSt');if(e){const tx=subText(c,false)||'Discussion privée';e.textContent=tx;e.classList.toggle('live',tx==='En ligne')}
   const a=$('infoAv');if(a)a.classList.toggle('on',!!on);
 }
 let pch=null,seenTimer=null;
@@ -1120,7 +1143,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.29';
+const APP_VERSION='2026-11-07.30';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
