@@ -23,7 +23,7 @@ self.addEventListener('push',e=>{
       msgs=(((ex&&ex.data&&ex.data.msgs)||[]).concat(d.body||'')).slice(-5);
       if(msgs.length>1){title=`${d.title} · ${msgs.length} messages`;body=msgs.join('\n')}
     }
-    const opts={body,tag:d.tag,renotify:!!d.tag,icon:'icon-192.png',badge:'icon-192.png',vibrate:[120,60,120],timestamp:Date.now(),
+    const opts={body,tag:d.tag,renotify:!!d.tag,icon:'icon-192.png?v=2',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
       data:{cid:d.cid,msgs,name:d.title}};
     if(d.image)opts.image=d.image;
     if(d.kind==='msg')opts.actions=[{action:'reply',title:'Répondre',type:'text',placeholder:'Ta réponse…'},{action:'read',title:'Marquer comme lu'}];
