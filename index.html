@@ -312,6 +312,9 @@ html[data-theme=dark] .comp textarea{caret-color:#9a90ff;box-shadow:inset 0 0 0 
 .send:not(:disabled):active{transform:scale(.92)}
 .send:disabled{opacity:1;background:var(--soft);box-shadow:none}.send:disabled .ico{stroke:var(--mut)}
 @media(max-width:900px){.comp:focus-within{margin-bottom:6px}}
+
+/* espace bas v2 */
+@media(max-width:900px){.comp{margin-bottom:max(8px,calc(env(safe-area-inset-bottom) - 12px));transition:margin-bottom .2s ease}.comp:focus-within{margin-bottom:6px}}
 </style>
 </head>
 <body>
@@ -955,7 +958,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.16';
+const APP_VERSION='2026-11-07.17';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
