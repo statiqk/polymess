@@ -538,6 +538,14 @@ html[data-theme=dark] .mlr.inv{background:linear-gradient(100deg,#2a2660,#3a2650
 .invb .ic{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex:none}
 .invb b{display:block;font-size:16px}.invb span.s{display:block;font-size:12.5px;opacity:.85;font-weight:500;margin-top:1px}
 .flash{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1d1a4b;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:99;max-width:86%;text-align:center}
+
+/* ===== Recherche + clavier ===== */
+.lh #qrow{display:flex;flex-direction:row;align-items:center;margin-top:14px;flex:none}.qrow .search{margin-top:0;flex:1;min-width:0}
+.search:focus{outline:0;box-shadow:inset 0 0 0 2px #7a6cff}
+.qcancel{width:0;padding:0;opacity:0;overflow:hidden;white-space:nowrap;color:var(--p);font-weight:700;font-size:15px;background:none;transition:width .18s,opacity .18s,padding .18s}
+.qrow.act .qcancel{width:auto;opacity:1;padding:0 2px 0 12px}
+html[data-theme=dark] .qcancel{color:#b3acff}
+@media(max-width:900px){html.kb .tbar{display:none!important}}
 </style>
 </head>
 <body>
@@ -583,7 +591,7 @@ html[data-theme=dark] .mlr.inv{background:linear-gradient(100deg,#2a2660,#3a2650
  <div class="list">
   <div class="lh">
    <h2><span class="hlft">Messages<i class="hlogo" aria-hidden="true"></i></span><span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="ico " viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></h2>
-   <input class="search" id="q" placeholder="Rechercher une conversation…">
+   <div class="qrow" id="qrow"><input class="search" id="q" placeholder="Rechercher une conversation…" enterkeyhint="search" autocomplete="off"><button type="button" class="qcancel" id="qCancel">Annuler</button></div>
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
   <div class="convs" id="convs"></div>
@@ -1233,7 +1241,7 @@ function openNew(){
   host.innerHTML=mob
    ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}${inv}<div class="res" id="res"></div></div></div>`
    :`<div class="ov" id="ov"><div class="modal"><h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>${field}${inv}<div class="res" id="res"></div></div></div>`;
-  const close=()=>host.innerHTML='';
+  const close=()=>{try{document.activeElement&&document.activeElement.blur()}catch(e){}host.innerHTML=''};
   $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
   $('invb').onclick=inviteFriend;
   const row=(p,sub)=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div class="pt"><b>${hl(p.display_name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div><span class="wr">${ico('chat')}Écrire</span></button>`;
@@ -1271,7 +1279,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.32';
+const APP_VERSION='2026-11-07.33';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1750,6 +1758,18 @@ const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigat
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ---------- RECHERCHE : annuler + clavier ---------- */
+(()=>{
+  const q=$('q'),row=$('qrow'),root=document.documentElement;
+  const upd=()=>row.classList.toggle('act',document.activeElement===q||!!q.value);
+  q.addEventListener('focus',upd);q.addEventListener('blur',upd);q.addEventListener('input',upd);
+  $('qCancel').onclick=()=>{q.value='';q.dispatchEvent(new Event('input'));q.blur();upd()};
+  const kbOn=e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&e.target.closest('.list'))root.classList.add('kb')};
+  document.addEventListener('focusin',kbOn);
+  document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.closest('.list')))root.classList.remove('kb')},60));
+  $('convs').addEventListener('touchmove',()=>{if(document.activeElement===q)q.blur()},{passive:true});
+})();
 
 /* ---------- INIT ---------- */
 (async()=>{
