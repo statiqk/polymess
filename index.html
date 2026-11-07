@@ -410,6 +410,23 @@ html[data-theme=dark] .comp textarea{background:#262650}
 .m.in{margin-left:38px}
 .mav2{position:absolute;left:-38px;bottom:0;width:30px;height:30px;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;font-style:normal;line-height:1}
 @media(max-width:900px){.m.in{max-width:calc(84% - 38px)}}
+
+/* nouvelle discussion v2 */
+.nsf{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:16px;height:46px;padding:0 14px;color:var(--mut);margin-top:2px}
+.nsf:focus-within{box-shadow:0 0 0 2px var(--p)}.nsf .ms{width:20px;height:20px;flex:none}
+.nsf input{flex:1;min-width:0;font-size:16px;color:var(--ink)}
+.nclr{width:22px;height:22px;border-radius:50%;background:var(--chk);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}.nclr .ico{width:13px;height:13px;stroke-width:2.4}
+.modal .res .h5,.mp .res .h5{margin:18px 4px 6px}
+.mp .res{overflow-y:auto;flex:1;margin-top:4px}
+.pick{padding:10px 6px}.pick+.pick{border-top:1px solid var(--line2)}
+.pick .av{width:44px;height:44px;font-size:15px}
+.pick .pt{flex:1;display:flex;flex-direction:column;min-width:0}.pick .pt b{font-size:16px}.pick .pt span{font-size:13px;color:var(--mut)}.pick mark{background:none;color:var(--p);font-weight:800}
+html[data-theme=dark] .pick mark{color:#a79dff}
+.wr{display:flex;align-items:center;gap:6px;background:rgba(120,110,255,.16);color:var(--p);font-weight:700;font-size:13px;padding:8px 12px;border-radius:99px;flex:none}.wr .ico{width:15px;height:15px}
+html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
+.nhint{text-align:center;color:var(--mut);font-size:13px;margin-top:22px}
+.nempty{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:70px;gap:8px;padding:0 20px}.nempty b{font-size:16px}.nempty span{font-size:14px;color:var(--mut)}
+.eic{width:64px;height:64px;border-radius:50%;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;margin-bottom:6px}.eic .ico{width:28px;height:28px}
 </style>
 </head>
 <body>
@@ -1036,36 +1053,49 @@ function startPresence(){
 $('newBtn').onclick=()=>openNew();
 function openNew(){
   let found=[],timer;
-  const host=$('modalHost');
-  host.innerHTML=`<div class="ov" id="ov"><div class="modal">
-    <h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>
-    <input class="search" id="uq" placeholder="Chercher par nom ou prénom…" style="margin-top:0">
-    <div class="res" id="res"><div class="empty">Tape au moins 2 caractères.</div></div>
-  </div></div>`;
+  const host=$('modalHost'),mob=isMob();
+  const field=`<div class="nsf">${ico('search','ms')}<input id="uq" placeholder="Nom ou prénom…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
+  host.innerHTML=mob
+   ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}<div class="res" id="res"></div></div></div>`
+   :`<div class="ov" id="ov"><div class="modal"><h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>${field}<div class="res" id="res"></div></div></div>`;
   const close=()=>host.innerHTML='';
   $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
-  const drawRes=()=>{
-    $('res').innerHTML=found.length?found.map(p=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${avBg(colorOf(p.id,p.color),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div><b>${esc(p.display_name)}</b></div></button>`).join(''):`<div class="empty">Aucun utilisateur trouvé.</div>`;
+  const row=(p,sub)=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div class="pt"><b>${hl(p.display_name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div><span class="wr">${ico('chat')}Écrire</span></button>`;
+  let q='';
+  const hl=n=>{const t=esc(n||'');if(q.length<2)return t;const i=(n||'').toLowerCase().indexOf(q);return i<0?t:esc(n.slice(0,i))+'<mark>'+esc(n.slice(i,i+q.length))+'</mark>'+esc(n.slice(i+q.length))};
+  const exists=id=>S.convs.find(c=>c.other?.id===id);
+  const recents=()=>{
+    const r=S.convs.filter(c=>c.other).slice(0,5);
+    $('res').innerHTML=(r.length?`<div class="h5">Récents</div>`+r.map(c=>row(c.other,statusOn()&&c.other.last_seen_at?fmtSeen(c.other.last_seen_at):'')).join(''):'')+`<div class="nhint">${r.length?'Ou cherche':'Cherche'} quelqu’un par son nom ou son prénom.</div>`;
   };
+  const drawRes=()=>{
+    $('res').innerHTML=found.length?`<div class="h5">${found.length} résultat${found.length>1?'s':''}</div>`+found.map(p=>row(p,exists(p.id)?'Discussion existante':'Nouveau contact')).join(''):`<div class="nempty"><div class="eic">${ico('search')}</div><b>Personne ne correspond à « ${esc($('uq').value.trim())} »</b><span>Vérifie l’orthographe ou essaie le prénom.</span></div>`;
+  };
+  recents();
+  $('uc').onclick=()=>{$('uq').value='';$('uq').dispatchEvent(new Event('input'));$('uq').focus()};
   $('uq').oninput=e=>{
-    clearTimeout(timer);const v=e.target.value.trim().toLowerCase().replace(/[%,()*]/g,'');
-    if(v.length<2){found=[];$('res').innerHTML='<div class="empty">Tape au moins 2 caractères.</div>';return}
+    clearTimeout(timer);q=e.target.value.trim().toLowerCase().replace(/[%,()*]/g,'');
+    $('uc').classList.toggle('hidden',!e.target.value);
+    if(q.length<2){found=[];recents();return}
     timer=setTimeout(async()=>{
-      const {data}=await sb.from('profiles').select('id,display_name,first_name,last_name,color,avatar_path').neq('id',S.me.id).or(`display_name.ilike.%${v}%,first_name.ilike.%${v}%,last_name.ilike.%${v}%`).limit(20);
+      const {data}=await sb.from('profiles').select('id,display_name,first_name,last_name,color,avatar_path').neq('id',S.me.id).or(`display_name.ilike.%${q}%,first_name.ilike.%${q}%,last_name.ilike.%${q}%`).limit(20);
       found=data||[];drawRes();
     },250);
   };
   $('res').onclick=async e=>{
     const b=e.target.closest('.pick');if(!b)return;
+    const ex=exists(b.dataset.id);
+    if(ex){close();openConv(ex.id);return}
     const {data,error}=await sb.rpc('start_direct',{other:b.dataset.id});
     if(error){alert(error.message);return}
     close();await loadConvs();renderList();openConv(data);
   };
+  $('uq').focus();
 }
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.22';
+const APP_VERSION='2026-11-07.23';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
