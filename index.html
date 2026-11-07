@@ -300,6 +300,7 @@ $('authForm').onsubmit=async e=>{
   }finally{$('authBtn').disabled=false}
 };
 async function logout(){
+  try{await pushDetach()}catch(e){}
   if(S.chan){sb.removeChannel(S.chan);S.chan=null}
   await sb.auth.signOut();
 }
@@ -318,6 +319,10 @@ async function boot(user){
   await loadConvs();
   subscribe();
   renderAll();
+  if(prefs.push&&pushSupported()&&Notification.permission==='granted')pushSubscribe().catch(()=>{});
+  const wanted=new URLSearchParams(location.search).get('c');
+  if(wanted&&S.convs.some(c=>c.id===wanted))openConv(wanted);
+  if(location.search)history.replaceState(history.state,'',location.pathname);
 }
 
 async function loadConvs(){
@@ -359,7 +364,7 @@ async function onNewMsg(m){
   c.last=m;
   if(m.sender_id!==S.me.id){
     if(prefs.sound&&(document.hidden||S.cur!==c.id))beep();
-    if(prefs.notif&&document.hidden&&'Notification' in window&&Notification.permission==='granted'){
+    if(prefs.notif&&!prefs.push&&document.hidden&&'Notification' in window&&Notification.permission==='granted'){
       const who=c.members.find(x=>x.id===m.sender_id)?.display_name||'Nouveau message';
       showNotif(c.is_group?`${c.name} · ${who}`:who,m.content.slice(0,140),c.id);
     }
@@ -545,7 +550,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.6';
+const APP_VERSION='2026-11-07.7';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -700,17 +705,22 @@ async function openSettings(tab){
       };
     },
     notif(b){
-      const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':Notification.permission==='denied'?'Bloquées dans les réglages du navigateur.':'';
+      const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':Notification.permission==='denied'?'Bloquées dans les réglages du navigateur.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
       b.innerHTML=`<div class="tg"><div><b>Son à la réception</b><div class="hint2">Un bip quand un message arrive dans une autre conversation ou quand l’onglet est en arrière-plan.</div></div><button type="button" class="sw2 ${prefs.sound?'on':''}" id="tSound" aria-label="Son"></button></div>
-       <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte quand l’onglet est masqué. ${esc(perm)}</div></div><button type="button" class="sw2 ${prefs.notif?'on':''}" id="tNotif" aria-label="Notifications"></button></div><div id="nm"></div>`;
+       <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet. ${esc(perm)}</div></div><button type="button" class="sw2 ${prefs.notif?'on':''}" id="tNotif" aria-label="Notifications"></button></div><div id="nm"></div>`;
       $('tSound').onclick=()=>{prefs.sound=!prefs.sound;savePrefs();$('tSound').classList.toggle('on',prefs.sound);if(prefs.sound)beep()};
       $('tNotif').onclick=async()=>{
-        if(prefs.notif){prefs.notif=false;savePrefs();$('tNotif').classList.remove('on');note('nm','','');return}
+        if(prefs.notif){prefs.notif=false;prefs.push=false;savePrefs();$('tNotif').classList.remove('on');pushUnsubscribe();note('nm','','');return}
         if(!('Notification' in window)){note('nm','Ce navigateur ne gère pas les notifications.','err');return}
         let r=Notification.permission;
         if(r!=='granted')r=await Notification.requestPermission();
         if(r!=='granted'){note('nm','Autorisation refusée : active les notifications pour ce site dans les réglages du navigateur.','err');return}
-        prefs.notif=true;savePrefs();$('tNotif').classList.add('on');note('nm','','');
+        prefs.push=false;
+        if(pushSupported()){
+          try{await pushSubscribe();prefs.push=true;note('nm','','')}
+          catch(e){note('nm','Alertes appli fermée indisponibles ('+(e.message||e)+'). Tu recevras les alertes seulement appli ouverte.','err')}
+        }
+        prefs.notif=true;savePrefs();$('tNotif').classList.add('on');
       };
     },
     theme(b){
@@ -801,6 +811,34 @@ async function showNotif(title,body,tag){
   try{const reg=await navigator.serviceWorker?.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png',badge:'icon-192.png'});return}}catch(e){}
   try{new Notification(title,{body,tag,icon:'icon-192.png'})}catch(e){}
 }
+
+// Web Push : abonner / désabonner cet appareil
+const pushSupported=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&location.protocol.startsWith('http');
+const urlB64=s=>{const b=(s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
+async function pushSubscribe(){
+  const reg=await navigator.serviceWorker.ready;
+  const res=await fetch(SB_URL+'/functions/v1/push',{headers:{apikey:SB_KEY}});
+  if(!res.ok)throw new Error('serveur injoignable');
+  const {key}=await res.json();
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64(key)});
+  const j=sub.toJSON();
+  const {error}=await sb.rpc('register_push',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_ua:navigator.userAgent});
+  if(error)throw error;
+}
+async function pushUnsubscribe(){
+  try{
+    const reg=await navigator.serviceWorker.getRegistration();const sub=await reg?.pushManager.getSubscription();
+    if(sub){await sb.rpc('unregister_push',{p_endpoint:sub.endpoint});await sub.unsubscribe()}
+  }catch(e){}
+}
+// à la déconnexion : l'appareil ne reçoit plus les messages de ce compte
+async function pushDetach(){
+  if(!pushSupported())return;
+  const reg=await navigator.serviceWorker.getRegistration();const sub=await reg?.pushManager.getSubscription();
+  if(sub)await sb.rpc('unregister_push',{p_endpoint:sub.endpoint});
+}
+navigator.serviceWorker?.addEventListener('message',e=>{if(e.data&&e.data.type==='open'&&e.data.id)openConv(e.data.id)});
 
 // installation sur l'écran d'accueil
 let installEv=null;
