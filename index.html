@@ -338,6 +338,34 @@ html[data-theme=dark] #menu.sheet{background:#26244c;border-top-color:rgba(150,1
 #menu .mit{padding:14px 4px;font-size:16px;font-weight:600;border-radius:12px}#menu .mit .chv{margin-left:auto;transform:rotate(-90deg);color:var(--mut)}
 #menu hr{border:0;border-top:1px solid var(--line);margin:2px 0}
 }
+
+/* réglages mobile v2 */
+.fld input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;width:100%;min-height:46px;text-align:left}
+.fld input[type=date]::-webkit-date-and-time-value{text-align:left}
+@media(max-width:900px){
+.ov.full{padding:0;align-items:stretch;background:var(--bg)}
+.modal.set.mp{max-width:none;width:100%;height:100%;max-height:none;border-radius:0;padding:0 16px;animation:none;background:var(--bg)}
+.mtop{display:flex;align-items:center;gap:6px;padding:calc(14px + env(safe-area-inset-top)) 0 6px;flex:none}
+.mbk{display:flex;align-items:center;color:var(--p);font-weight:700;padding:4px 4px 4px 0}.mbk .ico{width:26px;height:26px}.mbk em{font-style:normal;font-size:16px}
+.mttl{font-size:24px;font-weight:800;margin-left:6px}.mh2{font-size:28px;font-weight:800;margin:4px 0 6px;flex:none}
+.mp .sbody{padding:6px 0 calc(16px + env(safe-area-inset-bottom))}
+.musr{display:flex;gap:14px;align-items:center;background:var(--soft);border-radius:18px;padding:14px;margin:8px 0 18px}.musr b{display:block;font-size:17px}.musr span{font-size:13px;color:var(--mut);word-break:break-all}
+.musr .mav{width:54px;height:54px;border-radius:50%;color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;flex:none}
+.mgrp{background:var(--soft);border-radius:18px;overflow:hidden}
+.mlr{display:flex;align-items:center;gap:14px;width:100%;padding:14px;border-bottom:1px solid var(--line);font-size:16px;text-align:left}.mlr:last-child{border:0}.mlr b{font-weight:600;flex:1}
+.mib{width:36px;height:36px;border-radius:11px;background:rgba(120,110,255,.16);color:var(--p);display:flex;align-items:center;justify-content:center;flex:none}.mib .ico{width:20px;height:20px}
+.mlr .chv{transform:rotate(-90deg);color:var(--mut);width:18px;height:18px}
+html[data-theme=dark] .mib{color:#b3acff}
+.sw{flex-wrap:nowrap;gap:6px;justify-content:space-between}.sw button{width:32px;height:32px;flex:none}
+.mp #sSave{position:sticky;bottom:8px;display:block;width:100%;padding:14px;font-size:16px;margin-top:16px;background:linear-gradient(135deg,#4b3fd6,#6a5cff);color:#fff;box-shadow:0 6px 16px rgba(75,63,214,.4)}
+.mp #sSave:disabled{opacity:1;background:var(--soft);color:var(--mut);box-shadow:none}
+}
+
+@media(max-width:900px){
+.mp .sbody{display:flex;flex-direction:column}
+.mp #sSave{margin-top:auto;flex:none}.mp #sm{margin-top:auto}.mp #sm+#sSave{margin-top:12px}
+.sw{padding:5px}
+}
 </style>
 </head>
 <body>
@@ -981,7 +1009,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.18';
+const APP_VERSION='2026-11-07.19';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1113,7 +1141,10 @@ async function openSettings(tab){
        <div id="sm"></div><button class="sbtn" id="sSave">Enregistrer</button>`;
       const upd=()=>{$('pv').textContent=initials(($('sFirst').value+' '+$('sLast').value).trim()||'?')};
       $('sFirst').oninput=upd;$('sLast').oninput=upd;
-      b.querySelectorAll('.sw button').forEach(x=>x.onclick=()=>{color=x.dataset.c;b.querySelectorAll('.sw button').forEach(y=>y.classList.toggle('sel',y===x));$('pv').style.background=color});
+      const snap=()=>[$('sFirst').value,$('sLast').value,$('sBirth').value,color].join('|');let base=snap();
+      const chk=()=>{const d=snap()!==base;$('sSave').disabled=!d;if(d)$('sSave').textContent='Enregistrer'};
+      ['sFirst','sLast','sBirth'].forEach(i=>$(i).addEventListener('input',chk));$('sSave').disabled=true;
+      b.querySelectorAll('.sw button').forEach(x=>x.onclick=()=>{color=x.dataset.c;b.querySelectorAll('.sw button').forEach(y=>y.classList.toggle('sel',y===x));$('pv').style.background=color;chk()});
       $('sSave').onclick=async()=>{
         const f=$('sFirst').value.trim(),l=$('sLast').value.trim(),bv=$('sBirth').value;
         if(!f){note('sm','Indique ton prénom.','err');return}
@@ -1123,11 +1154,10 @@ async function openSettings(tab){
         const display=(f+' '+l).slice(0,40);
         const r1=await sb.from('profiles').update({first_name:f,last_name:l,display_name:display,color}).eq('id',S.me.id);
         const r2=await sb.from('profile_private').update({birth_date:bv}).eq('id',S.me.id);
-        $('sSave').disabled=false;
         const err=r1.error||r2.error;
-        if(err){note('sm','Enregistrement impossible : '+err.message,'err');return}
+        if(err){$('sSave').disabled=false;note('sm','Enregistrement impossible : '+err.message,'err');return}
         Object.assign(S.me,{first_name:f,last_name:l,display_name:display,color});birth=bv;
-        renderMe();await loadConvs();renderAll();note('sm','Profil enregistré.','ok');
+        renderMe();await loadConvs();renderAll();base=snap();$('sSave').textContent='Enregistré ✓';$('sSave').disabled=true;note('sm','Profil enregistré.','ok');
       };
     },
     compte(b){
@@ -1232,7 +1262,21 @@ async function openSettings(tab){
       };
     }
   };
+  let page=isMob()&&tab?tab:null;
+  const lbl=Object.fromEntries(tabs);
+  const shellMob=()=>{
+    if(!page){
+      host.innerHTML=`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk" id="mx" aria-label="Retour">${ico('back')}</button><b class="mttl">Réglages</b></div><div class="sbody"><div class="musr"><div class="mav" style="background:${esc(color)}">${esc(initials(S.me.display_name))}</div><div><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div></div><div class="mgrp">${tabs.map(([k,l])=>`<button type="button" class="mlr" data-t="${k}"><span class="mib">${ico(TABICO[k])}</span><b>${l}</b>${ico('down','chv')}</button>`).join('')}</div></div></div></div>`;
+      $('mx').onclick=close;
+      host.querySelectorAll('.mlr').forEach(x=>x.onclick=()=>{page=x.dataset.t;cur=page;shellMob()});
+    }else{
+      host.innerHTML=`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Réglages</em></button></div><h2 class="mh2">${lbl[page]}</h2><div class="sbody" id="sbody"></div></div></div>`;
+      $('mx').onclick=()=>{page=null;shellMob()};
+      views[page]($('sbody'));
+    }
+  };
   const shell=()=>{
+    if(isMob()){shellMob();return}
     host.innerHTML=`<div class="ov" id="ov"><div class="modal set"><h3>Réglages <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3><div class="stabs">${tabs.map(([k,l])=>`<button class="tab ${k===cur?'on':''}" data-t="${k}">${ico(TABICO[k],'mini')}${l}</button>`).join('')}</div><div class="sbody" id="sbody"></div></div></div>`;
     $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
     host.querySelectorAll('.stabs .tab').forEach(x=>x.onclick=()=>{cur=x.dataset.t;shell()});
