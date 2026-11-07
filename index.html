@@ -188,6 +188,39 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
  .msgs{padding:14px 12px}
  .comp{margin:0 10px calc(10px + env(safe-area-inset-bottom))}
 }
+
+.av{position:relative}
+.av.on::after{content:'';position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2fbf71;border:2px solid var(--card)}
+.ch .s.live{color:#1f9d5c}
+.m{position:relative}.m:not(.del){cursor:pointer}
+.m .q{display:block;border-left:3px solid currentColor;background:rgba(127,127,127,.16);border-radius:8px;padding:4px 8px;margin-bottom:6px;font-size:12.5px;cursor:pointer;white-space:normal}
+.m .q b{display:block;font-size:12px}.m .q span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;opacity:.85}
+.m.del{opacity:.65;font-style:italic}
+.m .pj{display:block;max-width:100%;max-height:320px;min-width:140px;min-height:90px;border-radius:12px;margin-bottom:4px;object-fit:cover;background:rgba(127,127,127,.18)}
+.m .file{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(127,127,127,.16);margin-bottom:4px;text-decoration:none;color:inherit;font-weight:600;white-space:normal}
+.m .file small{display:block;margin:0;text-align:left;opacity:.7;font-weight:400}
+.rxs{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.rx{font-size:12.5px;padding:1px 7px;border-radius:12px;background:rgba(127,127,127,.2);border:1px solid transparent;color:inherit}
+.rx.mine{border-color:var(--p);background:rgba(108,99,255,.2)}
+.out .rx.mine{border-color:#fff}
+.rd{color:#bff3ff;font-weight:700}
+.hl{animation:hl 1.3s}@keyframes hl{0%,70%{box-shadow:0 0 0 3px var(--p)}100%{box-shadow:0 0 0 0 transparent}}
+#mmenu{position:fixed;z-index:80;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(20,25,60,.28);padding:6px;min-width:200px}
+#mmenu .em{display:flex;gap:2px;padding:4px 4px 6px;border-bottom:1px solid var(--line2);margin-bottom:4px}
+#mmenu .em button{font-size:22px;width:36px;height:36px;border-radius:10px}
+#mmenu .em button.on,#mmenu .em button:hover,#mmenu .it:hover{background:var(--soft)}
+#mmenu .it{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:14.5px}
+#mmenu .it.red{color:#d93a55}
+.bar{margin:0 22px 8px;display:flex;flex-direction:column;gap:6px}
+.bar .bi{display:flex;align-items:center;gap:8px;background:var(--card);border-left:3px solid var(--p);border-radius:10px;padding:6px 10px;font-size:13px}
+.bar .bi div{flex:1;min-width:0}.bar .bi b{display:block;font-size:12px;color:var(--p)}
+.bar .bi span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mut)}
+.bar .bi button{width:26px;height:26px;border-radius:8px;background:var(--soft)}
+.clip{width:42px;height:42px;border-radius:14px;font-size:19px;flex:none}
+#lb{position:fixed;inset:0;z-index:90;background:rgba(10,12,30,.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+#lb img{max-width:94vw;max-height:78vh;border-radius:8px}
+#lb .lbb{display:flex;gap:10px}#lb .lbb button{background:#fff;color:#1c2033;padding:9px 16px;border-radius:12px;font-weight:700}
+@media(max-width:900px){.bar{margin:0 10px 6px}}
 </style>
 </head>
 <body>
@@ -225,7 +258,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
   <div class="lh">
    <h2>Messages <span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion">+</button></span></h2>
    <input class="search" id="q" placeholder="🔍 Rechercher une conversation…">
-   <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button><button class="tab" data-f="group">Groupes</button></div>
+   <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
   <div class="convs" id="convs"></div>
  </div>
@@ -240,7 +273,10 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
     <span class="sp"></span><button class="ibtn" id="infoBtn" title="Informations sur la conversation" aria-label="Informations">ⓘ</button>
    </div>
    <div class="msgs" id="msgs"></div>
+   <div class="bar hidden" id="bar"></div>
    <form class="comp" id="comp">
+    <button type="button" class="clip" id="clipBtn" title="Joindre un fichier" aria-label="Joindre un fichier">📎</button>
+    <input type="file" id="file" class="hidden" accept="image/*,.pdf,.txt,.zip,.doc,.docx,.xls,.xlsx,.pptx">
     <textarea id="txt" rows="1" placeholder="Écrire un message…" maxlength="4000"></textarea>
     <button class="send" id="sendBtn" type="submit" disabled>➤</button>
    </form>
@@ -261,7 +297,8 @@ const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false};
+const MCOLS='id,conversation_id,sender_id,content,created_at,reply_to,att_path,att_name,att_type,att_size,edited_at,deleted_at';
+const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false,react:{},online:new Set(),reply:null,edit:null,att:null,urls:{},typing:null};
 const COLORS=['#6c63ff','#e8618c','#4aa3f0','#34b46c','#f6b84b','#f0795b','#3cc4c4','#8a63e6'];
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const colorOf=(id,c)=>c||COLORS[[...String(id)].reduce((a,ch)=>a+ch.charCodeAt(0),0)%COLORS.length];
@@ -301,6 +338,7 @@ $('authForm').onsubmit=async e=>{
 };
 async function logout(){
   try{await pushDetach()}catch(e){}
+  stopPresence();
   if(S.chan){sb.removeChannel(S.chan);S.chan=null}
   await sb.auth.signOut();
 }
@@ -318,6 +356,7 @@ async function boot(user){
   $('auth').classList.add('hidden');$('app').classList.remove('hidden');
   await loadConvs();
   subscribe();
+  startPresence();
   renderAll();
   if(prefs.push&&pushSupported()&&Notification.permission==='granted')pushSubscribe().catch(()=>{});
   const wanted=new URLSearchParams(location.search).get('c');
@@ -326,25 +365,24 @@ async function boot(user){
 }
 
 async function loadConvs(){
-  const {data:mine,error}=await sb.from('conversation_members').select('conversation_id,last_read_at,conversations(id,is_group,name,created_at)').eq('user_id',S.me.id);
+  const {data:mine,error}=await sb.from('conversation_members').select('conversation_id,last_read_at,conversations(id,created_at)').eq('user_id',S.me.id);
   if(error){console.error(error);return}
   const ids=mine.map(m=>m.conversation_id);
   if(!ids.length){S.convs=[];return}
   const [{data:mem},{data:recent}]=await Promise.all([
-    sb.from('conversation_members').select('conversation_id,user_id,profiles(id,username,display_name,first_name,last_name,color)').in('conversation_id',ids),
-    sb.from('messages').select('id,conversation_id,sender_id,content,created_at').in('conversation_id',ids).order('created_at',{ascending:false}).limit(400)
+    sb.from('conversation_members').select('conversation_id,user_id,last_read_at,profiles(id,username,display_name,first_name,last_name,color,last_seen_at)').in('conversation_id',ids),
+    sb.from('messages').select(MCOLS).in('conversation_id',ids).order('created_at',{ascending:false}).limit(400)
   ]);
-  const byConv={};
-  (mem||[]).forEach(m=>{(byConv[m.conversation_id]??=[]).push(m.profiles)});
+  const byConv={},readAt={};
+  (mem||[]).forEach(m=>{if(m.profiles)(byConv[m.conversation_id]??=[]).push(m.profiles);readAt[m.conversation_id+m.user_id]=m.last_read_at});
   const lastBy={};
   (recent||[]).forEach(m=>{(lastBy[m.conversation_id]??=[]).push(m)});
   S.convs=mine.map(m=>{
     const c=m.conversations,members=byConv[c.id]||[];
-    const other=c.is_group?null:members.find(p=>p.id!==S.me.id);
+    const other=members.find(p=>p.id!==S.me.id);
     const msgs=(lastBy[c.id]||[]);
     const unread=msgs.filter(x=>x.sender_id!==S.me.id&&x.created_at>m.last_read_at).length;
-    return {id:c.id,is_group:c.is_group,name:c.is_group?(c.name||'Groupe'):(other?.display_name||'Utilisateur supprimé'),
-      color:colorOf(c.id,other?.color),other,members,last:msgs[0]||null,unread,created_at:c.created_at,last_read_at:m.last_read_at};
+    return {id:c.id,name:other?.display_name||'Utilisateur supprimé',color:colorOf(c.id,other?.color),other,members,last:msgs[0]||null,unread,created_at:c.created_at,last_read_at:m.last_read_at,other_read:other?readAt[c.id+other.id]:null};
   });
   sortConvs();
 }
@@ -355,28 +393,66 @@ function subscribe(){
   if(S.chan)sb.removeChannel(S.chan);
   S.chan=sb.channel('polymess')
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},p=>onNewMsg(p.new))
+   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages'},p=>onMsgUpdate(p.new))
+   .on('postgres_changes',{event:'*',schema:'public',table:'reactions'},p=>onReaction(p))
+   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'conversation_members'},p=>onMemberUpdate(p.new))
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'conversation_members',filter:'user_id=eq.'+S.me.id},async()=>{await loadConvs();renderAll()})
    .subscribe();
 }
+const attLabel=m=>m.att_path?((m.att_type||'').startsWith('image/')?'📷 Photo':'📎 '+(m.att_name||'Fichier')):'';
+const prevText=m=>m.deleted_at?'Message supprimé':(attLabel(m)+(attLabel(m)&&m.content?' ':'')+(m.content||''));
 async function onNewMsg(m){
   let c=S.convs.find(x=>x.id===m.conversation_id);
   if(!c){await loadConvs();c=S.convs.find(x=>x.id===m.conversation_id);if(!c){renderAll();return}}
   c.last=m;
   if(m.sender_id!==S.me.id){
     if(prefs.sound&&(document.hidden||S.cur!==c.id))beep();
-    if(prefs.notif&&!prefs.push&&document.hidden&&'Notification' in window&&Notification.permission==='granted'){
-      const who=c.members.find(x=>x.id===m.sender_id)?.display_name||'Nouveau message';
-      showNotif(c.is_group?`${c.name} · ${who}`:who,m.content.slice(0,140),c.id);
-    }
+    if(prefs.notif&&!prefs.push&&document.hidden&&'Notification' in window&&Notification.permission==='granted')
+      showNotif(c.name,prevText(m).slice(0,140),c.id);
+    clearTyping(c.id);
   }
   if(S.msgs[c.id]&&!S.msgs[c.id].some(x=>x.id===m.id))S.msgs[c.id].push(m);
-  if(S.cur===c.id){ if(m.sender_id!==S.me.id)markRead(c.id); renderMsgs(true) }
-  else if(m.sender_id!==S.me.id)c.unread++;
+  if(S.cur===c.id){
+    if(m.sender_id!==S.me.id){if(document.hidden)c.unread++;else markRead(c.id)}
+    renderMsgs(true)
+  }else if(m.sender_id!==S.me.id)c.unread++;
   sortConvs();renderList();
 }
 async function markRead(cid){
   const c=S.convs.find(x=>x.id===cid);if(c){c.unread=0;renderList()}
-  await sb.from('conversation_members').update({last_read_at:new Date().toISOString()}).eq('conversation_id',cid).eq('user_id',S.me.id);
+  const {data}=await sb.rpc('mark_read',{cid});
+  if(c&&data)c.last_read_at=data;
+}
+function onMsgUpdate(m){
+  const c=S.convs.find(x=>x.id===m.conversation_id);if(!c)return;
+  const arr=S.msgs[c.id];if(arr){const i=arr.findIndex(x=>x.id===m.id);if(i>=0)arr[i]=m}
+  if(c.last&&c.last.id===m.id)c.last=m;
+  if(m.deleted_at)S.react[c.id]=(S.react[c.id]||[]).filter(r=>r.message_id!==m.id);
+  if(S.cur===c.id)renderMsgs(false);
+  renderList();
+}
+function setReact(cid,mid,uid,emoji){
+  const l=(S.react[cid]||[]).filter(r=>!(r.message_id===mid&&r.user_id===uid));
+  if(emoji)l.push({message_id:mid,user_id:uid,emoji});
+  S.react[cid]=l;
+}
+function onReaction(p){
+  const r=p.eventType==='DELETE'?p.old:p.new;if(!r||!r.message_id)return;
+  if(p.eventType==='DELETE'){
+    for(const k in S.react)S.react[k]=S.react[k].filter(x=>!(x.message_id===r.message_id&&x.user_id===r.user_id));
+    if(S.cur)renderMsgs(false);return;
+  }
+  if(!r.conversation_id)return;
+  setReact(r.conversation_id,r.message_id,r.user_id,r.emoji);
+  if(S.cur===r.conversation_id)renderMsgs(false);
+}
+function onMemberUpdate(r){
+  const c=S.convs.find(x=>x.id===r.conversation_id);if(!c||r.user_id===S.me.id)return;
+  c.other_read=r.last_read_at;if(S.cur===c.id)renderMsgs(false);
+}
+async function loadReactions(id){
+  const {data}=await sb.from('reactions').select('message_id,user_id,emoji,conversation_id').eq('conversation_id',id);
+  if(data)S.react[id]=data;
 }
 
 /* ---------- RENDER ---------- */
@@ -400,7 +476,6 @@ function renderAll(){renderList();renderChat()}
 function renderList(){
   let list=S.convs.filter(c=>{
     if(S.filter==='unread'&&!c.unread)return false;
-    if(S.filter==='group'&&!c.is_group)return false;
     if(S.q&&!c.name.toLowerCase().includes(S.q))return false;
     return true;
   });
@@ -411,9 +486,9 @@ function renderList(){
     $('convs').innerHTML=`<div class="empty">${S.convs.length?'Aucune conversation ne correspond.':'Aucune conversation pour l’instant.<br>Appuie sur <b>+</b> pour écrire à quelqu’un.'}</div>`;return;
   }
   $('convs').innerHTML=list.map(c=>{
-    const prev=c.last?((c.is_group&&c.last.sender_id!==S.me.id?(c.members.find(p=>p.id===c.last.sender_id)?.display_name.split(' ')[0]+' : '):c.last.sender_id===S.me.id?'Toi : ':'')+c.last.content):'Nouvelle conversation';
+    const prev=c.last?((c.last.sender_id===S.me.id?'Toi : ':'')+prevText(c.last)):'Nouvelle conversation';
     return `<button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
-      <div class="av" style="background:${c.color}">${c.is_group?'👥':esc(initials(c.name))}</div>
+      <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on':''}" style="background:${c.color}">${esc(initials(c.name))}</div>
       <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.last?fmtList(c.last.created_at):''}</span></div>
       <div class="p"><i>${esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button>`;
   }).join('');
@@ -425,14 +500,17 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 });
 
 async function openConv(id){
+  if(S.cur!==id){S.reply=null;S.att=null;if(S.edit){S.edit=null;txt.value=''}}
   if(innerWidth<=900&&!$('app').classList.contains('inchat'))pushPM('chat');
   S.cur=id;$('app').classList.add('inchat');
   renderAll();
   if(!S.msgs[id]){
-    const {data,error}=await sb.from('messages').select('id,conversation_id,sender_id,content,created_at').eq('conversation_id',id).order('created_at',{ascending:false}).limit(200);
+    const {data,error}=await sb.from('messages').select(MCOLS).eq('conversation_id',id).order('created_at',{ascending:false}).limit(200);
     if(error){console.error(error);return}
     S.msgs[id]=data.reverse();
   }
+  await loadReactions(id);
+  joinTyping(id);
   if(S.cur!==id)return;
   renderMsgs(true);
   const c=S.convs.find(x=>x.id===id);if(c&&c.unread)markRead(id);
@@ -445,83 +523,276 @@ function renderChat(){
   $('blank').classList.toggle('hidden',!!c);
   $('chatBox').classList.toggle('hidden',!c);
   if(!c){$('info').innerHTML='';applyInfo();return}
-  $('chAv').style.background=c.color;$('chAv').textContent=c.is_group?'👥':initials(c.name);
+  $('chAv').style.background=c.color;$('chAv').textContent=initials(c.name);
   $('chName').textContent=c.name;
-  $('chSub').textContent=c.is_group?`${c.members.length} membres`:'Discussion privée';
-  renderMsgs(true);renderInfo(c);applyInfo();
+  updateSub();
+  renderMsgs(true);renderInfo(c);applyInfo();renderBar();
 }
 function renderInfo(c){
   const back='<button class="back" id="infoBack" aria-label="Retour">‹</button>';
-  const mem=c.members.map(p=>`<div class="mem"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div>${esc(p.display_name)}${p.id===S.me.id?' <span style="color:var(--mut)">(toi)</span>':''}</div></div>`).join('');
-  $('info').innerHTML=`${back}<div class="av" style="background:${c.color}">${c.is_group?'👥':esc(initials(c.name))}</div>
-   <h3>${esc(c.name)}</h3><p>${c.is_group?`Groupe · ${c.members.length} membres`:'Discussion privée'}</p>
-   <div class="sec"><h4>${c.is_group?'Membres':'Informations'}</h4>${c.is_group?mem:`<div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div>`}</div>
+  $('info').innerHTML=`${back}<div class="av" style="background:${c.color}">${esc(initials(c.name))}</div>
+   <h3>${esc(c.name)}</h3><p>Discussion privée</p>
+   <div class="sec"><h4>Informations</h4><div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div></div>
    <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>${esc(S.email)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
   const l=$('infoLogout');if(l)l.onclick=logout;
   $('infoBack').onclick=()=>{if(curPM==='info')history.back();else hideMobInfo()};
+}
+const RX=['👍','❤️','😂','😮','😢','🙏'];
+const fmtSize=n=>!n?'':n<1024*1024?Math.max(1,Math.round(n/1024))+' Ko':(n/1048576).toFixed(1).replace('.',',')+' Mo';
+const isRead=(c,m)=>!!c.other_read&&new Date(c.other_read)>=new Date(m.created_at);
+let stick=true;
+function cachedUrl(p){const e=S.urls[p];return e&&e.exp>Date.now()?e.url:null}
+async function signedUrl(p,dl){
+  if(!dl){const c=cachedUrl(p);if(c)return c}
+  const {data,error}=await sb.storage.from('attachments').createSignedUrl(p,3600,dl?{download:dl}:undefined);
+  if(error||!data)return null;
+  if(!dl)S.urls[p]={url:data.signedUrl,exp:Date.now()+3000*1000};
+  return data.signedUrl;
+}
+function hydrateImgs(){
+  $('msgs').querySelectorAll('img.pj:not([src])').forEach(async im=>{const u=await signedUrl(im.dataset.path);if(u)im.src=u});
 }
 function renderMsgs(scroll){
   const c=S.convs.find(x=>x.id===S.cur);if(!c)return;
   const list=S.msgs[c.id]||[],el=$('msgs');
   const near=el.scrollHeight-el.scrollTop-el.clientHeight<120;
+  const byId=new Map(list.map(m=>[m.id,m]));
+  const rx={};(S.react[c.id]||[]).forEach(r=>{(rx[r.message_id]??=[]).push(r)});
   let html='',lastDay='',lastSender='';
-  const names=Object.fromEntries(c.members.map(p=>[p.id,p]));
   for(const m of list){
     const day=new Date(m.created_at).toDateString();
     if(day!==lastDay){html+=`<div class="day">${esc(fmtDay(m.created_at))}</div>`;lastDay=day;lastSender=''}
-    const mine=m.sender_id===S.me.id;
-    const who=!mine&&c.is_group&&lastSender!==m.sender_id?`<span class="who" style="color:${colorOf(m.sender_id,names[m.sender_id]?.color)}">${esc(names[m.sender_id]?.display_name||'?')}</span>`:'';
-    html+=`<div class="m ${mine?'out':'in'} ${lastSender!==m.sender_id?'gap':''}">${who}${esc(m.content)}<small>${fmtTime(m.created_at)}${m.pending?' …':''}</small></div>`;
+    const mine=m.sender_id===S.me.id,gap=lastSender!==m.sender_id?'gap':'';
     lastSender=m.sender_id;
+    if(m.deleted_at){html+=`<div class="m del ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">🚫 Message supprimé<small>${fmtTime(m.created_at)}</small></div>`;continue}
+    let q='';
+    if(m.reply_to){const o=byId.get(m.reply_to);q=`<div class="q" data-go="${esc(m.reply_to)}"><b>${esc(o?(o.sender_id===S.me.id?'Toi':c.name):'Message')}</b><span>${esc(o?prevText(o):'Message d’origine indisponible')}</span></div>`}
+    let att='';
+    if(m.att_path){
+      if((m.att_type||'').startsWith('image/')){const u=m.localUrl||cachedUrl(m.att_path);att=`<img class="pj" alt="${esc(m.att_name||'image')}" data-path="${esc(m.att_path)}"${u?` src="${esc(u)}"`:''}>`}
+      else att=`<a class="file" href="#" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">📎<span>${esc(m.att_name||'Fichier')}<small>${fmtSize(m.att_size)}</small></span></a>`;
+    }
+    const rs=rx[m.id]||[];let rh='';
+    if(rs.length){const g={};rs.forEach(r=>{(g[r.emoji]??=[]).push(r.user_id)});
+      rh=`<div class="rxs">${Object.entries(g).map(([e,u])=>`<button class="rx ${u.includes(S.me.id)?'mine':''}" data-e="${e}" data-id="${esc(m.id)}">${e}${u.length>1?' '+u.length:''}</button>`).join('')}</div>`}
+    const tick=mine?(m.pending?' …':(isRead(c,m)?' <b class="rd">✓✓</b>':' ✓')):'';
+    html+=`<div class="m ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${q}${att}${m.content?esc(m.content):''}${rh}<small>${m.edited_at?'modifié · ':''}${fmtTime(m.created_at)}${tick}</small></div>`;
   }
   el.innerHTML=html||`<div class="empty">Dis bonjour 👋</div>`;
+  stick=near||scroll===true;
   if(scroll&&(near||scroll===true))el.scrollTop=el.scrollHeight;
+  hydrateImgs();
+}
+$('msgs').addEventListener('load',e=>{if(e.target.tagName==='IMG'&&stick)$('msgs').scrollTop=$('msgs').scrollHeight},true);
+$('msgs').addEventListener('scroll',()=>{closeMenu()},{passive:true});
+
+/* ---------- ACTIONS SUR LES MESSAGES ---------- */
+$('msgs').onclick=async e=>{
+  const rx=e.target.closest('.rx');if(rx){toggleReact(rx.dataset.id,rx.dataset.e);return}
+  const q=e.target.closest('.q');if(q){goTo(q.dataset.go);return}
+  const im=e.target.closest('img.pj');if(im){if(im.dataset.path!=='local'&&im.src)openLightbox(im.dataset.path,im.alt,im.src);return}
+  const f=e.target.closest('a.file');if(f){e.preventDefault();if(f.dataset.path!=='local')downloadFile(f.dataset.path,f.dataset.name);return}
+  const m=e.target.closest('.m');
+  if(m&&!m.classList.contains('del')&&!(getSelection()&&getSelection().toString()))openMsgMenu(m);
+};
+function goTo(id){
+  const t=$('msgs').querySelector(`.m[data-id="${CSS.escape(id)}"]`);if(!t)return;
+  t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.add('hl');setTimeout(()=>t.classList.remove('hl'),1400);
+}
+function closeMenu(){const d=document.getElementById('mmenu');if(d)d.remove()}
+document.addEventListener('pointerdown',e=>{const d=document.getElementById('mmenu');if(d&&!d.contains(e.target))closeMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();const l=document.getElementById('lb');if(l)l.remove()}});
+function openMsgMenu(el){
+  closeMenu();
+  const id=el.dataset.id;if(!id||id.startsWith('tmp-'))return;
+  const m=(S.msgs[S.cur]||[]).find(x=>x.id===id);if(!m)return;
+  const mine=m.sender_id===S.me.id;
+  const myR=(S.react[S.cur]||[]).find(r=>r.message_id===id&&r.user_id===S.me.id)?.emoji;
+  const d=document.createElement('div');d.id='mmenu';
+  d.innerHTML=`<div class="em">${RX.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}</div>
+   <button class="it" data-a="reply">↩ Répondre</button>${m.content?'<button class="it" data-a="copy">⧉ Copier</button>':''}${mine&&!m.att_path?'<button class="it" data-a="edit">✎ Modifier</button>':''}${mine?'<button class="it red" data-a="del">🗑 Supprimer</button>':''}`;
+  document.body.appendChild(d);
+  const r=el.getBoundingClientRect(),w=d.offsetWidth,h=d.offsetHeight;
+  let top=r.top-h-6;if(top<8)top=Math.max(8,Math.min(r.bottom+6,innerHeight-h-8));
+  let left=mine?r.right-w:r.left;left=Math.max(8,Math.min(left,innerWidth-w-8));
+  d.style.top=top+'px';d.style.left=left+'px';
+  d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;closeMenu();
+    if(b.dataset.e)toggleReact(id,b.dataset.e);
+    else if(b.dataset.a==='reply')startReply(m);
+    else if(b.dataset.a==='copy'){try{navigator.clipboard.writeText(m.content)}catch(e){}}
+    else if(b.dataset.a==='edit')startEdit(m);
+    else if(b.dataset.a==='del')delMsg(m)};
+}
+async function toggleReact(mid,emoji){
+  const cid=S.cur,mine=(S.react[cid]||[]).find(r=>r.message_id===mid&&r.user_id===S.me.id);
+  setReact(cid,mid,S.me.id,mine&&mine.emoji===emoji?null:emoji);renderMsgs(false);
+  const {error}=await sb.rpc('toggle_reaction',{mid,e:emoji});
+  if(error){await loadReactions(cid);renderMsgs(false)}
+}
+function startReply(m){
+  S.edit=null;
+  S.reply={id:m.id,who:m.sender_id===S.me.id?'Toi':(S.convs.find(x=>x.id===S.cur)?.name||''),text:prevText(m)};
+  renderBar();txt.focus();
+}
+function startEdit(m){S.reply=null;S.att=null;S.edit={id:m.id};txt.value=m.content;renderBar();txt.focus()}
+function renderBar(){
+  const b=$('bar');let h='';
+  if(S.edit)h+=`<div class="bi"><div><b>Modifier le message</b></div><button type="button" data-x="edit" aria-label="Annuler">✕</button></div>`;
+  if(S.reply)h+=`<div class="bi"><div><b>Répondre à ${esc(S.reply.who)}</b><span>${esc(S.reply.text)}</span></div><button type="button" data-x="reply" aria-label="Annuler">✕</button></div>`;
+  if(S.att)h+=`<div class="bi"><div><b>${S.att.isImg?'📷 Photo':'📎 Fichier'}</b><span>${esc(S.att.name)} · ${fmtSize(S.att.blob.size)}</span></div><button type="button" data-x="att" aria-label="Retirer">✕</button></div>`;
+  b.innerHTML=h;b.classList.toggle('hidden',!h);fit();
+}
+$('bar').onclick=e=>{
+  const x=e.target.closest('[data-x]');if(!x)return;const k=x.dataset.x;
+  if(k==='edit'){S.edit=null;txt.value=''}else if(k==='reply')S.reply=null;else S.att=null;
+  renderBar();
+};
+async function delMsg(m){
+  if(!confirm('Supprimer ce message pour tout le monde ?'))return;
+  const {error}=await sb.rpc('delete_message',{mid:m.id});
+  if(error){alert('Suppression impossible : '+error.message);return}
+  if(m.att_path)sb.storage.from('attachments').remove([m.att_path]);
+  onMsgUpdate({...m,content:'',deleted_at:new Date().toISOString(),att_path:null,att_name:null,att_type:null,att_size:null,reply_to:null});
+}
+function openLightbox(path,name,src){
+  const d=document.createElement('div');d.id='lb';
+  d.innerHTML=`<img src="${esc(src)}" alt=""><div class="lbb"><button id="lbd">Télécharger</button><button id="lbx">Fermer</button></div>`;
+  document.body.appendChild(d);
+  d.onclick=e=>{if(e.target===d)d.remove()};
+  d.querySelector('#lbx').onclick=()=>d.remove();
+  d.querySelector('#lbd').onclick=()=>downloadFile(path,name);
+}
+async function downloadFile(path,name){
+  const u=await signedUrl(path,name);if(!u){alert('Fichier indisponible.');return}
+  const a=document.createElement('a');a.href=u;a.download=name;a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
 }
 
-/* ---------- SEND ---------- */
+/* ---------- PIÈCES JOINTES ---------- */
+const OKT=/^(image\/(jpeg|png|gif|webp|heic)|application\/pdf|text\/plain|application\/zip|application\/msword|application\/vnd\.(ms-excel|openxmlformats-officedocument\.(wordprocessingml\.document|spreadsheetml\.sheet|presentationml\.presentation)))$/;
+$('clipBtn').onclick=()=>{if(!S.edit)$('file').click()};
+async function shrink(f){
+  const bm=await createImageBitmap(f),k=Math.min(1,1600/Math.max(bm.width,bm.height));
+  const cv=document.createElement('canvas');cv.width=Math.round(bm.width*k);cv.height=Math.round(bm.height*k);
+  const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(bm,0,0,cv.width,cv.height);
+  return await new Promise((ok,ko)=>cv.toBlob(b=>b?ok(b):ko(new Error('blob')),'image/jpeg',.85));
+}
+$('file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(!OKT.test(f.type)){alert('Type de fichier non pris en charge (images, PDF, Word, Excel, PowerPoint, texte, zip).');return}
+  let blob=f,type=f.type,name=f.name;const isImg=type.startsWith('image/');
+  if(isImg&&type!=='image/gif'){
+    try{const r=await shrink(f);if(r.size<f.size||type==='image/heic'){blob=r;type='image/jpeg';name=name.replace(/\.\w+$/,'')+'.jpg'}}catch(err){}
+  }
+  if(blob.size>10*1024*1024){alert('Fichier trop lourd (10 Mo maximum).');return}
+  S.att={blob,type,name,isImg};renderBar();
+};
+
+/* ---------- ENVOI ---------- */
 const txt=$('txt');
-const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeight,120)+'px';$('sendBtn').disabled=!txt.value.trim()};
-txt.oninput=fit;
+const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeight,120)+'px';$('sendBtn').disabled=!txt.value.trim()&&!S.att};
+let lastTypeSent=0;
+txt.oninput=()=>{fit();if(tReady&&tch&&txt.value&&!S.edit&&Date.now()-lastTypeSent>2500){lastTypeSent=Date.now();tch.send({type:'broadcast',event:'typing',payload:{uid:S.me.id}})}};
 txt.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&window.innerWidth>900){e.preventDefault();$('comp').requestSubmit()}};
+async function doEdit(content){
+  const id=S.edit.id,m=(S.msgs[S.cur]||[]).find(x=>x.id===id);
+  if(!content)return;
+  S.edit=null;txt.value='';renderBar();
+  if(!m||m.content===content)return;
+  const old=m.content,oldE=m.edited_at;m.content=content;m.edited_at=new Date().toISOString();
+  renderMsgs(false);
+  const {error}=await sb.rpc('edit_message',{mid:id,new_content:content});
+  if(error){m.content=old;m.edited_at=oldE;renderMsgs(false);alert('Modification impossible : '+error.message)}
+}
 $('comp').onsubmit=async e=>{
   e.preventDefault();
-  const content=txt.value.trim();if(!content||!S.cur)return;
-  const cid=S.cur;txt.value='';fit();
-  const tmp={id:'tmp-'+Date.now(),conversation_id:cid,sender_id:S.me.id,content,created_at:new Date().toISOString(),pending:true};
+  const content=txt.value.trim();
+  if(S.edit){await doEdit(content);return}
+  if((!content&&!S.att)||!S.cur)return;
+  const cid=S.cur,reply=S.reply,att=S.att;
+  txt.value='';S.reply=null;S.att=null;renderBar();
+  const tmp={id:'tmp-'+Date.now(),conversation_id:cid,sender_id:S.me.id,content,created_at:new Date().toISOString(),pending:true,reply_to:reply?reply.id:null};
+  if(att)Object.assign(tmp,{att_path:'local',att_name:att.name,att_type:att.type,att_size:att.blob.size,localUrl:att.isImg?URL.createObjectURL(att.blob):null});
   (S.msgs[cid]??=[]).push(tmp);renderMsgs(true);
-  const {data,error}=await sb.from('messages').insert({conversation_id:cid,sender_id:S.me.id,content}).select().single();
-  const arr=S.msgs[cid];const i=arr.findIndex(x=>x.id===tmp.id);
-  if(error){arr.splice(i,1);renderMsgs(true);txt.value=content;fit();alert('Envoi impossible : '+error.message);return}
-  // le temps réel a pu déjà ajouter le message : on évite le doublon
-  if(arr.some(x=>x.id===data.id))arr.splice(i,1);else arr[i]=data;
+  const arr=S.msgs[cid];
+  const fail=msg=>{const i=arr.findIndex(x=>x.id===tmp.id);if(i>=0)arr.splice(i,1);renderMsgs(true);txt.value=content;S.reply=reply;S.att=att;renderBar();alert('Envoi impossible : '+msg)};
+  const row={conversation_id:cid,sender_id:S.me.id,content,reply_to:reply?reply.id:null};
+  if(att){
+    const safe=att.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
+    const path=`${cid}/${crypto.randomUUID()}-${safe}`;
+    const up=await sb.storage.from('attachments').upload(path,att.blob,{contentType:att.type,upsert:false});
+    if(up.error){fail(up.error.message);return}
+    Object.assign(row,{att_path:path,att_name:att.name.slice(0,200),att_type:att.type,att_size:att.blob.size});
+  }
+  const {data,error}=await sb.from('messages').insert(row).select(MCOLS).single();
+  if(error){if(row.att_path)sb.storage.from('attachments').remove([row.att_path]);fail(error.message);return}
+  const i=arr.findIndex(x=>x.id===tmp.id);
+  if(arr.some(x=>x.id===data.id)){if(i>=0)arr.splice(i,1)}else if(i>=0)arr[i]=data;
+  if(tmp.localUrl&&data.att_path)S.urls[data.att_path]={url:tmp.localUrl,exp:Date.now()+3000*1000};
   const c=S.convs.find(x=>x.id===cid);if(c){c.last=data;sortConvs()}
   renderMsgs(true);renderList();
 };
 
+/* ---------- ÉCRITURE EN COURS + PRÉSENCE ---------- */
+let tch=null,tchId=null,tReady=false;const typingT={};
+function joinTyping(id){
+  if(tchId===id&&tch)return;
+  if(tch){sb.removeChannel(tch);tch=null}
+  tchId=id;tReady=false;
+  tch=sb.channel('typing:'+id,{config:{broadcast:{self:false}}})
+   .on('broadcast',{event:'typing'},({payload})=>{
+     if(!payload||payload.uid===S.me.id)return;
+     clearTimeout(typingT[id]);S.typing=id;typingT[id]=setTimeout(()=>clearTyping(id),4000);updateSub();
+   })
+   .subscribe(st=>{tReady=st==='SUBSCRIBED'});
+}
+function clearTyping(id){clearTimeout(typingT[id]);if(S.typing===id){S.typing=null;updateSub()}}
+const statusOn=()=>prefs.presence!==false;
+function fmtSeen(d){
+  const x=new Date(d),n=new Date(),y=new Date(n);y.setDate(n.getDate()-1);
+  if(x.toDateString()===n.toDateString())return 'Vu à '+fmtTime(d);
+  if(x.toDateString()===y.toDateString())return 'Vu hier à '+fmtTime(d);
+  return 'Vu le '+x.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+}
+function updateSub(){
+  const c=S.convs.find(x=>x.id===S.cur);if(!c)return;
+  const on=statusOn()&&c.other&&S.online.has(c.other.id);
+  let t='';
+  if(S.typing===c.id)t='écrit…';
+  else if(on)t='En ligne';
+  else if(statusOn()&&c.other?.last_seen_at)t=fmtSeen(c.other.last_seen_at);
+  $('chSub').textContent=t||'Discussion privée';
+  $('chSub').classList.toggle('live',t==='En ligne'||t==='écrit…');
+  $('chAv').classList.toggle('on',!!on);
+}
+let pch=null,seenTimer=null;
+const touchSeen=()=>sb.rpc('touch_seen',{visible:true});
+function stopPresence(){clearInterval(seenTimer);if(pch){sb.removeChannel(pch);pch=null}S.online=new Set()}
+function startPresence(){
+  stopPresence();
+  if(!S.me)return;
+  if(!statusOn()){sb.rpc('touch_seen',{visible:false});return}
+  pch=sb.channel('presence',{config:{presence:{key:S.me.id}}});
+  pch.on('presence',{event:'sync'},()=>{S.online=new Set(Object.keys(pch.presenceState()));updateSub();renderList()})
+     .on('presence',{event:'leave'},({key})=>{for(const c of S.convs)if(c.other?.id===key)c.other.last_seen_at=new Date().toISOString();updateSub()})
+     .subscribe(async st=>{if(st==='SUBSCRIBED'&&!document.hidden)await pch.track({at:Date.now()})});
+  touchSeen();seenTimer=setInterval(()=>{if(!document.hidden)touchSeen()},60000);
+}
+
 /* ---------- NOUVELLE DISCUSSION ---------- */
 $('newBtn').onclick=()=>openNew();
 function openNew(){
-  let mode='direct',sel=new Set(),found=[],timer;
+  let found=[],timer;
   const host=$('modalHost');
   host.innerHTML=`<div class="ov" id="ov"><div class="modal">
     <h3>Nouvelle discussion <button class="x" id="mx">✕</button></h3>
-    <div class="mode"><button class="tab on" data-m="direct">Message</button><button class="tab" data-m="group">Groupe</button></div>
-    <input class="hidden fld" id="gName" placeholder="Nom du groupe" maxlength="60" style="background:var(--soft);border-radius:12px;padding:11px 14px;margin-bottom:8px;width:100%">
     <input class="search" id="uq" placeholder="🔍 Chercher par nom ou prénom…" style="margin-top:0">
     <div class="res" id="res"><div class="empty">Tape au moins 2 caractères.</div></div>
-    <button class="btn-p hidden" id="go">Créer le groupe</button>
   </div></div>`;
   const close=()=>host.innerHTML='';
   $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
   const drawRes=()=>{
-    $('res').innerHTML=found.length?found.map(p=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div><b>${esc(p.display_name)}</b></div>${mode==='group'?`<span class="chk ${sel.has(p.id)?'on':''}">${sel.has(p.id)?'✓':''}</span>`:''}</button>`).join(''):`<div class="empty">Aucun utilisateur trouvé.</div>`;
-    $('go').classList.toggle('hidden',mode!=='group');
-    $('go').textContent=sel.size?`Créer le groupe (${sel.size})`:'Créer le groupe';
+    $('res').innerHTML=found.length?found.map(p=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${colorOf(p.id,p.color)}">${esc(initials(p.display_name))}</div><div><b>${esc(p.display_name)}</b></div></button>`).join(''):`<div class="empty">Aucun utilisateur trouvé.</div>`;
   };
-  host.querySelectorAll('.mode .tab').forEach(t=>t.onclick=()=>{
-    host.querySelectorAll('.mode .tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-    mode=t.dataset.m;$('gName').classList.toggle('hidden',mode!=='group');if(found.length||$('uq').value)drawRes();else $('go').classList.toggle('hidden',mode!=='group');
-  });
   $('uq').oninput=e=>{
     clearTimeout(timer);const v=e.target.value.trim().toLowerCase().replace(/[%,()*]/g,'');
     if(v.length<2){found=[];$('res').innerHTML='<div class="empty">Tape au moins 2 caractères.</div>';return}
@@ -532,17 +803,7 @@ function openNew(){
   };
   $('res').onclick=async e=>{
     const b=e.target.closest('.pick');if(!b)return;
-    const id=b.dataset.id;
-    if(mode==='group'){sel.has(id)?sel.delete(id):sel.add(id);drawRes();return}
-    const {data,error}=await sb.rpc('start_direct',{other:id});
-    if(error){alert(error.message);return}
-    close();await loadConvs();renderList();openConv(data);
-  };
-  $('go').onclick=async()=>{
-    const name=$('gName').value.trim();
-    if(!name){$('gName').focus();return}
-    if(!sel.size){alert('Choisis au moins un membre.');return}
-    const {data,error}=await sb.rpc('start_group',{group_name:name,members:[...sel]});
+    const {data,error}=await sb.rpc('start_direct',{other:b.dataset.id});
     if(error){alert(error.message);return}
     close();await loadConvs();renderList();openConv(data);
   };
@@ -550,7 +811,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.9';
+const APP_VERSION='2026-11-07.10';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -572,7 +833,10 @@ async function checkUpdate(manual){
   }catch(e){return 'err'}
 }
 setInterval(checkUpdate,5*60*1000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();refreshAll()}});
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){checkUpdate();refreshAll();if(pch)pch.track({at:Date.now()});if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
+  else if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}
+});
 addEventListener('online',refreshAll);
 addEventListener('pageshow',e=>{if(e.persisted)refreshAll()});
 setTimeout(checkUpdate,3000);
@@ -632,7 +896,7 @@ async function openSettings(tab){
   let cur=tab||'profil',color=S.me.color||colorOf(S.me.id),birth='';
   try{const {data}=await sb.from('profile_private').select('birth_date').eq('id',S.me.id).maybeSingle();birth=data?.birth_date||''}catch(e){}
   const close=()=>host.innerHTML='';
-  const tabs=[['profil','Profil'],['compte','Compte'],['notif','Notifications'],['theme','Apparence'],['about','À propos']];
+  const tabs=[['profil','Profil'],['compte','Compte'],['notif','Notifications'],['privacy','Confidentialité'],['theme','Apparence'],['about','À propos']];
   const note=(id,t,k)=>{$(id).innerHTML=t?`<div class="msg ${k}">${esc(t)}</div>`:''};
   const validDate=v=>{const d=new Date(v+'T00:00:00');return !!v&&!isNaN(d)&&d<=new Date()&&d>=new Date('1900-01-01T00:00:00')};
   const views={
@@ -723,6 +987,11 @@ async function openSettings(tab){
         prefs.notif=true;savePrefs();$('tNotif').classList.add('on');
       };
     },
+    privacy(b){
+      b.innerHTML=`<div class="tg"><div><b>Statut en ligne</b><div class="hint2">Montre quand tu es en ligne et ta dernière connexion. Si tu le désactives, tu ne vois pas non plus celui des autres.</div></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="tPres" aria-label="Statut en ligne"></button></div>
+       <div class="hint2" style="margin-top:12px">Les confirmations de lecture (✓✓) restent actives dans les conversations.</div>`;
+      $('tPres').onclick=()=>{prefs.presence=!statusOn();savePrefs();$('tPres').classList.toggle('on',statusOn());startPresence();updateSub();renderList()};
+    },
     theme(b){
       const opts=[['light','Clair','#f7f8fc'],['dark','Sombre','#1b1f3d'],['auto','Automatique','linear-gradient(90deg,#f7f8fc 50%,#1b1f3d 50%)']];
       b.innerHTML=`<div class="themes">${opts.map(([k,l,bg])=>`<button type="button" class="th ${prefs.theme===k?'on':''}" data-k="${k}"><i style="background:${bg}"></i>${l}</button>`).join('')}</div>
@@ -797,9 +1066,10 @@ async function refreshAll(){
   try{
     await loadConvs();
     if(S.cur){
-      const {data}=await sb.from('messages').select('id,conversation_id,sender_id,content,created_at').eq('conversation_id',S.cur).order('created_at',{ascending:false}).limit(200);
+      const {data}=await sb.from('messages').select(MCOLS).eq('conversation_id',S.cur).order('created_at',{ascending:false}).limit(200);
       if(data)S.msgs[S.cur]=data.reverse();
-      const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(S.cur);
+      await loadReactions(S.cur);
+      const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread&&!document.hidden)markRead(S.cur);
     }
     renderAll();
     if(S.chan&&S.chan.state!=='joined'&&S.chan.state!=='joining')subscribe();
