@@ -465,7 +465,7 @@ html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
 
  <div class="list">
   <div class="lh">
-   <h2><span class="hlft"><i class="hlogo" aria-hidden="true"></i>Messages</span><span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="ico " viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></h2>
+   <h2><span class="hlft">Messages<i class="hlogo" aria-hidden="true"></i></span><span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="ico " viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></h2>
    <input class="search" id="q" placeholder="Rechercher une conversation…">
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
@@ -1098,7 +1098,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.25';
+const APP_VERSION='2026-11-07.26';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
