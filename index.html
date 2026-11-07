@@ -406,6 +406,10 @@ html[data-theme=dark] .comp .clip{color:#b3acff}
 html[data-theme=dark] .comp textarea{background:#262650}
 .comp .send{border-radius:50%;width:42px;height:42px}
 .comp .send:disabled{background:rgba(120,110,255,.18)}
+
+.m.in{margin-left:38px}
+.mav2{position:absolute;left:-38px;bottom:0;width:30px;height:30px;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;font-style:normal;line-height:1}
+@media(max-width:900px){.m.in{max-width:calc(84% - 38px)}}
 </style>
 </head>
 <body>
@@ -786,7 +790,9 @@ function renderMsgs(scroll){
     const nx=list[i+1],cont=nx&&nx.sender_id===m.sender_id&&!nx.deleted_at&&new Date(nx.created_at).toDateString()===day&&(new Date(nx.created_at)-new Date(m.created_at))<300000;
     const mine=m.sender_id===S.me.id,gap=(lastSender!==m.sender_id?'gap':'')+(cont?' cont':'')+(hs&&hs.has(m.id)?' hit'+(S.sq.ids[S.sq.i]===m.id?' cur':''):'');
     lastSender=m.sender_id;
-    if(m.deleted_at){html+=`<div class="m del ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${ico('trash','dl')}<em>Message supprimé</em><small>${fmtTime(m.created_at)}</small></div>`;continue}
+    let avh='';
+    if(!mine){const au=c.members.find(p=>p.id===m.sender_id)||c.other;if(!cont&&au)avh=`<span class="mav2" style="background:${avBg(esc(colorOf(au.id,au.color)),au.avatar_path)}">${avTxt(au.display_name,au.avatar_path)}</span>`}
+    if(m.deleted_at){html+=`<div class="m del ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${avh}${ico('trash','dl')}<em>Message supprimé</em><small>${fmtTime(m.created_at)}</small></div>`;continue}
     let q='';
     if(m.reply_to){const o=byId.get(m.reply_to);q=`<div class="q" data-go="${esc(m.reply_to)}"><b>${esc(o?(o.sender_id===S.me.id?'Toi':c.name):'Message')}</b><span>${esc(o?prevText(o):'Message d’origine indisponible')}</span></div>`}
     let att='';
@@ -798,7 +804,7 @@ function renderMsgs(scroll){
     if(rs.length){const g={};rs.forEach(r=>{(g[r.emoji]??=[]).push(r.user_id)});
       rh=`<div class="rxs">${Object.entries(g).map(([e,u])=>`<button class="rx ${u.includes(S.me.id)?'mine':''}" data-e="${e}" data-id="${esc(m.id)}">${e}${u.length>1?' '+u.length:''}</button>`).join('')}</div>`}
     const tick=mine?(m.pending?` <span class="tk">${ico('clock')}</span>`:(isRead(c,m)?` <span class="tk rd">${ico('ticks')}</span>`:` <span class="tk">${ico('tick')}</span>`)):'';
-    html+=`<div class="m ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${q}${att}${m.content?esc(m.content):''}${rh}<small>${m.edited_at?'modifié · ':''}${fmtTime(m.created_at)}${tick}</small></div>`;
+    html+=`<div class="m ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${avh}${q}${att}${m.content?esc(m.content):''}${rh}<small>${m.edited_at?'modifié · ':''}${fmtTime(m.created_at)}${tick}</small></div>`;
   }
   el.innerHTML=html||`<div class="empty">${ico('wave','big')}<br>Dis bonjour</div>`;
   if(c._mc!==undefined&&(list.filter(x=>x.att_path&&x.att_path!=='local'&&!x.deleted_at).length!==c._mc))renderInfo(c);
@@ -1059,7 +1065,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.21';
+const APP_VERSION='2026-11-07.22';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
