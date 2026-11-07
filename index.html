@@ -600,12 +600,15 @@ html[data-theme=dark] .ephsh{background:#1c1c3a}
 .ephok{width:100%;margin-top:8px;height:52px;border-radius:26px;background:linear-gradient(100deg,#6A5CFF,#8B5CFF);color:#fff;font-weight:700;font-size:16px}
 
 /* ===== Fiche contact : même rendu que la maquette A ===== */
-#app.mobinfo .info{padding:64px 14px 24px}
+#app.mobinfo .info{padding:64px 14px 24px;background:var(--bg) linear-gradient(var(--card) env(safe-area-inset-top,0px),var(--bg) calc(env(safe-area-inset-top,0px) + 90px)) no-repeat}
+#app.mobinfo .info .sec{background:var(--card)}
+#app.mobinfo .info .act button{background:var(--card)}
+html[data-theme=dark] #app.mobinfo .info .act button{background:#1f1f42}
 .info .av{width:84px;height:84px;font-size:28px;margin:6px auto 10px}
 .info h3{font-size:20px;font-weight:800}
 .info .act{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 0 12px;margin:0}
 .info .act button{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--soft);border-radius:16px;padding:11px 4px;font-size:12.5px;font-weight:600;color:var(--tabtx)}
-html[data-theme=dark] .info .act button{background:var(--soft);color:#cfcdee}
+html[data-theme=dark] .info .act button{background:#1f1f42;color:#cfcdee}
 .info .act .ic2{width:auto;height:auto;border-radius:0;background:none!important;margin:0;color:var(--p)}
 html[data-theme=dark] .info .act .ic2{color:#cfcdee}
 .info .act .sel{box-shadow:inset 0 0 0 1.5px var(--p)}
@@ -1461,7 +1464,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.39';
+const APP_VERSION='2026-11-07.40';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
