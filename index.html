@@ -428,7 +428,7 @@ html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
 .nempty{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:70px;gap:8px;padding:0 20px}.nempty b{font-size:16px}.nempty span{font-size:14px;color:var(--mut)}
 .eic{width:64px;height:64px;border-radius:50%;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;margin-bottom:6px}.eic .ico{width:28px;height:28px}
 
-.hlogo{width:32px;height:32px;border-radius:9px;background:url(icon-192.png?v=2) center/cover no-repeat;flex:none;display:inline-block;box-shadow:0 2px 8px rgba(40,30,120,.25)}
+.hlogo{width:30px;height:30px;background:url(logo-bubble.png?v=1) center/contain no-repeat;flex:none;display:inline-block}
 .lh h2 .hlft{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 </style>
 </head>
@@ -1098,7 +1098,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.26';
+const APP_VERSION='2026-11-07.27';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
