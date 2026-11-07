@@ -427,6 +427,9 @@ html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
 .nhint{text-align:center;color:var(--mut);font-size:13px;margin-top:22px}
 .nempty{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:70px;gap:8px;padding:0 20px}.nempty b{font-size:16px}.nempty span{font-size:14px;color:var(--mut)}
 .eic{width:64px;height:64px;border-radius:50%;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;margin-bottom:6px}.eic .ico{width:28px;height:28px}
+
+.hlogo{width:32px;height:32px;border-radius:9px;background:url(icon-192.png?v=2) center/cover no-repeat;flex:none;display:inline-block;box-shadow:0 2px 8px rgba(40,30,120,.25)}
+.lh h2 .hlft{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -462,7 +465,7 @@ html[data-theme=dark] .wr{color:#b3acff;background:rgba(120,110,255,.2)}
 
  <div class="list">
   <div class="lh">
-   <h2><span class="hlft">Messages</span><span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="ico " viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></h2>
+   <h2><span class="hlft"><i class="hlogo" aria-hidden="true"></i>Messages</span><span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="ico " viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></h2>
    <input class="search" id="q" placeholder="Rechercher une conversation…">
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
@@ -1095,7 +1098,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.24';
+const APP_VERSION='2026-11-07.25';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
