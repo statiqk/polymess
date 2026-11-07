@@ -433,7 +433,7 @@ async function boot(user){
   renderAll();
   if(prefs.push&&pushSupported()&&Notification.permission==='granted')pushSubscribe().catch(()=>{});
   const wanted=new URLSearchParams(location.search).get('c');
-  if(wanted&&S.convs.some(c=>c.id===wanted))openConv(wanted);
+  if(wanted&&S.convs.some(c=>c.id===wanted)){openConv(wanted);if(new URLSearchParams(location.search).get('reply'))setTimeout(()=>txt.focus(),400)}
   if(location.search)history.replaceState(history.state,'',location.pathname);
 }
 
@@ -556,6 +556,7 @@ function renderList(){
   const tot=S.convs.reduce((a,c)=>a+c.unread,0);
   const rb=$('railBadge');rb.textContent=tot;rb.classList.toggle('hidden',!tot);
   document.title=(tot?`(${tot}) `:'')+'PolyMess';
+  try{if(navigator.setAppBadge){tot?navigator.setAppBadge(tot):navigator.clearAppBadge()}}catch(e){}
   if(!list.length){
     $('convs').innerHTML=`<div class="empty">${S.convs.length?'Aucune conversation ne correspond.':'Aucune conversation pour l’instant.<br>Appuie sur <b>+</b> pour écrire à quelqu’un.'}</div>`;return;
   }
@@ -932,7 +933,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.11';
+const APP_VERSION='2026-11-07.12';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1093,7 +1094,20 @@ async function openSettings(tab){
     notif(b){
       const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':Notification.permission==='denied'?'Bloquées dans les réglages du navigateur.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
       b.innerHTML=`<div class="tg"><div><b>Son à la réception</b><div class="hint2">Un bip quand un message arrive dans une autre conversation ou quand l’onglet est en arrière-plan.</div></div><button type="button" class="sw2 ${prefs.sound?'on':''}" id="tSound" aria-label="Son"></button></div>
-       <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet. ${esc(perm)}</div></div><button type="button" class="sw2 ${prefs.notif?'on':''}" id="tNotif" aria-label="Notifications"></button></div><div id="nm"></div>`;
+       <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet. ${esc(perm)}</div></div><button type="button" class="sw2 ${prefs.notif?'on':''}" id="tNotif" aria-label="Notifications"></button></div>
+       <div class="tg"><div><b>Réactions à mes messages</b><div class="hint2">Une alerte quand quelqu’un réagit avec un emoji à l’un de tes messages.</div></div><button type="button" class="sw2 ${S.me.notify_reactions!==false?'on':''}" id="tReact" aria-label="Réactions"></button></div>
+       <button class="sbtn ghost" id="tTest" style="margin-top:14px">Envoyer une notification de test</button><div id="nm"></div>`;
+      $('tReact').onclick=async()=>{const v=S.me.notify_reactions===false;S.me.notify_reactions=v;$('tReact').classList.toggle('on',v);const {error}=await sb.from('profiles').update({notify_reactions:v}).eq('id',S.me.id);if(error){S.me.notify_reactions=!v;$('tReact').classList.toggle('on',!v);note('nm','Impossible : '+error.message,'err')}};
+      $('tTest').onclick=async()=>{
+        if(!prefs.push){note('nm','Active d’abord les notifications du navigateur ci-dessus.','err');return}
+        try{
+          const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
+          if(!sub){note('nm','Cet appareil n’est pas abonné. Désactive puis réactive les notifications.','err');return}
+          const r=await fetch(SB_URL+'/functions/v1/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'test',endpoint:sub.endpoint})}).then(x=>x.json());
+          if(r.sent)note('nm','Notification envoyée : elle devrait arriver dans quelques secondes.','ok');
+          else note('nm','Le serveur n’a pas pu joindre cet appareil. Désactive puis réactive les notifications.','err');
+        }catch(e){note('nm','Test impossible : '+(e.message||e),'err')}
+      };
       $('tSound').onclick=()=>{prefs.sound=!prefs.sound;savePrefs();$('tSound').classList.toggle('on',prefs.sound);if(prefs.sound)beep()};
       $('tNotif').onclick=async()=>{
         if(prefs.notif){prefs.notif=false;prefs.push=false;savePrefs();$('tNotif').classList.remove('on');pushUnsubscribe();note('nm','','');return}
@@ -1230,7 +1244,7 @@ async function pushDetach(){
   const reg=await navigator.serviceWorker.getRegistration();const sub=await reg?.pushManager.getSubscription();
   if(sub)await sb.rpc('unregister_push',{p_endpoint:sub.endpoint});
 }
-navigator.serviceWorker?.addEventListener('message',e=>{if(e.data&&e.data.type==='open'&&e.data.id)openConv(e.data.id)});
+navigator.serviceWorker?.addEventListener('message',e=>{if(e.data&&e.data.type==='open'&&e.data.id){openConv(e.data.id);if(e.data.focus)setTimeout(()=>txt.focus(),300)}});
 
 // installation sur l'écran d'accueil
 let installEv=null;
