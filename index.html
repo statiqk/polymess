@@ -605,14 +605,12 @@ html[data-theme=dark] .ephsh{background:#1c1c3a}
 .info h3{font-size:20px;font-weight:800}
 .info .act{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 0 12px;margin:0}
 .info .act button{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--soft);border-radius:16px;padding:11px 4px;font-size:12.5px;font-weight:600;color:var(--tabtx)}
-html[data-theme=dark] .info .act button{background:#1f1f42;color:#cfcdee}
+html[data-theme=dark] .info .act button{background:var(--soft);color:#cfcdee}
 .info .act .ic2{width:auto;height:auto;border-radius:0;background:none!important;margin:0;color:var(--p)}
 html[data-theme=dark] .info .act .ic2{color:#cfcdee}
 .info .act .sel{box-shadow:inset 0 0 0 1.5px var(--p)}
 .info .ephsec{margin:0 0 12px;text-align:left}
 .info .sec{background:var(--soft);border-radius:18px;padding:12px 14px;margin:0 0 12px}
-#app.mobinfo .info{background:var(--bg)}#app.mobinfo .info .sec{background:var(--card)}
-html[data-theme=dark] #app.mobinfo .info .act button{background:#1f1f42}
 .info .sec h4{font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;color:inherit;margin:0 0 10px}
 .mgrid img.th{border:0;padding:0;border-radius:12px;font-size:0}
 </style>
@@ -1463,7 +1461,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.38';
+const APP_VERSION='2026-11-07.39';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
