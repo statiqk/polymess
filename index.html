@@ -598,6 +598,28 @@ html[data-theme=dark] .ephsh{background:#1c1c3a}
 .ephrd{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--line);display:flex;align-items:center;justify-content:center;color:#fff}.ephrd .ico{width:16px;height:16px}
 .epho.on .ephrd{background:#6A5CFF;box-shadow:none}
 .ephok{width:100%;margin-top:8px;height:52px;border-radius:26px;background:linear-gradient(100deg,#6A5CFF,#8B5CFF);color:#fff;font-weight:700;font-size:16px}
+
+/* ===== Fiche contact : même rendu que la maquette A ===== */
+.info .ihd,.info .itt{display:none}
+#app.mobinfo .info{padding:76px 14px 24px}
+#app.mobinfo .info .ihd{display:block;position:absolute;left:0;right:0;top:0;height:68px;background:var(--card);border-bottom:1px solid var(--line)}
+html[data-theme=dark] #app.mobinfo .info .ihd{background:#1c1c3a;border-bottom-color:#2a2a50}
+#app.mobinfo .info .back{z-index:2;background:none;box-shadow:none;width:42px;height:42px}
+#app.mobinfo .info .itt{display:flex;position:absolute;z-index:2;top:14px;left:62px;height:42px;align-items:center;font-size:17px;font-weight:700}
+.info .av{width:84px;height:84px;font-size:28px;margin:6px auto 10px}
+.info h3{font-size:20px;font-weight:800}
+.info .act{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 0 12px;margin:0}
+.info .act button{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--soft);border-radius:16px;padding:11px 4px;font-size:12.5px;font-weight:600;color:var(--tabtx)}
+html[data-theme=dark] .info .act button{background:#1f1f42;color:#cfcdee}
+.info .act .ic2{width:auto;height:auto;border-radius:0;background:none!important;margin:0;color:var(--p)}
+html[data-theme=dark] .info .act .ic2{color:#cfcdee}
+.info .act .sel{box-shadow:inset 0 0 0 1.5px var(--p)}
+.info .ephsec{margin:0 0 12px;text-align:left}
+.info .sec{background:var(--soft);border-radius:18px;padding:12px 14px;margin:0 0 12px}
+#app.mobinfo .info{background:var(--bg)}#app.mobinfo .info .sec{background:var(--card)}
+html[data-theme=dark] #app.mobinfo .info .act button{background:#1f1f42}
+.info .sec h4{font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;color:inherit;margin:0 0 10px}
+.mgrid img.th{border:0;padding:0;border-radius:12px;font-size:0}
 </style>
 </head>
 <body>
@@ -1018,12 +1040,11 @@ function renderInfo(c){
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
   const seenLong=statusOn()&&c.other?.last_seen_at?fmtSeenLong(c.other.last_seen_at):'';
   const stTxt=subText(c,false)||'Discussion privée';
-  $('info').innerHTML=`${back}<div class="av${on?' on':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
+  $('info').innerHTML=`<div class="ihd"></div>${back}<b class="itt">Infos du contact</b><div class="av${on?' on':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
    <h3>${esc(c.name)}</h3><p class="st${stTxt==='En ligne'?' live':''}" id="infoSt">${esc(stTxt)}</p>
    <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
    <div class="sec ephsec"><button type="button" class="ephr" id="aEph"><span class="ephi">${ico('clock')}</span><span class="ephx"><b>Messages éphémères</b><small>${EPH[c.eph]||'30 jours'}</small></span><span class="ephc">${ico('back')}</span></button><p class="ephh">Les messages de cette discussion sont supprimés automatiquement après la durée choisie.</p></div>
-   <div class="sec"><h4>Informations</h4><div class="row"><span>Nom</span>${esc([c.other?.first_name,c.other?.last_name].filter(Boolean).join(' ')||c.name)}</div>${seenLong?`<div class="row"><span>Vu pour la dernière fois</span>${esc(seenLong)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div></div>
-   ${media.length?`<div class="sec"><h4>Photos et fichiers · ${media.length}</h4><p class="exph">Les fichiers sont supprimés au bout de 24 h.</p>${imgs.length?`<div class="mgrid">${imgs.map(m=>attExpired(m)?`<div class="thx off">${ico('clock')}<em>Expiré</em></div>`:`<div class="thx"><img class="th" alt="${esc(m.att_name||'')}" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'image')}"${cachedUrl(m.att_path)?` src="${esc(cachedUrl(m.att_path))}"`:''}><em>${fmtLeft(expLeft(m))}</em></div>`).join('')}</div>`:''}${files.map(m=>attExpired(m)?`<div class="frow off">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>Fichier expiré</small></div></div>`:`<div class="frow" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>${fmtSize(m.att_size)} · expire dans ${fmtLeft(expLeft(m))}</small></div><button type="button" class="frs" aria-label="Enregistrer">${ico('download')}</button></div>`).join('')}</div>`:''}
+   ${media.length?`<div class="sec"><h4>Photos et fichiers · ${media.length}</h4>${imgs.length?`<div class="mgrid">${imgs.map(m=>attExpired(m)?`<div class="thx off">${ico('clock')}<em>Expiré</em></div>`:`<div class="thx"><img class="th" alt="${esc(m.att_name||'')}" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'image')}"${cachedUrl(m.att_path)?` src="${esc(cachedUrl(m.att_path))}"`:''}><em>${fmtLeft(expLeft(m))}</em></div>`).join('')}</div>`:''}${files.map(m=>attExpired(m)?`<div class="frow off">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>Fichier expiré</small></div></div>`:`<div class="frow" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>${fmtSize(m.att_size)} · expire dans ${fmtLeft(expLeft(m))}</small></div><button type="button" class="frs" aria-label="Enregistrer">${ico('download')}</button></div>`).join('')}</div>`:''}
 `;
   $('infoBack').onclick=()=>{if(curPM==='info')history.back();else hideMobInfo()};
   $('aSearch').onclick=()=>{closeInfoPanel();setTimeout(openSearch,60)};
@@ -1447,7 +1468,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.36';
+const APP_VERSION='2026-11-07.37';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
