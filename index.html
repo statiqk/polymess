@@ -467,28 +467,83 @@ html[data-theme=dark] .act .sel .ic2{background:rgba(120,110,255,.3);color:#d6d3
 #app.mobinfo .info .back{border-radius:50%;width:42px;height:42px}
 .info .av{margin-top:6px}
 }
+
+/* ===== Connexion v2 (toujours sombre) ===== */
+#auth{display:block!important;background:#0D1030!important;position:relative;overflow-y:auto;color:#ecebff;padding:0}
+#auth.hidden{display:none!important}
+#auth:before{content:"";position:fixed;inset:0;background:linear-gradient(165deg,#2A1650 0%,#17153F 50%,#0D1030 100%),#0D1030;z-index:0}
+#auth:after{content:"";position:fixed;inset:0;background:radial-gradient(380px 300px at 90% 8%,rgba(255,107,87,.25),transparent 70%),radial-gradient(420px 360px at 0% 40%,rgba(106,92,255,.3),transparent 70%);z-index:0;pointer-events:none}
+.aw{position:relative;z-index:1;max-width:420px;margin:0 auto;padding:max(26px,env(safe-area-inset-top)) 24px max(26px,env(safe-area-inset-bottom))}
+.atop{display:flex;align-items:center;justify-content:space-between;margin:2px 0 18px}
+.al{display:flex;align-items:center;gap:10px}.al .hlogo{width:34px;height:34px}.al b{font-size:20px;font-weight:700}
+.aon{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:#bff0cf;background:rgba(52,180,108,.14);box-shadow:inset 0 0 0 1px rgba(52,180,108,.35);border-radius:20px;padding:6px 12px}
+.aon i{width:8px;height:8px;border-radius:50%;background:#34d27b;box-shadow:0 0 8px #34d27b}.aon em{font-style:normal}
+.aon.off{color:#ffc4c4;background:rgba(229,72,77,.14);box-shadow:inset 0 0 0 1px rgba(229,72,77,.4)}.aon.off i{background:#ff6a6f;box-shadow:0 0 8px #ff6a6f}
+.astack{position:relative;height:186px;margin-bottom:18px}
+.acd{position:absolute;left:0;right:0;display:flex;align-items:center;gap:12px;background:#26244f;border-radius:22px;padding:12px 14px;box-shadow:0 14px 32px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.08)}
+.aav{width:42px;height:42px;border-radius:50%;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+.act{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.act b{font-size:16px;font-weight:700;color:#fff}.act span{font-size:14px;color:#a9a6d6;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acd small{font-size:12px;color:#9a97c8;font-weight:600}
+.acm{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.acm em{font-style:normal;min-width:22px;height:22px;border-radius:11px;background:#FF6B57;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.acd.c1{top:0;left:16px;right:16px;opacity:.6;transform:scale(.93);transform-origin:center top}
+.acd.c2{top:44px;left:8px;right:8px;opacity:.85;transform:scale(.97)}
+.acd.c3{top:92px;background:#322f66;transform:rotate(-1.2deg)}
+#authForm h1{font-size:40px;line-height:1;font-weight:800;letter-spacing:-.035em;color:#fff;margin:0 0 20px}
+.asub{color:#aeabdb;font-size:15px;margin:-8px 0 18px}
+#auth .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.af{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);border-radius:20px;height:58px;padding:0 18px;margin-bottom:12px;color:#aeabdb;position:relative}
+.af:focus-within{box-shadow:inset 0 0 0 1.5px #8B7BFF;background:rgba(255,255,255,.11)}
+.af .ai{display:flex;color:#9d94ff}.af .ai svg,.aeye svg{width:22px;height:22px}
+.af input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:17px;font-weight:500;height:100%;width:100%;padding:0;box-shadow:none}
+.af input::placeholder{color:#aeabdb}
+.af .afl{font-size:15px;color:#aeabdb;white-space:nowrap}
+.af input[type=date]{-webkit-appearance:none;appearance:none;text-align:right;color:#fff;min-height:0;color-scheme:dark}
+.aeye{display:flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:-8px;color:#9d94ff;background:none}.aeye.on{color:#fff}
+.afgw{text-align:right;margin:2px 4px 0}.afg{color:#b3acff;font-weight:600;font-size:15px;background:none;padding:4px 2px}
+.abtn{width:100%;margin-top:14px;height:60px;border-radius:22px;background:linear-gradient(100deg,#6A5CFF,#8B5CFF);color:#fff;font-weight:700;font-size:19px;box-shadow:0 16px 34px rgba(106,92,255,.4)}
+.abtn:active{transform:scale(.98)}.abtn:disabled{opacity:.6}
+.aswitch{text-align:center;margin-top:20px;font-size:16px;color:#bdbbe6;font-weight:500}
+.aswitch button{color:#fff;font-weight:700;font-size:16px;background:none;text-decoration:underline;text-decoration-color:#FF6B57;text-decoration-thickness:2px;text-underline-offset:4px}
+#auth #authMsg .msg{margin-top:14px;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:500}
+#auth #authMsg .msg.err{background:rgba(229,72,77,.16);color:#ffc4c4}
+#auth #authMsg .msg.ok{background:rgba(52,180,108,.16);color:#bff0cf}
+#auth.up .astack,#auth.rec .astack{display:none}
+#auth.up #authForm h1,#auth.rec #authForm h1{font-size:34px}
+#auth.rec .afgw,#auth.rec .aswitch,#auth.rec #fMailW{display:none}
+#auth.up .afgw{display:none}
+@media(max-height:760px){.astack{display:none}}
+@media(min-width:700px){.aw{padding-top:max(40px,6vh)}}
 </style>
 </head>
 <body>
 
 <!-- AUTH -->
 <div id="auth" class="hidden">
- <form class="card" id="authForm" autocomplete="on">
-  <div class="brand"><div class="logo">P</div><h1>PolyMess</h1></div>
-  <p class="sub" id="authSub">Connecte-toi pour discuter.</p>
-  <div id="signupOnly" class="hidden">
-   <div class="two">
-    <label class="fld"><span>Prénom</span><input id="fFirst" maxlength="40" autocomplete="given-name" placeholder="Julien"></label>
-    <label class="fld"><span>Nom</span><input id="fLast" maxlength="40" autocomplete="family-name" placeholder="Lespes"></label>
-   </div>
-   <label class="fld"><span>Date de naissance</span><input id="fBirth" type="date" min="1900-01-01" autocomplete="bday"></label>
+ <div class="aw">
+  <div class="atop"><div class="al"><i class="hlogo"></i><b>PolyMess</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span></div>
+  <div class="astack" id="aStack" aria-hidden="true">
+   <div class="acd c1"><span class="aav" style="background:#4aa3df">TP</span><div class="act"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
+   <div class="acd c2"><span class="aav" style="background:#34b46c">CR</span><div class="act"><b>Camille</b><span>Photo reçue</span></div><small>08:12</small></div>
+   <div class="acd c3"><span class="aav" style="background:#e8648b">ML</span><div class="act"><b>Marie</b><span>Parfait, jeudi 14h 👍</span></div><div class="acm"><small>09:06</small><em>2</em></div></div>
   </div>
-  <label class="fld"><span>E-mail</span><input id="fMail" type="email" required autocomplete="email" placeholder="toi@exemple.fr"></label>
-  <label class="fld"><span>Mot de passe</span><input id="fPass" type="password" required minlength="6" autocomplete="current-password" placeholder="6 caractères minimum"></label>
-  <button class="btn-p" id="authBtn" type="submit">Se connecter</button>
-  <div id="authMsg"></div>
-  <div class="switch"><span id="swTxt">Pas encore de compte ?</span> <button type="button" id="swBtn">Créer un compte</button></div>
- </form>
+  <form id="authForm" autocomplete="on">
+   <h1 id="authH">Retrouve tes discussions.</h1>
+   <p class="asub hidden" id="authSub"></p>
+   <div id="signupOnly" class="hidden">
+    <div class="two">
+     <label class="af"><input id="fFirst" maxlength="40" autocomplete="given-name" placeholder="Prénom"></label>
+     <label class="af"><input id="fLast" maxlength="40" autocomplete="family-name" placeholder="Nom"></label>
+    </div>
+    <label class="af"><span class="afl">Né(e) le</span><input id="fBirth" type="date" min="1900-01-01" autocomplete="bday"></label>
+   </div>
+   <label class="af" id="fMailW"><i class="ai" data-ic="mail"></i><input id="fMail" type="email" required autocomplete="email" placeholder="E-mail"></label>
+   <label class="af pw"><i class="ai" data-ic="lock"></i><input id="fPass" type="password" required minlength="6" autocomplete="current-password" placeholder="Mot de passe"><button type="button" class="aeye" tabindex="-1" aria-label="Afficher ou masquer le mot de passe" data-ic="eye"></button></label>
+   <div class="afgw"><button type="button" id="fgBtn" class="afg">Mot de passe oublié ?</button></div>
+   <button class="abtn" id="authBtn" type="submit">Se connecter</button>
+   <div id="authMsg"></div>
+   <div class="aswitch"><span id="swTxt">Pas encore de compte ?</span> <button type="button" id="swBtn">Créer un compte</button></div>
+  </form>
+ </div>
 </div>
 
 <!-- APP -->
@@ -541,6 +596,7 @@ html[data-theme=dark] .act .sel .ic2{background:rgba(120,110,255,.3);color:#d6d3
 <script>
 const SB_URL='https://qcogqpwjhtutxpyhrcld.supabase.co';
 const SB_KEY='sb_publishable_XoDSg1mKCph5ruluOBHvBQ_gKIxXymt';
+const REC0=/type=recovery/.test(location.hash);
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -559,14 +615,42 @@ const colorOf=(id,c)=>c||COLORS[[...String(id)].reduce((a,ch)=>a+ch.charCodeAt(0
 /* ---------- AUTH ---------- */
 function setAuthMode(signup){
   S.signup=signup;
+  const au=$('auth');au.classList.toggle('up',signup);au.classList.remove('rec');S.rec=false;
   $('signupOnly').classList.toggle('hidden',!signup);
+  $('fMail').required=true;
+  $('authH').textContent=signup?'Crée ton compte.':'Retrouve tes discussions.';
   $('authBtn').textContent=signup?'Créer mon compte':'Se connecter';
-  $('authSub').textContent=signup?'Crée ton compte PolyMess.':'Connecte-toi pour discuter.';
   $('swTxt').textContent=signup?'Déjà un compte ?':'Pas encore de compte ?';
   $('swBtn').textContent=signup?'Se connecter':'Créer un compte';
   $('fPass').autocomplete=signup?'new-password':'current-password';
+  $('fPass').placeholder='Mot de passe';
   $('authMsg').innerHTML='';
 }
+function showRecovery(){
+  S.rec=true;S.signup=false;
+  const au=$('auth');au.classList.remove('up');au.classList.add('rec');
+  $('app').classList.add('hidden');au.classList.remove('hidden');
+  $('signupOnly').classList.add('hidden');$('fMail').required=false;
+  $('authH').textContent='Nouveau mot de passe.';
+  $('authBtn').textContent='Enregistrer';
+  $('fPass').value='';$('fPass').autocomplete='new-password';$('fPass').placeholder='Nouveau mot de passe';
+  $('authMsg').innerHTML='';
+}
+/* icônes + connexion réseau + mot de passe oublié */
+document.querySelectorAll('#auth [data-ic]').forEach(e=>{e.innerHTML=ICONS[e.dataset.ic].startsWith('<')?`<svg class="ico" viewBox="0 0 24 24">${ICONS[e.dataset.ic]}</svg>`:''});
+document.querySelector('#auth .aeye').onclick=e=>{const b=e.currentTarget,i=$('fPass');i.type=i.type==='password'?'text':'password';b.classList.toggle('on',i.type==='text')};
+function netPill(){const on=navigator.onLine!==false;$('aOn').classList.toggle('off',!on);$('aOn').querySelector('em').textContent=on?'En ligne':'Hors ligne'}
+addEventListener('online',netPill);addEventListener('offline',netPill);netPill();
+$('fgBtn').onclick=async()=>{
+  const email=$('fMail').value.trim();
+  if(!email){authMsg('Entre ton e-mail ci-dessus, puis touche « Mot de passe oublié ? ».','err');$('fMail').focus();return}
+  $('fgBtn').disabled=true;
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+    if(error)authMsg(/rate|seconds/i.test(error.message)?'Patiente une minute avant de redemander un e-mail.':error.message,'err');
+    else authMsg('Si un compte existe pour cette adresse, un e-mail pour changer ton mot de passe vient d’être envoyé.','ok');
+  }finally{$('fgBtn').disabled=false}
+};
 $('swBtn').onclick=()=>setAuthMode(!S.signup);
 const authMsg=(t,k)=>$('authMsg').innerHTML=`<div class="msg ${k}">${esc(t)}</div>`;
 $('authForm').onsubmit=async e=>{
@@ -574,6 +658,15 @@ $('authForm').onsubmit=async e=>{
   const email=$('fMail').value.trim(),password=$('fPass').value;
   $('authBtn').disabled=true;$('authMsg').innerHTML='';
   try{
+    if(S.rec){
+      if(password.length<6){authMsg('6 caractères minimum.','err');return}
+      const {data,error}=await sb.auth.updateUser({password});
+      if(error){authMsg(/same|different/i.test(error.message)?'Choisis un mot de passe différent de l’ancien.':error.message,'err');return}
+      S.rec=false;history.replaceState(null,'',location.pathname+location.search);
+      $('auth').classList.remove('rec');
+      if(data?.user)boot(data.user);
+      return;
+    }
     if(S.signup){
       const first_name=$('fFirst').value.trim(),last_name=$('fLast').value.trim(),birth_date=$('fBirth').value;
       if(!first_name){authMsg('Indique ton prénom.','err');return}
@@ -582,7 +675,7 @@ $('authForm').onsubmit=async e=>{
       if(!birth_date||isNaN(bd)||bd>new Date()||bd<new Date('1900-01-01T00:00:00')){authMsg('Indique une date de naissance valide.','err');return}
       const {data,error}=await sb.auth.signUp({email,password,options:{data:{first_name,last_name,birth_date}}});
       if(error){authMsg(/already registered/i.test(error.message)?'Cette adresse e-mail est déjà utilisée.':error.message,'err');return}
-      if(!data.session){authMsg('Compte créé. Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.','ok');setAuthMode(false)}
+      if(!data.session){setAuthMode(false);authMsg('Compte créé. Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.','ok')}
     }else{
       const {error}=await sb.auth.signInWithPassword({email,password});
       if(error)authMsg(error.message==='Invalid login credentials'?'E-mail ou mot de passe incorrect.':error.message,'err');
@@ -597,7 +690,8 @@ async function logout(){
 }
 
 sb.auth.onAuthStateChange((ev,session)=>{
-  if(session?.user){ if(S.me?.id!==session.user.id) setTimeout(()=>boot(session.user),0) }
+  if(ev==='PASSWORD_RECOVERY'){setTimeout(showRecovery,0);return}
+  if(session?.user){ if(S.rec)return; if(S.me?.id!==session.user.id) setTimeout(()=>boot(session.user),0) }
   else{ S.me=null;S.convs=[];S.cur=null;S.msgs={};$('app').classList.add('hidden');$('auth').classList.remove('hidden') }
 });
 
@@ -1143,7 +1237,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.30';
+const APP_VERSION='2026-11-07.31';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1624,7 +1718,10 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 /* ---------- INIT ---------- */
 (async()=>{
   setAuthMode(false);
+  if(REC0){S.rec=true}
   const {data:{session}}=await sb.auth.getSession();
+  if(REC0&&session){showRecovery();return}
+  if(REC0&&!session){S.rec=false;authMsg('Ce lien a expiré. Redemande un e-mail avec « Mot de passe oublié ? ».','err')}
   if(!session)$('auth').classList.remove('hidden');
 })();
 </script>
