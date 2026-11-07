@@ -497,7 +497,7 @@ html[data-theme=dark] .act .sel .ic2{background:rgba(120,110,255,.3);color:#d6d3
 .astack{position:relative;height:186px;margin-bottom:18px}
 .acd{position:absolute;left:0;right:0;display:flex;align-items:center;gap:12px;background:#26244f;border-radius:22px;padding:12px 14px;box-shadow:0 14px 32px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.08)}
 .aav{width:42px;height:42px;border-radius:50%;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
-.act{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.act b{font-size:16px;font-weight:700;color:#fff}.act span{font-size:14px;color:#a9a6d6;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aat{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.aat b{font-size:16px;font-weight:700;color:#fff}.aat span{font-size:14px;color:#a9a6d6;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .acd small{font-size:12px;color:#9a97c8;font-weight:600}
 .acm{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.acm em{font-style:normal;min-width:22px;height:22px;border-radius:11px;background:#FF6B57;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px}
 .acd.c1{top:0;left:16px;right:16px;opacity:.6;transform:scale(.93);transform-origin:center top}
@@ -543,7 +543,7 @@ html[data-theme=dark] .mlr.inv{background:linear-gradient(100deg,#2a2660,#3a2650
 .lh #qrow{display:flex;flex-direction:row;align-items:center;margin-top:14px;flex:none}.qrow .search{margin-top:0;flex:1;min-width:0}
 .search:focus{outline:0;box-shadow:inset 0 0 0 2px #7a6cff}
 .qcancel{width:0;padding:0;opacity:0;overflow:hidden;white-space:nowrap;color:var(--p);font-weight:700;font-size:15px;background:none;transition:width .18s,opacity .18s,padding .18s}
-.qrow.act .qcancel{width:auto;opacity:1;padding:0 2px 0 12px}
+.qrow.qon .qcancel{width:auto;opacity:1;padding:0 2px 0 12px}
 html[data-theme=dark] .qcancel{color:#b3acff}
 @media(max-width:900px){html.kb .tbar{display:none!important}}
 </style>
@@ -555,9 +555,9 @@ html[data-theme=dark] .qcancel{color:#b3acff}
  <div class="aw">
   <div class="atop"><div class="al"><i class="hlogo"></i><b>PolyMess</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span></div>
   <div class="astack" id="aStack" aria-hidden="true">
-   <div class="acd c1"><span class="aav" style="background:#4aa3df">TP</span><div class="act"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
-   <div class="acd c2"><span class="aav" style="background:#34b46c">CR</span><div class="act"><b>Camille</b><span>Photo reçue</span></div><small>08:12</small></div>
-   <div class="acd c3"><span class="aav" style="background:#e8648b">ML</span><div class="act"><b>Marie</b><span>Parfait, jeudi 14h 👍</span></div><div class="acm"><small>09:06</small><em>2</em></div></div>
+   <div class="acd c1"><span class="aav" style="background:#4aa3df">TP</span><div class="aat"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
+   <div class="acd c2"><span class="aav" style="background:#34b46c">CR</span><div class="aat"><b>Camille</b><span>Photo reçue</span></div><small>08:12</small></div>
+   <div class="acd c3"><span class="aav" style="background:#e8648b">ML</span><div class="aat"><b>Marie</b><span>Parfait, jeudi 14h 👍</span></div><div class="acm"><small>09:06</small><em>2</em></div></div>
   </div>
   <form id="authForm" autocomplete="on">
    <h1 id="authH">Retrouve tes discussions.</h1>
@@ -1279,7 +1279,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.33';
+const APP_VERSION='2026-11-07.34';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1762,7 +1762,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 /* ---------- RECHERCHE : annuler + clavier ---------- */
 (()=>{
   const q=$('q'),row=$('qrow'),root=document.documentElement;
-  const upd=()=>row.classList.toggle('act',document.activeElement===q||!!q.value);
+  const upd=()=>row.classList.toggle('qon',document.activeElement===q||!!q.value);
   q.addEventListener('focus',upd);q.addEventListener('blur',upd);q.addEventListener('input',upd);
   $('qCancel').onclick=()=>{q.value='';q.dispatchEvent(new Event('input'));q.blur();upd()};
   const kbOn=e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&e.target.closest('.list'))root.classList.add('kb')};
