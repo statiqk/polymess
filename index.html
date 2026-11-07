@@ -315,6 +315,29 @@ html[data-theme=dark] .comp textarea{caret-color:#9a90ff;box-shadow:inset 0 0 0 
 
 /* espace bas v2 */
 @media(max-width:900px){.comp{margin-bottom:max(8px,calc(env(safe-area-inset-bottom) - 12px));transition:margin-bottom .2s ease}.comp:focus-within{margin-bottom:6px}}
+
+/* menu compte v2 */
+#cfm{position:fixed;inset:0;z-index:100;background:rgba(5,4,20,.6);display:flex;align-items:center;justify-content:center;padding:22px}
+#cfm .cd{background:var(--card);border-radius:22px;padding:22px 20px 16px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.45);animation:pop .15s}
+#cfm .cd b{font-size:18px}#cfm .cd p{color:var(--mut);font-size:14px;margin:6px 0 16px}
+#cfm .cb{display:flex;gap:10px}#cfm .cb button{flex:1;padding:12px 0;border-radius:14px;background:var(--soft);font-weight:700;font-size:14px}#cfm .cb .rdb{background:#e5484d;color:#fff}
+@media(max-width:900px){
+#mbd{position:fixed;left:0;right:0;top:0;bottom:calc(76px + env(safe-area-inset-bottom));z-index:59;background:rgba(30,25,70,.32)}
+html[data-theme=dark] #mbd{background:rgba(5,4,20,.55)}
+#menu.sheet{left:0;right:0;top:auto;bottom:calc(76px + env(safe-area-inset-bottom));max-width:none;border-radius:26px 26px 0 0;padding:10px 18px 14px;box-shadow:0 -12px 40px rgba(0,0,0,.3);animation:sheetUp .22s ease;border-top:1px solid var(--line)}
+html[data-theme=dark] #menu.sheet{background:#26244c;border-top-color:rgba(150,140,255,.28)}
+@keyframes sheetUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+#menu .hdl{display:block;width:40px;height:5px;border-radius:9px;background:var(--mut);opacity:.5;margin:0 auto 14px}
+#menu .who{display:flex;gap:14px;align-items:center;padding-bottom:14px}#menu .mav{width:50px;height:50px;border-radius:50%;color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex:none}
+#menu .wt b{display:block;font-size:17px}#menu .wt span{font-size:13px;color:var(--mut);word-break:break-all}
+#menu .pres{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--soft);border-radius:16px;padding:12px 14px;margin-bottom:12px}#menu .pres b{font-size:14px;display:block}#menu .pres small{font-size:12px;color:var(--mut)}
+#menu .sw2{width:46px;padding:0;display:block;flex:none}#menu .sw2.on{background:var(--p)}
+#menu .mlab{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:4px 2px 7px}
+#menu .mseg{display:flex;background:var(--soft);border-radius:14px;padding:4px;gap:4px;margin-bottom:8px}#menu .mseg button{flex:1;width:auto;display:flex;gap:6px;align-items:center;justify-content:center;padding:9px 0;border-radius:11px;font-size:13px;font-weight:700;color:var(--mut)}
+#menu .mseg button.on{background:#4b3fd6;color:#fff}#menu .mseg button.on .ico,#menu .mseg button .ico{color:inherit;width:17px;height:17px}
+#menu .mit{padding:14px 4px;font-size:16px;font-weight:600;border-radius:12px}#menu .mit .chv{margin-left:auto;transform:rotate(-90deg);color:var(--mut)}
+#menu hr{border:0;border-top:1px solid var(--line);margin:2px 0}
+}
 </style>
 </head>
 <body>
@@ -393,7 +416,7 @@ const sb=supabase.createClient(SB_URL,SB_KEY);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const ICONS={"chat": "<path d=\"M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z\"/><circle cx=\"8.4\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"12\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"15.6\" cy=\"11\" r=\".9\" class=\"f\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.6\"/><path d=\"M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.4 15.4L20 20\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"8.8\"/><path d=\"M12 11v5.5\"/><circle cx=\"12\" cy=\"7.8\" r=\".7\" class=\"f\"/>", "back": "<path d=\"M14.5 5.5L8 12l6.5 6.5\"/>", "close": "<path d=\"M6.5 6.5l11 11M17.5 6.5l-11 11\"/>", "up": "<path d=\"M6 14.5l6-6 6 6\"/>", "down": "<path d=\"M6 9.5l6 6 6-6\"/>", "sliders": "<path d=\"M4 7h8M18 7h2M4 17h2M12 17h8\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"9\" cy=\"17\" r=\"2.2\"/>", "clip": "<path d=\"M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4\"/>", "send": "<path d=\"M20.5 3.5L10.5 13.5\"/><path d=\"M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z\"/>", "tick": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>", "ticks": "<path d=\"M2.5 12.5L7 17l8.5-9.5\"/><path d=\"M10.5 15.5l1.5 1.5L21.5 7.5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5v4.7l3 1.8\"/>", "reply": "<path d=\"M9.5 6L4 11.5 9.5 17\"/><path d=\"M4 11.5h9.5a6.5 6.5 0 016.5 6.5v1\"/>", "copy": "<rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M5 15V7a2 2 0 012-2h8\"/>", "edit": "<path d=\"M4 20l1-4.5L16.3 4.2a2.1 2.1 0 013 3L8 18.5 4 20z\"/><path d=\"M14.5 6l3 3\"/>", "trash": "<path d=\"M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5M14 11v5\"/>", "pin": "<path d=\"M9 4h6l-1 5 3 3v1.5H7V12l3-3-1-5z\"/><path d=\"M12 13.5V20\"/>", "bell": "<path d=\"M6 16v-5.5a6 6 0 0112 0V16l1.5 2h-15L6 16z\"/><path d=\"M10 21h4\"/>", "bellOff": "<path d=\"M8.2 4.7A6 6 0 0118 10.5V16l1.5 2H9M6 9.5V16l-1.5 2H6\"/><path d=\"M10 21h4M4 4l16 16\"/>", "file": "<path d=\"M14 3.5H7.5a2 2 0 00-2 2v13a2 2 0 002 2h9a2 2 0 002-2V8L14 3.5z\"/><path d=\"M14 3.5V8h4.5M9 13h6M9 16.5h4\"/>", "image": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"3\"/><circle cx=\"9\" cy=\"10\" r=\"1.6\"/><path d=\"M4 17l5-4.5 4 3.5 3-2.5 4 3.5\"/>", "out": "<path d=\"M10 20.5H6.5a2 2 0 01-2-2v-13a2 2 0 012-2H10\"/><path d=\"M15.5 16.5L20 12l-4.5-4.5M20 12H9.5\"/>", "mail": "<rect x=\"3.5\" y=\"6\" width=\"17\" height=\"12\" rx=\"3\"/><path d=\"M4.5 8.5L12 13.5l7.5-5\"/>", "shield": "<path d=\"M12 3.5l7 2.5v5.5c0 4.3-2.8 7.4-7 9-4.2-1.6-7-4.7-7-9V6l7-2.5z\"/><path d=\"M9 12l2.2 2.2L15.5 10\"/>", "moon": "<path d=\"M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z\"/>", "smile": "<path d=\"M20.5 12.5A8.5 8.5 0 1111 3.5\"/><path d=\"M8.3 13.5c.8 1.4 2 2.1 3.2 2.1s2.4-.7 3.2-2.1\"/><circle cx=\"8.6\" cy=\"9.8\" r=\".8\" class=\"f\"/><circle cx=\"13.4\" cy=\"9.8\" r=\".8\" class=\"f\"/><path d=\"M18 2.5v5M15.5 5h5\"/>", "volume": "<path d=\"M4 9.5h3.5L12 5.5v13l-4.5-4H4z\"/><path d=\"M15.8 9a4 4 0 010 6M18.6 6.4a8 8 0 010 11.2\"/>", "wave": "<path d=\"M5 18.5V8.5a2 2 0 014 0V13M9 13V6.5a2 2 0 014 0V13M13 13V7.5a2 2 0 014 0V14.5a6 6 0 01-6 6h-.5a6.5 6.5 0 01-5-2.4\"/>"};
+const ICONS={"chat": "<path d=\"M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z\"/><circle cx=\"8.4\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"12\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"15.6\" cy=\"11\" r=\".9\" class=\"f\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.6\"/><path d=\"M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.4 15.4L20 20\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"8.8\"/><path d=\"M12 11v5.5\"/><circle cx=\"12\" cy=\"7.8\" r=\".7\" class=\"f\"/>", "back": "<path d=\"M14.5 5.5L8 12l6.5 6.5\"/>", "close": "<path d=\"M6.5 6.5l11 11M17.5 6.5l-11 11\"/>", "up": "<path d=\"M6 14.5l6-6 6 6\"/>", "down": "<path d=\"M6 9.5l6 6 6-6\"/>", "sliders": "<path d=\"M4 7h8M18 7h2M4 17h2M12 17h8\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"9\" cy=\"17\" r=\"2.2\"/>", "clip": "<path d=\"M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4\"/>", "send": "<path d=\"M20.5 3.5L10.5 13.5\"/><path d=\"M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z\"/>", "tick": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>", "ticks": "<path d=\"M2.5 12.5L7 17l8.5-9.5\"/><path d=\"M10.5 15.5l1.5 1.5L21.5 7.5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5v4.7l3 1.8\"/>", "reply": "<path d=\"M9.5 6L4 11.5 9.5 17\"/><path d=\"M4 11.5h9.5a6.5 6.5 0 016.5 6.5v1\"/>", "copy": "<rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M5 15V7a2 2 0 012-2h8\"/>", "edit": "<path d=\"M4 20l1-4.5L16.3 4.2a2.1 2.1 0 013 3L8 18.5 4 20z\"/><path d=\"M14.5 6l3 3\"/>", "trash": "<path d=\"M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5M14 11v5\"/>", "pin": "<path d=\"M9 4h6l-1 5 3 3v1.5H7V12l3-3-1-5z\"/><path d=\"M12 13.5V20\"/>", "bell": "<path d=\"M6 16v-5.5a6 6 0 0112 0V16l1.5 2h-15L6 16z\"/><path d=\"M10 21h4\"/>", "bellOff": "<path d=\"M8.2 4.7A6 6 0 0118 10.5V16l1.5 2H9M6 9.5V16l-1.5 2H6\"/><path d=\"M10 21h4M4 4l16 16\"/>", "file": "<path d=\"M14 3.5H7.5a2 2 0 00-2 2v13a2 2 0 002 2h9a2 2 0 002-2V8L14 3.5z\"/><path d=\"M14 3.5V8h4.5M9 13h6M9 16.5h4\"/>", "image": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"3\"/><circle cx=\"9\" cy=\"10\" r=\"1.6\"/><path d=\"M4 17l5-4.5 4 3.5 3-2.5 4 3.5\"/>", "out": "<path d=\"M10 20.5H6.5a2 2 0 01-2-2v-13a2 2 0 012-2H10\"/><path d=\"M15.5 16.5L20 12l-4.5-4.5M20 12H9.5\"/>", "mail": "<rect x=\"3.5\" y=\"6\" width=\"17\" height=\"12\" rx=\"3\"/><path d=\"M4.5 8.5L12 13.5l7.5-5\"/>", "shield": "<path d=\"M12 3.5l7 2.5v5.5c0 4.3-2.8 7.4-7 9-4.2-1.6-7-4.7-7-9V6l7-2.5z\"/><path d=\"M9 12l2.2 2.2L15.5 10\"/>", "moon": "<path d=\"M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z\"/>", "smile": "<path d=\"M20.5 12.5A8.5 8.5 0 1111 3.5\"/><path d=\"M8.3 13.5c.8 1.4 2 2.1 3.2 2.1s2.4-.7 3.2-2.1\"/><circle cx=\"8.6\" cy=\"9.8\" r=\".8\" class=\"f\"/><circle cx=\"13.4\" cy=\"9.8\" r=\".8\" class=\"f\"/><path d=\"M18 2.5v5M15.5 5h5\"/>", "volume": "<path d=\"M4 9.5h3.5L12 5.5v13l-4.5-4H4z\"/><path d=\"M15.8 9a4 4 0 010 6M18.6 6.4a8 8 0 010 11.2\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4\"/>", "wave": "<path d=\"M5 18.5V8.5a2 2 0 014 0V13M9 13V6.5a2 2 0 014 0V13M13 13V7.5a2 2 0 014 0V14.5a6 6 0 01-6 6h-.5a6.5 6.5 0 01-5-2.4\"/>"};
 const ico=(n,c='')=>`<svg class="ico ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
 const MCOLS='id,conversation_id,sender_id,content,created_at,reply_to,att_path,att_name,att_type,att_size,edited_at,deleted_at';
 const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false,sq:null,react:{},online:new Set(),reply:null,edit:null,att:null,urls:{},typing:null};
@@ -652,7 +675,7 @@ function renderInfo(c){
    ${media.length?`<div class="sec"><h4>Photos et fichiers · ${media.length}</h4>${imgs.length?`<div class="mgrid">${imgs.map(m=>`<img class="th" alt="${esc(m.att_name||'')}" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'image')}"${cachedUrl(m.att_path)?` src="${esc(cachedUrl(m.att_path))}"`:''}>`).join('')}</div>`:''}${files.map(m=>`<div class="frow" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>${fmtSize(m.att_size)}</small></div></div>`).join('')}</div>`:''}
    <div class="sec"><h4>Informations</h4><div class="row"><span>Prénom</span>${esc(c.other?.first_name||c.name)}</div>${c.other?.last_name?`<div class="row"><span>Nom</span>${esc(c.other.last_name)}</div>`:''}<div class="row"><span>Discussion depuis</span>${new Date(c.created_at).toLocaleDateString('fr-FR')}</div></div>
    <div class="sec"><h4>Mon compte</h4><div class="row"><span>${esc(S.me.display_name)}</span>${esc(S.email)}</div><div class="row logout" style="cursor:pointer" id="infoLogout">Se déconnecter</div></div>`;
-  const l=$('infoLogout');if(l)l.onclick=logout;
+  const l=$('infoLogout');if(l)l.onclick=askLogout;
   $('infoBack').onclick=()=>{if(curPM==='info')history.back();else hideMobInfo()};
   $('aSearch').onclick=()=>{closeInfoPanel();setTimeout(openSearch,60)};
   $('aMute').onclick=()=>setFlag(c,'muted',!c.muted);
@@ -958,7 +981,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.17';
+const APP_VERSION='2026-11-07.18';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1023,14 +1046,46 @@ function renderMe(){
   const bg=colorOf(S.me.id,S.me.color),t=initials(S.me.display_name);
   ['meBtn','meBtnM'].forEach(id=>{const e=$(id);e.style.background=bg;e.textContent=t});
 }
+const isMob=()=>innerWidth<=900;
+function confirmLogout(){
+  return new Promise(res=>{
+    const d=document.createElement('div');d.id='cfm';
+    d.innerHTML=`<div class="cd"><b>Se déconnecter ?</b><p>Tu pourras te reconnecter à tout moment avec ton e-mail.</p><div class="cb"><button type="button" id="cNo">Annuler</button><button type="button" id="cYes" class="rdb">Se déconnecter</button></div></div>`;
+    document.body.appendChild(d);
+    const done=v=>{d.remove();res(v)};
+    $('cNo').onclick=()=>done(false);$('cYes').onclick=()=>done(true);
+    d.onclick=e=>{if(e.target===d)done(false)};
+  });
+}
+const askLogout=()=>confirmLogout().then(ok=>{if(ok)logout()});
+function menuHtml(){
+  const col=colorOf(S.me.id,S.me.color);
+  if(!isMob())return `<div class="mh"><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div><button id="mSet">${ico('sliders')}Réglages</button><button id="mOut" class="mo-out">${ico('out')}Se déconnecter</button>`;
+  const seg=[['auto','sliders','Auto'],['light','sun','Clair'],['dark','moon','Sombre']].map(([k,i,l])=>`<button type="button" class="${prefs.theme===k?'on':''}" data-th="${k}">${ico(i)}${l}</button>`).join('');
+  return `<i class="hdl"></i><div class="who"><div class="mav" style="background:${esc(col)}">${esc(initials(S.me.display_name))}</div><div class="wt"><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div></div>
+   <div class="pres"><div><b>Statut en ligne</b><small>Les autres voient quand tu es connecté</small></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="mPres" aria-label="Statut en ligne"></button></div>
+   <div class="mlab">Apparence</div><div class="mseg">${seg}</div>
+   <button id="mSet" class="mit">${ico('sliders')}Réglages${ico('down','chv')}</button><hr><button id="mOut" class="mit mo-out">${ico('out')}Se déconnecter</button>`;
+}
+function wireMenu(m){
+  $('mSet').onclick=()=>{m.classList.add('hidden');openSettings()};
+  $('mOut').onclick=()=>{m.classList.add('hidden');askLogout()};
+  const p=$('mPres');if(p)p.onclick=()=>{prefs.presence=!statusOn();savePrefs();p.classList.toggle('on',statusOn());startPresence();updateSub();renderList()};
+  m.querySelectorAll('[data-th]').forEach(b=>b.onclick=e=>{e.stopPropagation();prefs.theme=b.dataset.th;savePrefs();applyTheme();m.innerHTML=menuHtml();wireMenu(m)});
+}
 function toggleMenu(){
   const m=$('menu');
   if(!m.classList.contains('hidden')){m.classList.add('hidden');return}
-  m.innerHTML=`<div class="mh"><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div><button id="mSet">${ico('sliders')}Réglages</button><button id="mOut" class="mo-out">${ico('out')}Se déconnecter</button>`;
-  m.classList.remove('hidden');
-  $('mSet').onclick=()=>{m.classList.add('hidden');openSettings()};
-  $('mOut').onclick=()=>{m.classList.add('hidden');logout()};
+  m.className=isMob()?'sheet':'';
+  m.innerHTML=menuHtml();wireMenu(m);
 }
+new MutationObserver(()=>{
+  const m=$('menu'),open=!m.classList.contains('hidden')&&m.classList.contains('sheet');
+  let bd=$('mbd');
+  if(open&&!bd){bd=document.createElement('div');bd.id='mbd';document.body.appendChild(bd)}
+  if(!open&&bd)bd.remove();
+  $('tbMe').classList.toggle('s',open);$('tbMsgs').classList.toggle('s',!open);
+}).observe($('menu'),{attributes:true,attributeFilter:['class']});
 ['meBtn','meBtnM','tbMe'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();toggleMenu()});
 $('tbMsgs').onclick=()=>{$('convs').scrollTop=0};
 document.addEventListener('click',e=>{
