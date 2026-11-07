@@ -387,6 +387,25 @@ html[data-theme=dark] .mib{color:#b3acff}
 .faq details{background:var(--soft);border-radius:14px;padding:12px 14px;margin-bottom:8px}.faq summary{font-weight:600;font-size:15px;cursor:pointer}.faq p{font-size:14px;color:var(--mut);margin-top:8px;line-height:1.5}
 .legal h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:16px 0 6px}.legal p{font-size:14.5px;line-height:1.55}
 #ipg .ipb{padding:4px 2px 18px}
+
+/* conversation v2 */
+.msgs{gap:3px}.m.gap{margin-top:9px}
+.tsep{align-self:center;font-size:12px;font-weight:500;color:var(--mut);margin:10px 0 6px;opacity:.85}
+.day{margin:12px 0 8px}
+.rd{color:#bfe3ff}
+html[data-theme=dark] .in{background:#262650;box-shadow:inset 0 0 0 1px #34346a}
+.m.del{opacity:1;font-style:normal;display:flex;align-items:center;flex-wrap:wrap;gap:0 7px;background:rgba(75,63,214,.22);color:var(--mut);box-shadow:none}
+.m.del.out{background:rgba(91,79,240,.38);color:#d6d3f5}
+html:not([data-theme=dark]) .m.del.in{background:var(--soft)}
+.m.del em{font-style:italic}.m.del .dl{width:15px;height:15px;flex:none}.m.del small{margin-left:auto;padding-left:8px}
+.comp{border-radius:30px;padding:6px;align-items:center;background:var(--soft)}
+html[data-theme=dark] .comp{background:#1c1c3a}
+.comp .clip{width:42px;height:42px;border-radius:50%;background:rgba(120,110,255,.18);color:var(--p)}
+html[data-theme=dark] .comp .clip{color:#b3acff}
+.comp textarea{background:var(--card);box-shadow:none!important;border-radius:22px;padding:11px 16px}
+html[data-theme=dark] .comp textarea{background:#262650}
+.comp .send{border-radius:50%;width:42px;height:42px}
+.comp .send:disabled{background:rgba(120,110,255,.18)}
 </style>
 </head>
 <body>
@@ -763,10 +782,11 @@ function renderMsgs(scroll){
     const m=list[i];
     const day=new Date(m.created_at).toDateString();
     if(day!==lastDay){html+=`<div class="day">${esc(fmtDay(m.created_at))}</div>`;lastDay=day;lastSender=''}
+    else if(i&&new Date(m.created_at)-new Date(list[i-1].created_at)>=1800000){html+=`<div class="tsep">${fmtTime(m.created_at)}</div>`;lastSender=''}
     const nx=list[i+1],cont=nx&&nx.sender_id===m.sender_id&&!nx.deleted_at&&new Date(nx.created_at).toDateString()===day&&(new Date(nx.created_at)-new Date(m.created_at))<300000;
     const mine=m.sender_id===S.me.id,gap=(lastSender!==m.sender_id?'gap':'')+(cont?' cont':'')+(hs&&hs.has(m.id)?' hit'+(S.sq.ids[S.sq.i]===m.id?' cur':''):'');
     lastSender=m.sender_id;
-    if(m.deleted_at){html+=`<div class="m del ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">Message supprimé<small>${fmtTime(m.created_at)}</small></div>`;continue}
+    if(m.deleted_at){html+=`<div class="m del ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${ico('trash','dl')}<em>Message supprimé</em><small>${fmtTime(m.created_at)}</small></div>`;continue}
     let q='';
     if(m.reply_to){const o=byId.get(m.reply_to);q=`<div class="q" data-go="${esc(m.reply_to)}"><b>${esc(o?(o.sender_id===S.me.id?'Toi':c.name):'Message')}</b><span>${esc(o?prevText(o):'Message d’origine indisponible')}</span></div>`}
     let att='';
@@ -1039,7 +1059,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.20';
+const APP_VERSION='2026-11-07.21';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
