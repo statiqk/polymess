@@ -600,12 +600,7 @@ html[data-theme=dark] .ephsh{background:#1c1c3a}
 .ephok{width:100%;margin-top:8px;height:52px;border-radius:26px;background:linear-gradient(100deg,#6A5CFF,#8B5CFF);color:#fff;font-weight:700;font-size:16px}
 
 /* ===== Fiche contact : même rendu que la maquette A ===== */
-.info .ihd,.info .itt{display:none}
-#app.mobinfo .info{padding:76px 14px 24px}
-#app.mobinfo .info .ihd{display:block;position:absolute;left:0;right:0;top:0;height:68px;background:var(--card);border-bottom:1px solid var(--line)}
-html[data-theme=dark] #app.mobinfo .info .ihd{background:#1c1c3a;border-bottom-color:#2a2a50}
-#app.mobinfo .info .back{z-index:2;background:none;box-shadow:none;width:42px;height:42px}
-#app.mobinfo .info .itt{display:flex;position:absolute;z-index:2;top:14px;left:62px;height:42px;align-items:center;font-size:17px;font-weight:700}
+#app.mobinfo .info{padding:64px 14px 24px}
 .info .av{width:84px;height:84px;font-size:28px;margin:6px auto 10px}
 .info h3{font-size:20px;font-weight:800}
 .info .act{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 0 12px;margin:0}
@@ -1040,7 +1035,7 @@ function renderInfo(c){
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
   const seenLong=statusOn()&&c.other?.last_seen_at?fmtSeenLong(c.other.last_seen_at):'';
   const stTxt=subText(c,false)||'Discussion privée';
-  $('info').innerHTML=`<div class="ihd"></div>${back}<b class="itt">Infos du contact</b><div class="av${on?' on':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
+  $('info').innerHTML=`${back}<div class="av${on?' on':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
    <h3>${esc(c.name)}</h3><p class="st${stTxt==='En ligne'?' live':''}" id="infoSt">${esc(stTxt)}</p>
    <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
    <div class="sec ephsec"><button type="button" class="ephr" id="aEph"><span class="ephi">${ico('clock')}</span><span class="ephx"><b>Messages éphémères</b><small>${EPH[c.eph]||'30 jours'}</small></span><span class="ephc">${ico('back')}</span></button><p class="ephh">Les messages de cette discussion sont supprimés automatiquement après la durée choisie.</p></div>
@@ -1468,7 +1463,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.37';
+const APP_VERSION='2026-11-07.38';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
