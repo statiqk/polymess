@@ -290,6 +290,7 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
  .comp{margin:0 10px calc(10px + env(safe-area-inset-bottom))}
  #sbar{padding:8px 10px}
 }
+.logo{background:url(icon-192.png?v=2) center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:0 6px 16px rgba(60,40,160,.22)!important}
 </style>
 </head>
 <body>
@@ -933,7 +934,7 @@ function openNew(){
 
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.13';
+const APP_VERSION='2026-11-07.14';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
