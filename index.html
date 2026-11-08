@@ -957,7 +957,10 @@ async function markRead(cid){
   const c=S.convs.find(x=>x.id===cid);if(c){c.unread=0;renderList()}
   const {data}=await sb.rpc('mark_read',{cid});
   if(c&&data)c.last_read_at=data;
+  clearNotifs(cid);
 }
+// ferme les bannières déjà affichées pour cette conversation
+async function clearNotifs(cid){try{const r=await navigator.serviceWorker?.ready;(await r.getNotifications()).forEach(x=>{if(x.data&&x.data.cid===cid)x.close()})}catch(e){}}
 function onMsgDelete(o){
   if(!o||!o.id)return;
   S.convs.forEach(c=>{const a=S.msgs[c.id];if(a){const i=a.findIndex(x=>x.id===o.id);if(i>=0){a.splice(i,1);if(S.cur===c.id)renderMsgs(false)}}});
@@ -1852,7 +1855,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.50';
+const APP_VERSION='2026-11-08.51';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';

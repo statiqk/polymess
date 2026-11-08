@@ -16,19 +16,11 @@ self.addEventListener('push',e=>{
     const ios=/iphone|ipad|ipod/i.test(self.navigator.userAgent);
     // Appli déjà à l'écran : elle affiche le message elle-même (sauf iPhone, qui exige une notification à chaque push)
     if(!ios&&d.kind!=='test'&&list.some(c=>c.visibilityState==='visible'))return;
-    let title=d.title||'PolyMess',body=d.body||'',msgs=null;
-    // Plusieurs messages d'une même conversation : on les regroupe dans une seule notification
-    if(d.kind==='msg'&&d.tag){
-      const ex=(await self.registration.getNotifications({tag:d.tag}))[0];
-      msgs=(((ex&&ex.data&&ex.data.msgs)||[]).concat(d.body||'')).slice(-5);
-      if(msgs.length>1){
-        // aperçu masqué : on compte seulement ; sinon on liste les derniers messages
-        if(d.hidden){title=d.title;body=`${msgs.length} nouveaux messages`}
-        else{title=`${d.title} · ${msgs.length} messages`;body=msgs.join('\n')}
-      }
-    }
-    const opts={body,tag:d.tag,renotify:!!d.tag,icon:'icon-192.png?v=3',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
-      data:{cid:d.cid,msgs,name:d.title,req:!!d.req}};
+    // Une notification par message (elles s'empilent) ; tag unique pour qu'aucune n'en remplace une autre
+    const title=d.title||'PolyMess',body=d.body||'';
+    const tag=d.tag?d.tag+'|'+Date.now():undefined;
+    const opts={body,tag,icon:'icon-192.png?v=3',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
+      data:{cid:d.cid,name:d.title,req:!!d.req}};
     if(d.image)opts.image=d.image;
     if(d.kind==='msg')opts.actions=[{action:'reply',title:'Répondre',type:'text',placeholder:'Ta réponse…'},{action:'read',title:'Marquer comme lu'}];
     await self.registration.showNotification(title,opts);
@@ -40,7 +32,9 @@ self.addEventListener('push',e=>{
 self.addEventListener('notificationclick',e=>{
   const n=e.notification,d=n.data||{};
   n.close();
+  const closeAll=async()=>{if(!d.cid)return;try{(await self.registration.getNotifications()).forEach(x=>{if(x.data&&x.data.cid===d.cid)x.close()})}catch(_){}};
   e.waitUntil((async()=>{
+    await closeAll();
     const sub=await self.registration.pushManager.getSubscription().catch(()=>null);
     const call=b=>fetch(PUSH_URL,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({endpoint:sub&&sub.endpoint,...b})}).then(r=>r.json()).catch(()=>null);
     if(e.action==='read'&&d.cid){const r=await call({action:'read',cid:d.cid});if(r)setBadge(r.unread);return}
