@@ -237,6 +237,19 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 /* ===== Design v2 ===== */
 .rail{display:none}
 .zoomable{cursor:zoom-in}
+.cw.pvhide .conv{visibility:hidden}
+@media (hover:none){.conv{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
+#cdim{position:fixed;inset:0;z-index:79;background:rgba(5,6,20,.66)}
+#cpv{position:fixed;z-index:81;background:var(--bg);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.45);overflow:hidden}
+#cpv .pmb{padding:12px;display:flex;flex-direction:column;gap:7px;max-height:min(46vh,300px);overflow:hidden}
+#cpv .pm{max-width:80%;border-radius:16px;padding:8px 12px;font-size:13.5px;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
+#cpv .pm small{display:block;text-align:right;font-size:10px;opacity:.65;margin-top:2px}
+#cpv .pm.in{background:var(--soft);align-self:flex-start}#cpv .pm.out{background:var(--p);color:#fff;align-self:flex-end}#cpv .pm.dl{font-style:italic;opacity:.7}
+#cpv .pmu{text-align:center;font-size:11.5px;font-weight:700;color:var(--p);background:rgba(120,110,255,.16);border-radius:10px;padding:4px;margin:4px 30px}
+#cpv .pme{text-align:center;color:var(--mut);font-size:13.5px;padding:18px 0}
+#cmenu{position:fixed;z-index:82;width:250px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.4);padding:6px}
+#cmenu .it{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px;border-radius:10px;font-size:15px}#cmenu .it:hover{background:var(--hov2)}#cmenu .it .ico{width:19px;height:19px;opacity:.75}
+#cmenu .it.red{color:var(--red)}#cmenu .it.red .ico{opacity:1}
 .cw{position:relative;overflow:hidden;border-radius:16px}.cw .conv{margin:0;width:100%;touch-action:pan-y;position:relative}
 .swa{display:none;position:absolute;right:0;top:0;bottom:0;width:192px}.cw.open .swa{display:flex}
 .swa button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff}.swa small{font-size:11.5px;font-weight:600}.swa .ico{width:20px;height:20px}
@@ -1126,6 +1139,69 @@ $('convs').addEventListener('click',e=>{
   }
   if(swOpen){e.stopImmediatePropagation();e.preventDefault();swClose()}
 },true);
+
+// ---- Appui long sur une conversation : aperçu des derniers messages + menu
+let cpT=null,cpX=0,cpY=0,cpFired=false;
+const closeCMenu=()=>{['cdim','cpv','cmenu'].forEach(i=>{const d=document.getElementById(i);if(d)d.remove()});const r=document.querySelector('.cw.pvhide');if(r)r.classList.remove('pvhide')};
+$('convs').addEventListener('pointerdown',e=>{
+  clearTimeout(cpT);if(e.pointerType==='mouse'||swOpen)return;
+  const w=e.target.closest('.cw');if(!w||e.target.closest('.swa'))return;
+  cpFired=false;cpX=e.clientX;cpY=e.clientY;
+  cpT=setTimeout(()=>{cpT=null;cpFired=true;sw=null;try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}openConvMenu(w)},450);
+},{passive:true});
+['pointerup','pointercancel'].forEach(t=>$('convs').addEventListener(t,()=>clearTimeout(cpT),{passive:true}));
+$('convs').addEventListener('pointermove',e=>{if(cpT&&Math.hypot(e.clientX-cpX,e.clientY-cpY)>10){clearTimeout(cpT);cpT=null}},{passive:true});
+$('convs').addEventListener('scroll',()=>{clearTimeout(cpT);cpT=null},{passive:true});
+$('convs').addEventListener('contextmenu',e=>{const w=e.target.closest('.cw');if(!w)return;e.preventDefault();if(e.pointerType!=='touch'&&!cpFired)openConvMenu(w)});
+$('convs').addEventListener('click',e=>{if(cpFired){cpFired=false;e.stopImmediatePropagation();e.preventDefault()}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCMenu()});
+async function openConvMenu(w){
+  closeCMenu();closeMenu();
+  const c=S.convs.find(x=>x.id===w.dataset.id);if(!c)return;
+  let msgs=S.msgs[c.id];
+  if(!msgs){
+    const {data}=await sb.from('messages').select(MCOLS).eq('conversation_id',c.id).order('created_at',{ascending:false}).limit(12);
+    msgs=(data||[]).reverse().filter(x=>!c.cleared||x.created_at>c.cleared);
+  }
+  c._pv=msgs;
+  const vis=msgs.filter(m=>!msgGone(m)).slice(-7);
+  const incoming=msgs.filter(m=>m.sender_id!==S.me.id&&!m.deleted_at);
+  const firstUnread=c.unread?vis.findIndex(m=>m.sender_id!==S.me.id&&m.created_at>c.last_read_at):-1;
+  const bub=m=>`<div class="pm ${m.sender_id===S.me.id?'out':'in'}${m.deleted_at?' dl':''}">${esc(prevText(m)||'Message')}<small>${esc(fmtTime(m.created_at))}</small></div>`;
+  const body=vis.length?vis.map((m,i)=>(i===firstUnread?`<div class="pmu">${c.unread} non lu${c.unread>1?'s':''}</div>`:'')+bub(m)).join(''):'<div class="pme">Aucun message</div>';
+  const r=w.getBoundingClientRect();
+  const dim=document.createElement('div');dim.id='cdim';const t0=Date.now();dim.onclick=()=>{if(Date.now()-t0>500)closeCMenu()};document.body.appendChild(dim);
+  const pv=document.createElement('div');pv.id='cpv';pv.innerHTML=`<div class="pmb">${body}</div>`;document.body.appendChild(pv);
+  const m=document.createElement('div');m.id='cmenu';
+  const it=(a,ic,t,cls='')=>`<button type="button" class="it ${cls}" data-a="${a}">${ico(ic)}${t}</button>`;
+  m.innerHTML=it('pin','pin',c.pinned?'Désépingler':'Épingler')+it('mute',c.muted?'bell':'bellOff',c.muted?'Réactiver le son':'Couper le son')+(c.unread?it('read','mail','Marquer comme lu'):incoming.length?it('unread','mail','Marquer comme non lu'):'')+it('prof','eye','Voir le profil')+it('del','trash','Supprimer','red');
+  document.body.appendChild(m);
+  w.classList.add('pvhide');
+  const W=Math.min(innerWidth-28,420),L=Math.max(14,Math.min(r.left,innerWidth-W-14));
+  pv.style.width=W+'px';pv.style.left=L+'px';m.style.left=L+'px';
+  const ph=pv.offsetHeight,mh=m.offsetHeight;
+  let top=r.top;if(top+ph+mh+18>innerHeight-10)top=Math.max(10,innerHeight-10-ph-mh-18);
+  pv.style.top=top+'px';m.style.top=(top+ph+10)+'px';
+  const pb=pv.querySelector('.pmb');pb.scrollTop=pb.scrollHeight;
+  m.onclick=async ev=>{
+    const b=ev.target.closest('button');if(!b)return;closeCMenu();
+    const a=b.dataset.a;
+    if(a==='pin')setFlag(c,'pinned',!c.pinned);
+    else if(a==='mute')setFlag(c,'muted',!c.muted);
+    else if(a==='read'){c.unread=0;renderList();markRead(c.id)}
+    else if(a==='unread')markUnread(c,incoming[incoming.length-1]);
+    else if(a==='prof'){await openConv(c.id);if(innerWidth<=900)showMobInfo();else if($('app').classList.contains('noinfo')&&$('infoBtn'))$('infoBtn').click()}
+    else askDeleteConv(c);
+  };
+}
+async function markUnread(c,last){
+  if(!last)return;
+  const t=new Date(new Date(last.created_at).getTime()-1).toISOString();
+  const {error}=await sb.from('conversation_members').update({last_read_at:t}).eq('conversation_id',c.id).eq('user_id',S.me.id);
+  if(error){flash('Impossible : '+error.message);return}
+  c.last_read_at=t;c.unread=Math.max(1,(c._pv||[]).filter(x=>x.sender_id!==S.me.id&&!x.deleted_at&&x.created_at>t).length);
+  renderList();
+}
 function askDeleteConv(c){
   const d=document.createElement('div');d.id='ephs';
   d.innerHTML=`<div class="ephbg"></div><div class="ephsh"><span class="ephgr"></span><h3>Supprimer la conversation ?</h3><p>Elle disparaît de ta liste et l’historique est effacé pour toi. ${esc(c.name)} garde ses messages. Si ${esc(c.name)} t’écrit de nouveau, la conversation réapparaît.</p><button type="button" class="dcb red">Supprimer</button><button type="button" class="dcb">Annuler</button></div>`;
@@ -1935,7 +2011,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.55';
+const APP_VERSION='2026-11-08.56';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
