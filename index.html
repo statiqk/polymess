@@ -1388,7 +1388,7 @@ function renderMsgs(scroll){
     html+=`<div class="m ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${avh}${q}${att}${m.content?esc(m.content):''}${rh}${msgLeft(m)<3600000?`<div class="te" data-x="${new Date(m.expires_at).getTime()}">${ico('clock','mini')}Disparaît dans ${fmtLeft(msgLeft(m))}</div>`:''}<small>${m.edited_at?'modifié · ':''}${fmtTime(m.created_at)}${tick}</small></div>`;
   }
   el.innerHTML=html||(S.msgs[c.id]?`<div class="empty">${ico('wave','big')}<br>Dis bonjour</div>`:'');
-  if(c._mc!==undefined&&(list.filter(x=>x.att_path&&x.att_path!=='local'&&!x.deleted_at).length!==c._mc))renderInfo(c);
+  if(c._mc!==undefined&&(list.filter(x=>x.att_path&&x.att_path!=='local'&&!x.deleted_at&&!attExpired(x)).length!==c._mc))renderInfo(c);
   stick=near||scroll===true;
   if(scroll&&(near||scroll===true))el.scrollTop=el.scrollHeight;
   hydrateImgs();
@@ -2115,7 +2115,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.71';
+const APP_VERSION='2026-11-08.72';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
