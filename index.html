@@ -10,21 +10,21 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="PolyMess">
-<title>PolyMess</title>
-<meta name="description" content="PolyMess, ta messagerie instantanée : écris à ceux qui comptent.">
+<meta name="apple-mobile-web-app-title" content="PolyTalk">
+<title>PolyTalk</title>
+<meta name="description" content="PolyTalk, ta messagerie instantanée : écris à ceux qui comptent.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="PolyMess">
+<meta property="og:site_name" content="PolyTalk">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="PolyMess · Messagerie instantanée">
+<meta property="og:title" content="PolyTalk · Messagerie instantanée">
 <meta property="og:description" content="Écris à ceux qui comptent. Crée ton compte en quelques secondes.">
 <meta property="og:url" content="https://statiqk.github.io/polymess/">
 <meta property="og:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="PolyMess : écris à ceux qui comptent">
+<meta property="og:image:alt" content="PolyTalk : écris à ceux qui comptent">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="PolyMess · Messagerie instantanée">
+<meta name="twitter:title" content="PolyTalk · Messagerie instantanée">
 <meta name="twitter:description" content="Écris à ceux qui comptent. Crée ton compte en quelques secondes.">
 <meta name="twitter:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -711,7 +711,7 @@ html[data-theme=dark] .frlink{color:#c9c4ff}.frlink span{display:flex;align-item
 <!-- AUTH -->
 <div id="auth" class="hidden">
  <div class="aw">
-  <div class="atop"><div class="al"><i class="hlogo"></i><b>PolyMess</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span></div>
+  <div class="atop"><div class="al"><i class="hlogo"></i><b>PolyTalk</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span></div>
   <div class="astack" id="aStack" aria-hidden="true">
    <div class="acd c1"><span class="aav" style="background:#4aa3df">TP</span><div class="aat"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
    <div class="acd c2"><span class="aav" style="background:#34b46c">CR</span><div class="aat"><b>Camille</b><span>Photo reçue</span></div><small>08:12</small></div>
@@ -759,7 +759,7 @@ html[data-theme=dark] .frlink{color:#c9c4ff}.frlink span{display:flex;align-item
  </div>
 
  <div class="chat" id="chat">
-  <div class="blank" id="blank"><div class="logo">P</div><b style="color:var(--ink);font-size:18px">Bienvenue sur PolyMess</b><span>Choisis une conversation ou démarre-en une avec le bouton +</span></div>
+  <div class="blank" id="blank"><div class="logo">P</div><b style="color:var(--ink);font-size:18px">Bienvenue sur PolyTalk</b><span>Choisis une conversation ou démarre-en une avec le bouton +</span></div>
   <div class="hidden" id="chatBox" style="display:flex;flex-direction:column;flex:1;min-height:0">
    <div class="ch">
     <button class="back" id="backBtn"><svg class="ico " viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
@@ -1091,7 +1091,7 @@ function renderList(){
   const tot=S.convs.reduce((a,c)=>a+c.unread,0);
   const rb=$('railBadge');rb.textContent=tot;rb.classList.toggle('hidden',!tot);
   const tb=$('tbBadge');tb.textContent=tot>99?'99+':tot;tb.classList.toggle('hidden',!tot);
-  document.title=(tot?`(${tot}) `:'')+'PolyMess';
+  document.title=(tot?`(${tot}) `:'')+'PolyTalk';
   try{if(navigator.setAppBadge){tot?navigator.setAppBadge(tot):navigator.clearAppBadge()}}catch(e){}
   if(!list.length){
     $('convs').innerHTML=`<div class="empty">${vis.length?'Aucune conversation ne correspond.':'Aucune conversation pour l’instant.<br>Appuie sur <b>+</b> pour écrire à quelqu’un.'}</div>`;return;
@@ -1947,7 +1947,7 @@ const errLogText=()=>{try{return JSON.parse(localStorage.getItem(ERR_KEY)||'[]')
 const isNet=e=>!navigator.onLine||(!!e&&!e.code&&!e.status&&/fetch|network|load failed|timeout|abort/i.test(e.message||''));
 const errMsg=e=>isNet(e)?'Pas de connexion.':/trop de/i.test((e&&e.message)||'')?e.message:'Le serveur a refusé. Réessaie.';
 async function inviteFriend(){
-  const data={title:'PolyMess',text:'Rejoins-moi sur PolyMess, ma messagerie. Crée ton compte ici :',url:SHARE_URL};
+  const data={title:'PolyTalk',text:'Rejoins-moi sur PolyTalk, ma messagerie. Crée ton compte ici :',url:SHARE_URL};
   if(navigator.share){try{await navigator.share(data);return}catch(e){if(e&&e.name==='AbortError')return}}
   try{await navigator.clipboard.writeText(data.text+' '+data.url);flash('Lien copié, colle-le dans un message.')}catch(e){flash(SHARE_URL)}
 }
@@ -1955,7 +1955,7 @@ function openNew(){
   let found=[],timer;
   const host=$('modalHost'),mob=isMob();
   const field=`<div class="nsf">${ico('search','ms')}<input id="uq" placeholder="Prénom et nom complets…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
-  const inv=`<button type="button" class="invb" id="invb"><span class="ic">${ico('share')}</span><div><b>Inviter un ami</b><span class="s">Il n’est pas encore sur PolyMess ?</span></div></button>`;
+  const inv=`<button type="button" class="invb" id="invb"><span class="ic">${ico('share')}</span><div><b>Inviter un ami</b><span class="s">Il n’est pas encore sur PolyTalk ?</span></div></button>`;
   host.innerHTML=mob
    ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}${inv}<div class="res" id="res"></div></div></div>`
    :`<div class="ov" id="ov"><div class="modal"><h3>Nouvelle discussion <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>${field}${inv}<div class="res" id="res"></div></div></div>`;
@@ -2115,7 +2115,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.72';
+const APP_VERSION='2026-11-08.73';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2130,7 +2130,7 @@ async function checkUpdate(manual){
     updShown=true;
     if(manual){go();return 'new'}
     // Pas de brouillon en cours et pas déjà tenté : mise à jour automatique
-    if(!$('txt').value.trim()&&tried!==v){$('upd').innerHTML='Mise à jour de PolyMess…';$('upd').classList.remove('hidden');setTimeout(go,1200);return 'new'}
+    if(!$('txt').value.trim()&&tried!==v){$('upd').innerHTML='Mise à jour de PolyTalk…';$('upd').classList.remove('hidden');setTimeout(go,1200);return 'new'}
     $('upd').innerHTML='<span>Nouvelle version disponible</span><button id="updBtn">Mettre à jour</button>';
     $('upd').classList.remove('hidden');$('updBtn').onclick=go;
     return 'new';
@@ -2198,7 +2198,7 @@ function confirmLogout(){
   });
 }
 const FAQ=[
- ['Comment installer PolyMess sur iPhone ?','Dans Safari, touche Partager, puis « Sur l’écran d’accueil », puis Ajouter. Ouvre ensuite PolyMess depuis son icône.'],
+ ['Comment installer PolyTalk sur iPhone ?','Dans Safari, touche Partager, puis « Sur l’écran d’accueil », puis Ajouter. Ouvre ensuite PolyTalk depuis son icône.'],
  ['Comment recevoir les notifications ?','Sur iPhone, installe d’abord l’appli sur l’écran d’accueil. Ouvre ensuite Réglages, Notifications, active « Notifications du navigateur » et autorise-les quand l’iPhone le demande.'],
  ['Comment changer le thème ?','Touche « Moi », puis choisis Auto, Clair ou Sombre dans la feuille qui s’ouvre.'],
  ['Comment supprimer mon compte ?','Réglages, Compte, puis « Zone de danger ». La suppression est définitive.'],
@@ -2214,7 +2214,7 @@ async function exportData(){
     if(!data||data.length<1000)break;
   }
   const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),file=new File([blob],'polymess-mes-donnees.json',{type:'application/json'});
-  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Mes données PolyMess'});return out.messages_envoyes.length}catch(e){if(e.name==='AbortError')return out.messages_envoyes.length}}
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Mes données PolyTalk'});return out.messages_envoyes.length}catch(e){if(e.name==='AbortError')return out.messages_envoyes.length}}
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
   return out.messages_envoyes.length;
 }
@@ -2234,9 +2234,9 @@ async function aboutPage(k,host){
       };
     });
   }else if(k==='privacy'){
-    infoPage('Confidentialité des données',`<div class="legal"><h4>Ce que PolyMess enregistre</h4><p>Ton prénom, ton nom, ta date de naissance (jamais visible par les autres), ton adresse e-mail, ta photo et ta couleur de profil, tes messages et les fichiers que tu envoies, ton statut en ligne et ta dernière connexion (désactivables dans Confidentialité), et un identifiant technique de ton appareil si tu actives les notifications.</p><h4>À quoi ça sert</h4><p>Uniquement à faire fonctionner la messagerie. Aucune publicité, aucune revente de données.</p><h4>Où sont-elles stockées</h4><p>Chez Supabase, sur des serveurs situés en Europe (Paris).</p><h4>Important</h4><p>Les messages ne sont pas chiffrés de bout en bout : ils sont protégés par ton compte et par les règles d’accès de la base, mais l’éditeur de l’appli y a techniquement accès.</p><h4>Tes droits</h4><p>Tu peux télécharger tes données (À propos, Exporter mes données), corriger ton profil (Profil) et supprimer ton compte (Compte, Zone de danger). Pour toute question, utilise « Signaler un problème ».</p></div>`);
+    infoPage('Confidentialité des données',`<div class="legal"><h4>Ce que PolyTalk enregistre</h4><p>Ton prénom, ton nom, ta date de naissance (jamais visible par les autres), ton adresse e-mail, ta photo et ta couleur de profil, tes messages et les fichiers que tu envoies, ton statut en ligne et ta dernière connexion (désactivables dans Confidentialité), et un identifiant technique de ton appareil si tu actives les notifications.</p><h4>À quoi ça sert</h4><p>Uniquement à faire fonctionner la messagerie. Aucune publicité, aucune revente de données.</p><h4>Où sont-elles stockées</h4><p>Chez Supabase, sur des serveurs situés en Europe (Paris).</p><h4>Important</h4><p>Les messages ne sont pas chiffrés de bout en bout : ils sont protégés par ton compte et par les règles d’accès de la base, mais l’éditeur de l’appli y a techniquement accès.</p><h4>Tes droits</h4><p>Tu peux télécharger tes données (À propos, Exporter mes données), corriger ton profil (Profil) et supprimer ton compte (Compte, Zone de danger). Pour toute question, utilise « Signaler un problème ».</p></div>`);
   }else if(k==='legal'){
-    infoPage('Mentions légales',`<div class="legal"><h4>Éditeur</h4><p>PolyMess est éditée par Julien Lespes.</p><h4>Hébergement</h4><p>Application : GitHub Pages (GitHub, Inc.).<br>Données : Supabase, serveurs en Europe (Paris).</p><h4>Contact</h4><p>Via « Signaler un problème » dans À propos.</p></div>`);
+    infoPage('Mentions légales',`<div class="legal"><h4>Éditeur</h4><p>PolyTalk est éditée par Julien Lespes.</p><h4>Hébergement</h4><p>Application : GitHub Pages (GitHub, Inc.).<br>Données : Supabase, serveurs en Europe (Paris).</p><h4>Contact</h4><p>Via « Signaler un problème » dans À propos.</p></div>`);
   }else if(k==='export'){
     say('Préparation de tes données…','ok');
     try{const n=await exportData();say(`Tes données sont prêtes (${n} message${n>1?'s':''} envoyé${n>1?'s':''}).`,'ok')}
@@ -2414,7 +2414,7 @@ async function openSettings(tab){
     },
     notif(b){
       const denied='Notification' in window&&Notification.permission==='denied';
-      const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':denied?'Bloquées dans les réglages du téléphone ou du navigateur : autorise-les pour PolyMess, puis réactive ici.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
+      const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':denied?'Bloquées dans les réglages du téléphone ou du navigateur : autorise-les pour PolyTalk, puis réactive ici.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
       const on=prefs.notif&&!denied;
       b.innerHTML=`<div class="tg"><div><b>${ico('volume','mini')}Son à la réception</b><div class="hint2">Un bip quand un message arrive dans une autre conversation ou quand l’onglet est en arrière-plan.</div></div><button type="button" class="sw2 ${prefs.sound?'on':''}" id="tSound" aria-label="Son"></button></div>
        <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet.</div>${perm?`<div class="hint2 ${denied?'bad':''}">${esc(perm)}</div>`:''}</div><button type="button" class="sw2 ${on?'on':''}" id="tNotif" aria-label="Notifications"></button></div>
@@ -2461,10 +2461,10 @@ async function openSettings(tab){
       const [vd,vn]=APP_VERSION.split('.');
       const vtxt='Version '+(parseInt(vn,10)||vn||'')+' · '+new Date(vd+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
       const iosNew=isIOS()&&!isStandalone();
-      const inst=isStandalone()?'<div class="hint2">PolyMess est déjà installée sur cet appareil.</div>':installEv?'<button class="sbtn ghost" id="aInst" style="width:100%">Installer PolyMess</button>':iosNew?`<div class="steps"><div><span class="n">1</span>Touche ${ico('share','sh')} <b>Partager</b> dans Safari</div><div><span class="n">2</span>Choisis ${ico('addsq','sh')} <b>Sur l’écran d’accueil</b></div><div><span class="n">3</span>Touche <b>Ajouter</b></div></div>`:'<div class="hint2">Dans ton navigateur, utilise « Installer l’application » (menu ⋮ ou icône dans la barre d’adresse).</div>';
+      const inst=isStandalone()?'<div class="hint2">PolyTalk est déjà installée sur cet appareil.</div>':installEv?'<button class="sbtn ghost" id="aInst" style="width:100%">Installer PolyTalk</button>':iosNew?`<div class="steps"><div><span class="n">1</span>Touche ${ico('share','sh')} <b>Partager</b> dans Safari</div><div><span class="n">2</span>Choisis ${ico('addsq','sh')} <b>Sur l’écran d’accueil</b></div><div><span class="n">3</span>Touche <b>Ajouter</b></div></div>`:'<div class="hint2">Dans ton navigateur, utilise « Installer l’application » (menu ⋮ ou icône dans la barre d’adresse).</div>';
       const links=[['info','Aide et contact','help'],['flag','Signaler un problème','report'],['shield','Confidentialité des données','privacy'],['file','Mentions légales','legal'],['download','Exporter mes données','export']];
-      b.innerHTML=`<div style="text-align:center;padding:14px 0 18px"><div class="logo" style="margin:0 auto 10px">P</div><b style="font-size:20px">PolyMess</b><div class="hint2">${esc(vtxt)}</div></div>
-       <div class="mgrp" style="margin-bottom:12px"><button type="button" class="mlr inv" id="aInv"><span class="mib">${ico('share')}</span><b>Inviter un ami<small>Envoie le lien de PolyMess</small></b>${ico('down','chv')}</button></div>
+      b.innerHTML=`<div style="text-align:center;padding:14px 0 18px"><div class="logo" style="margin:0 auto 10px">P</div><b style="font-size:20px">PolyTalk</b><div class="hint2">${esc(vtxt)}</div></div>
+       <div class="mgrp" style="margin-bottom:12px"><button type="button" class="mlr inv" id="aInv"><span class="mib">${ico('share')}</span><b>Inviter un ami<small>Envoie le lien de PolyTalk</small></b>${ico('down','chv')}</button></div>
        <button class="sbtn ghost" id="aChk" style="width:100%">Vérifier les mises à jour</button><div id="am"></div>
        <div class="h5">${iosNew?'Installer sur iPhone':'Installer l’application'}</div>${inst}
        <div class="h5">Aide et informations</div>
@@ -2569,7 +2569,7 @@ async function enableNotifs(){
   if(!('Notification' in window))return {fatal:true,msg:'Ce navigateur ne gère pas les notifications.'};
   let r=Notification.permission;
   if(r!=='granted')r=await Notification.requestPermission();
-  if(r!=='granted')return {fatal:true,msg:'Autorisation refusée : active les notifications pour PolyMess dans les réglages du téléphone ou du navigateur.'};
+  if(r!=='granted')return {fatal:true,msg:'Autorisation refusée : active les notifications pour PolyTalk dans les réglages du téléphone ou du navigateur.'};
   prefs.push=false;let msg='';
   if(pushSupported()){
     try{await pushSubscribe();prefs.push=true}
@@ -2586,7 +2586,7 @@ function renderInv(){
   const iosWeb=isIOS()&&!isStandalone();
   const ok=S.me&&'Notification' in window&&Notification.permission==='default'&&!prefs.notif&&Date.now()>until&&(pushSupported()||iosWeb);
   if(!ok){b.classList.add('hidden');b.innerHTML='';return}
-  b.innerHTML=`<button type="button" class="nix" id="niX" aria-label="Fermer">${ico('close')}</button><div class="nib">${ico('bell')}</div><b>Ne rate aucun message</b><div class="nis">${iosWeb?'Sur iPhone, ajoute d’abord PolyMess à l’écran d’accueil pour recevoir les alertes.':'Reçois une alerte à chaque message, même quand l’appli est fermée.'}</div><button type="button" class="nigo" id="niGo">${iosWeb?'Voir comment faire':'Activer les notifications'}</button><button type="button" class="nilat" id="niLater">Plus tard</button><div class="nierr" id="niErr"></div>`;
+  b.innerHTML=`<button type="button" class="nix" id="niX" aria-label="Fermer">${ico('close')}</button><div class="nib">${ico('bell')}</div><b>Ne rate aucun message</b><div class="nis">${iosWeb?'Sur iPhone, ajoute d’abord PolyTalk à l’écran d’accueil pour recevoir les alertes.':'Reçois une alerte à chaque message, même quand l’appli est fermée.'}</div><button type="button" class="nigo" id="niGo">${iosWeb?'Voir comment faire':'Activer les notifications'}</button><button type="button" class="nilat" id="niLater">Plus tard</button><div class="nierr" id="niErr"></div>`;
   b.classList.remove('hidden');
   const later=()=>{try{localStorage.setItem(INV_KEY,String(Date.now()+7*864e5))}catch(e){}renderInv()};
   $('niX').onclick=later;$('niLater').onclick=later;

@@ -61,7 +61,7 @@ self.addEventListener('push',e=>{
     // Appli déjà à l'écran : elle affiche le message elle-même (sauf iPhone, qui exige une notification à chaque push)
     if(!ios&&d.kind!=='test'&&list.some(c=>c.visibilityState==='visible'))return;
     // Une notification par message (elles s'empilent) ; tag unique pour qu'aucune n'en remplace une autre
-    const title=d.title||'PolyMess',body=d.body||'';
+    const title=d.title||'PolyTalk',body=d.body||'';
     const tag=d.tag?d.tag+'|'+Date.now():undefined;
     const opts={body,tag,icon:'icon-192.png?v=3',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
       data:{cid:d.cid,name:d.title,req:!!d.req}};

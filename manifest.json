@@ -1,6 +1,6 @@
 {
-  "name": "PolyMess",
-  "short_name": "PolyMess",
+  "name": "PolyTalk",
+  "short_name": "PolyTalk",
   "description": "Messagerie instantanée",
   "lang": "fr",
   "start_url": "./",
