@@ -494,8 +494,8 @@ html[data-theme=dark] .tbar button.s{color:#8f84ff}
 .tbar button.s .tic .ico{fill:currentColor;fill-opacity:.2}
 .tbar .tic .ico .f{fill:currentColor;fill-opacity:1}
 .tbd{position:absolute;top:-4px;right:5px;min-width:18px;height:18px;border-radius:9px;background:#ff5a4d;color:#fff;font-size:11px;font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 0 0 2px var(--card)}
-.tbph{width:28px;height:28px;border-radius:50%;display:block}
-
+.tbph{width:28px;height:28px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--mut)}
+.tbar button.s .tbph{box-shadow:0 0 0 2px var(--p)}
 .tbar button.s .tic:has(.tbph){background:none}
 }
 
@@ -2115,7 +2115,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.74';
+const APP_VERSION='2026-11-08.73';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
