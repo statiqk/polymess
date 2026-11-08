@@ -1300,7 +1300,8 @@ async function setFlag(c,k,v){
 function closeInfoPanel(){if(curPM==='info')history.back();else hideMobInfo();S.infoOverlay=false;applyInfo()}
 function renderInfo(c){
   const back=`<button class="back" id="infoBack" aria-label="Retour">${ico('back')}</button>`;
-  const media=(S.msgs[c.id]||[]).filter(m=>m.att_path&&m.att_path!=='local'&&!m.deleted_at&&!msgGone(m)).reverse();
+  const allMedia=(S.msgs[c.id]||[]).filter(m=>m.att_path&&m.att_path!=='local'&&!m.deleted_at&&!msgGone(m)).reverse();
+  const media=allMedia.filter(m=>!attExpired(m));
   c._mc=media.length;
   const imgs=media.filter(m=>(m.att_type||'').startsWith('image/')).slice(0,9),files=media.filter(m=>!(m.att_type||'').startsWith('image/')).slice(0,5);
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
@@ -1311,6 +1312,7 @@ function renderInfo(c){
    <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
    <div class="sec ephsec"><button type="button" class="ephr" id="aEph"><span class="ephi">${ico('clock')}</span><span class="ephx"><b>Messages éphémères</b><small>${EPH[c.eph]||'30 jours'}</small></span><span class="ephc">${ico('back')}</span></button><p class="ephh">Les messages de cette discussion sont supprimés automatiquement après la durée choisie.</p></div>
    ${friendSec(c)}
+   ${!media.length&&allMedia.length?`<div class="sec"><h4>Photos et fichiers</h4><p class="ephh">Aucun fichier disponible. Les fichiers sont supprimés au bout de 24 heures.</p></div>`:''}
    ${media.length?`<div class="sec"><h4>Photos et fichiers · ${media.length}</h4>${imgs.length?`<div class="mgrid">${imgs.map(m=>attExpired(m)?`<div class="thx off">${ico('clock')}<em>Expiré</em></div>`:`<div class="thx"><img class="th" alt="${esc(m.att_name||'')}" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'image')}"${cachedUrl(m.att_path)?` src="${esc(cachedUrl(m.att_path))}"`:''}><em>${fmtLeft(expLeft(m))}</em></div>`).join('')}</div>`:''}${files.map(m=>attExpired(m)?`<div class="frow off">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>Fichier expiré</small></div></div>`:`<div class="frow" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<div><b>${esc(m.att_name||'Fichier')}</b><small>${fmtSize(m.att_size)} · expire dans ${fmtLeft(expLeft(m))}</small></div><button type="button" class="frs" aria-label="Enregistrer">${ico('download')}</button></div>`).join('')}</div>`:''}
 `;
   $('infoBack').onclick=()=>{if(curPM==='info')history.back();else hideMobInfo()};
@@ -2113,7 +2115,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.70';
+const APP_VERSION='2026-11-08.71';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
