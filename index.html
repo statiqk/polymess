@@ -1190,6 +1190,7 @@ async function openConvMenu(w){
   const r=w.getBoundingClientRect();
   const dim=document.createElement('div');dim.id='cdim';const t0=Date.now();dim.onclick=()=>{if(Date.now()-t0>500)closeCMenu()};document.body.appendChild(dim);
   const pv=document.createElement('div');pv.id='cpv';pv.innerHTML=`<div class="pmb">${body}</div><div class="pms"><i></i></div>`;document.body.appendChild(pv);
+  pv.style.cursor='pointer';pv.onclick=()=>{if(Date.now()-t0<500)return;closeCMenu();openConv(c.id)};
   const m=document.createElement('div');m.id='cmenu';
   const it=(a,ic,t,cls='')=>`<button type="button" class="it ${cls}" data-a="${a}">${ico(ic)}${t}</button>`;
   m.innerHTML=it('pin','pin',c.pinned?'Désépingler':'Épingler')+it('mute',c.muted?'bell':'bellOff',c.muted?'Réactiver le son':'Couper le son')+(c.unread?it('read','mail','Marquer comme lu'):incoming.length?it('unread','mail','Marquer comme non lu'):'')+it('prof','eye','Voir le profil')+it('del','trash','Supprimer','red');
@@ -2111,7 +2112,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.68';
+const APP_VERSION='2026-11-08.69';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
