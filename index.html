@@ -1789,12 +1789,20 @@ function calcOnline(){
   clearTimeout(graceT);const t=Object.values(goneAt);
   if(t.length)graceT=setTimeout(calcOnline,Math.max(1000,GRACE-(now-Math.min(...t)))+500);
 }
+// départ d'un ami : on prend l'heure réelle de la base (dernière activité), et l'heure locale seulement en secours
+function syncSeenOne(id){
+  if(!S.seen[id])S.seen[id]=new Date().toISOString();
+  sb.from('presence_seen').select('seen_at').eq('user_id',id).maybeSingle().then(({data})=>{if(data&&data.seen_at){S.seen[id]=data.seen_at;updateSub();renderList()}},()=>{});
+}
+// passage de minuit : « Vu à » devient « Vu hier à » sans attendre une autre mise à jour
+let seenDay=new Date().toDateString();
+setInterval(()=>{const d=new Date().toDateString();if(d!==seenDay){seenDay=d;if(S.me){updateSub();renderList()}}},30000);
 function setFriendPresence(id,entries){
   if(entries.length){
     rawOn.add(id);delete goneAt[id];
     entries.some(e=>!e.away)?S.away.delete(id):S.away.add(id);
   }else if(rawOn.has(id)){
-    rawOn.delete(id);goneAt[id]=Date.now();S.seen[id]=new Date().toISOString();
+    rawOn.delete(id);goneAt[id]=Date.now();syncSeenOne(id);
   }
   calcOnline();
 }
@@ -2015,7 +2023,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.59';
+const APP_VERSION='2026-11-08.60';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
