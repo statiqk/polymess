@@ -1855,7 +1855,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.52';
+const APP_VERSION='2026-11-08.53';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2363,7 +2363,7 @@ async function pushDetach(){
 }
 navigator.serviceWorker?.addEventListener('message',e=>{
   // le service worker demande dans quelle conversation on est (pour ne pas faire sonner un message déjà sous les yeux)
-  if(e.data&&e.data.type==='whereami'){try{e.ports[0].postMessage({cid:S.cur||null,visible:document.visibilityState==='visible'&&document.hasFocus()})}catch(_){}return}
+  if(e.data&&e.data.type==='whereami'){try{e.ports[0].postMessage({cid:S.cur||null,visible:document.visibilityState==='visible'})}catch(_){}return}
   if(!e.data||e.data.type!=='open')return;if(e.data.req){openRequests();return}if(e.data.id){openConv(e.data.id);if(e.data.focus)setTimeout(()=>txt.focus(),300)}});
 
 // installation sur l'écran d'accueil
