@@ -947,7 +947,7 @@ function subscribe(){
    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'conversations'},p=>onConvUpdate(p.new))
    .on('postgres_changes',{event:'*',schema:'public',table:'friendships'},()=>loadFriends())
    .on('postgres_changes',{event:'*',schema:'public',table:'reactions'},p=>onReaction(p))
-   .on('postgres_changes',{event:'*',schema:'public',table:'presence_seen'},p=>{const r=p.new;if(!r||!r.user_id||r.user_id===S.me.id)return;S.seen[r.user_id]=r.seen_at;updateSub();renderList()})
+   .on('postgres_changes',{event:'*',schema:'public',table:'presence_seen'},p=>{if(p.eventType==='DELETE'){const u=p.old&&p.old.user_id;if(u&&u!==S.me.id&&S.seen[u]){delete S.seen[u];updateSub();renderList()}return}const r=p.new;if(!r||!r.user_id||r.user_id===S.me.id)return;S.seen[r.user_id]=r.seen_at;updateSub();renderList()})
    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'conversation_members'},p=>onMemberUpdate(p.new))
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'conversation_members',filter:'user_id=eq.'+S.me.id},async()=>{await loadConvs();renderAll()})
    .subscribe();
@@ -2015,7 +2015,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.58';
+const APP_VERSION='2026-11-08.59';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
