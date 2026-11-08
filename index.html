@@ -220,11 +220,11 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .out .rx.mine{border-color:#fff}
 .rd{color:#bff3ff;font-weight:700}
 .hl{animation:hl 1.3s}@keyframes hl{0%,70%{box-shadow:0 0 0 3px var(--p)}100%{box-shadow:0 0 0 0 transparent}}
-#mmenu{position:fixed;z-index:80;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(20,25,60,.28);padding:6px;min-width:200px}
+#mmenu{position:fixed;z-index:82;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(20,25,60,.28);padding:6px;min-width:200px}
 #mmenu .em{display:flex;gap:2px;padding:4px 4px 6px;border-bottom:1px solid var(--line2);margin-bottom:4px}
 #mmenu .em button{font-size:22px;width:36px;height:36px;border-radius:10px}
 #mmenu .em button.on,#mmenu .em button:hover,#mmenu .it:hover{background:var(--soft)}
-#mmenu .it{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:14.5px}
+#mmenu .it{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:14.5px}#mmenu .it .ico{width:18px;height:18px;flex:none;opacity:.75}#mmenu .it.red .ico{opacity:1}
 #mmenu .it.red{color:#d93a55}
 .bar{margin:0 22px 8px;display:flex;flex-direction:column;gap:6px}
 .bar .bi{display:flex;align-items:center;gap:8px;background:var(--card);border-left:3px solid var(--p);border-radius:10px;padding:6px 10px;font-size:13px}
@@ -627,6 +627,15 @@ html[data-theme=dark] .info .act .ic2{color:#cfcdee}
 .ntinv .nigo{margin-top:14px;width:100%;border:0;border-radius:22px;padding:12px;font:inherit;font-weight:700;font-size:14.5px;color:#fff;background:linear-gradient(90deg,#6A5CFF,#8b5cff)}
 .ntinv .nilat{display:block;margin:10px auto 0;background:none;border:0;font:inherit;font-weight:600;font-size:13px;color:var(--mut)}.ntinv .nierr{margin-top:8px;font-size:12.5px;color:#e5484d}
 .hint2.bad{color:#e5484d;font-weight:600}
+#mdim{position:fixed;inset:0;z-index:79;background:rgba(5,6,20,.55)}
+.mclone{z-index:81;pointer-events:none;box-shadow:0 0 0 2px #a9a2ff,0 10px 30px rgba(0,0,0,.45)!important}
+@media (hover:none){#msgs .m{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
+.mipv{border-radius:16px;padding:10px 13px;font-size:14.5px;margin:4px 0 12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:120px;overflow:auto}
+.mipv.out{background:var(--p);color:#fff}.mipv.in{background:var(--soft)}
+.mir{display:flex;gap:14px;align-items:center;padding:11px 2px;border-top:1px solid var(--line2)}.mir .ico{width:20px;height:20px;color:var(--mut);flex:none}.mir.g .ico{color:#2fbf71}
+.mir b{display:block;font-size:15px}.mir span{font-size:13px;color:var(--mut)}
+.fwl{max-height:46vh;overflow:auto}.fwb{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 4px;color:inherit;border-radius:14px}
+.fwb .av{width:44px;height:44px;flex:none}.fwb b{flex:1;font-size:15.5px}.fws{font-size:13px;font-weight:700;color:var(--p);background:rgba(120,110,255,.14);padding:7px 14px;border-radius:16px}
 .av.on.away::after{background:#ffa42e}
 .ch .s.away{color:#d98200;font-weight:600}html[data-theme=dark] .ch .s.away{color:#ffb454}
 .info p.st.away{color:#d98200}html[data-theme=dark] .info p.st.away{color:#ffb454}
@@ -1186,14 +1195,34 @@ $('msgs').onclick=async e=>{
   const im=e.target.closest('img.pj');if(im){if(im.dataset.path!=='local'&&im.src)openLightbox(im.dataset.path);return}
   const f=e.target.closest('a.file');if(f){e.preventDefault();if(f.dataset.path!=='local')downloadFile(f.dataset.path,f.dataset.name);return}
   const m=e.target.closest('.m');
-  if(m&&!m.classList.contains('del')&&!(getSelection()&&getSelection().toString()))openMsgMenu(m);
+  // souris : un clic ouvre le menu ; écran tactile : appui long (voir plus bas)
+  if(m&&lastPT==='mouse'&&!m.classList.contains('del')&&!(getSelection()&&getSelection().toString()))openMsgMenu(m);
 };
+let lpT=null,lpX=0,lpY=0,lpFired=false,lastPT='mouse';
+const msgsEl=$('msgs');
+msgsEl.addEventListener('pointerdown',e=>{
+  lastPT=e.pointerType||'mouse';
+  clearTimeout(lpT);
+  if(lastPT==='mouse')return;
+  const m=e.target.closest('.m');if(!m||m.classList.contains('del')||e.target.closest('.rx,.sv'))return;
+  lpFired=false;lpX=e.clientX;lpY=e.clientY;
+  lpT=setTimeout(()=>{lpT=null;lpFired=true;try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}openMsgMenu(m)},450);
+},{passive:true});
+['pointerup','pointercancel'].forEach(t=>msgsEl.addEventListener(t,()=>clearTimeout(lpT),{passive:true}));
+msgsEl.addEventListener('pointermove',e=>{if(lpT&&Math.hypot(e.clientX-lpX,e.clientY-lpY)>10){clearTimeout(lpT);lpT=null}},{passive:true});
+msgsEl.addEventListener('scroll',()=>{clearTimeout(lpT);lpT=null},{passive:true});
+msgsEl.addEventListener('contextmenu',e=>{
+  const m=e.target.closest('.m');if(!m)return;
+  e.preventDefault();
+  if(lastPT==='mouse'&&!m.classList.contains('del'))openMsgMenu(m);
+});
+msgsEl.addEventListener('click',e=>{if(lpFired){lpFired=false;e.stopImmediatePropagation();e.preventDefault()}},true);
 function goTo(id){
   const t=$('msgs').querySelector(`.m[data-id="${CSS.escape(id)}"]`);if(!t)return;
   t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.add('hl');setTimeout(()=>t.classList.remove('hl'),1400);
 }
-function closeMenu(){const d=document.getElementById('mmenu');if(d)d.remove()}
-document.addEventListener('pointerdown',e=>{const d=document.getElementById('mmenu');if(d&&!d.contains(e.target))closeMenu()});
+function closeMenu(){['mmenu','mdim','mclone'].forEach(i=>{const d=document.getElementById(i);if(d)d.remove()})}
+document.addEventListener('pointerdown',e=>{const d=document.getElementById('mmenu');if(d&&!d.contains(e.target)&&e.target.id!=='mdim')closeMenu()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();const l=document.getElementById('lb');if(l)l.remove();const p=document.getElementById('ephs');if(p)p.remove()}});
 function openMsgMenu(el){
   closeMenu();
@@ -1202,10 +1231,17 @@ function openMsgMenu(el){
   const mine=m.sender_id===S.me.id;
   const myR=(S.react[S.cur]||[]).find(r=>r.message_id===id&&r.user_id===S.me.id)?.emoji;
   const d=document.createElement('div');d.id='mmenu';
+  const att=!!m.att_path&&m.att_path!=='local';
   d.innerHTML=`<div class="em">${RX.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}</div>
-   <button class="it" data-a="reply">${ico('reply')}Répondre</button>${m.content?`<button class="it" data-a="copy">${ico('copy')}Copier</button>`:''}${mine&&!m.att_path?`<button class="it" data-a="edit">${ico('edit')}Modifier</button>`:''}${mine?`<button class="it red" data-a="del">${ico('trash')}Supprimer</button>`:''}`;
+   <button class="it" data-a="reply">${ico('reply')}Répondre</button>${m.content?`<button class="it" data-a="copy">${ico('copy')}Copier</button>`:''}${att?`<button class="it" data-a="save">${ico('download')}Enregistrer</button>`:''}<button class="it" data-a="fwd">${ico('share')}Transférer</button><button class="it" data-a="info">${ico('info')}Infos</button>${mine&&!m.att_path?`<button class="it" data-a="edit">${ico('edit')}Modifier</button>`:''}${mine?`<button class="it red" data-a="del">${ico('trash')}Supprimer</button>`:''}`;
+  // le reste de l'écran s'assombrit, le message touché reste net et surligné
+  const r0=el.getBoundingClientRect();
+  const dim=document.createElement('div');dim.id='mdim';const t0=Date.now();dim.onclick=()=>{if(Date.now()-t0>500)closeMenu()};document.body.appendChild(dim);
+  const cl=el.cloneNode(true);cl.id='mclone';cl.classList.add('mclone');cl.removeAttribute('data-id');
+  cl.style.cssText=`position:fixed;left:${r0.left}px;top:${r0.top}px;width:${r0.width}px;margin:0;`;
+  document.body.appendChild(cl);
   document.body.appendChild(d);
-  const r=el.getBoundingClientRect(),w=d.offsetWidth,h=d.offsetHeight;
+  const r=r0,w=d.offsetWidth,h=d.offsetHeight;
   let top=r.top-h-6;if(top<8)top=Math.max(8,Math.min(r.bottom+6,innerHeight-h-8));
   let left=mine?r.right-w:r.left;left=Math.max(8,Math.min(left,innerWidth-w-8));
   d.style.top=top+'px';d.style.left=left+'px';
@@ -1213,8 +1249,63 @@ function openMsgMenu(el){
     if(b.dataset.e)toggleReact(id,b.dataset.e);
     else if(b.dataset.a==='reply')startReply(m);
     else if(b.dataset.a==='copy'){try{navigator.clipboard.writeText(m.content)}catch(e){}}
+    else if(b.dataset.a==='save')saveFile(m.att_path,m.att_name||'fichier');
+    else if(b.dataset.a==='fwd')openForward(m);
+    else if(b.dataset.a==='info')openMsgInfo(m);
     else if(b.dataset.a==='edit')startEdit(m);
     else if(b.dataset.a==='del')delMsg(m)};
+}
+// ---- Infos du message
+function openMsgInfo(m){
+  const c=S.convs.find(x=>x.id===m.conversation_id);if(!c)return;
+  const mine=m.sender_id===S.me.id;
+  const row=(ic,t,s,cls='')=>`<div class="mir ${cls}">${ico(ic)}<div><b>${t}</b><span>${s}</span></div></div>`;
+  let rows=row(mine?'send':'tick',mine?'Envoyé':'Reçu',esc(fmtWhen(m.created_at)));
+  if(mine)rows+=isRead(c,m)?row('ticks','Lu','Dernière lecture : '+esc(fmtWhen(c.other_read)),'g'):row('tick','Pas encore lu','Envoyé à '+esc(c.name));
+  if(m.att_path&&m.att_path!=='local')rows+=row('file','Pièce jointe',attExpired(m)?'Expirée (24 h après l’envoi)':'Disponible encore '+esc(fmtLeft(expLeft(m))));
+  if(m.expires_at)rows+=row('clock','Disparaît',msgLeft(m)>0?'Dans '+esc(fmtLeft(msgLeft(m)))+' ('+esc(fmtWhen(m.expires_at))+')':'Bientôt');
+  rows+=row('edit','Modifié',m.edited_at?esc(fmtWhen(m.edited_at)):'Non');
+  const d=document.createElement('div');d.id='ephs';
+  d.innerHTML=`<div class="ephbg"></div><div class="ephsh"><span class="ephgr"></span><h3>Infos du message</h3><div class="mipv ${mine?'out':'in'}">${esc(prevText(m)||'Message')}</div>${rows}</div>`;
+  document.body.appendChild(d);
+  d.querySelector('.ephbg').onclick=()=>d.remove();
+}
+// ---- Transférer
+function openForward(m){
+  if(m.att_path&&m.att_path!=='local'&&attExpired(m)){flash('La pièce jointe a expiré : impossible de la transférer.');return}
+  const fr=S.fr.filter(r=>r.status==='accepted').map(r=>S.frp[frOther(r)]).filter(Boolean).filter(p=>p.id!==S.convs.find(x=>x.id===m.conversation_id)?.other?.id);
+  const d=document.createElement('div');d.id='ephs';
+  d.innerHTML=`<div class="ephbg"></div><div class="ephsh"><span class="ephgr"></span><h3>Transférer à…</h3>${fr.length?'<div class="fwl">'+fr.map(p=>`<button type="button" class="fwb" data-id="${esc(p.id)}"><div class="av" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><b>${esc(p.display_name)}</b><span class="fws">Envoyer</span></button>`).join('')+'</div>':'<p>Tu n’as pas d’autre ami à qui transférer ce message.</p>'}</div>`;
+  document.body.appendChild(d);
+  const close=()=>d.remove();d.querySelector('.ephbg').onclick=close;
+  d.querySelectorAll('.fwb').forEach(b=>b.onclick=async()=>{
+    const s=b.querySelector('.fws');if(s.dataset.busy)return;s.dataset.busy=1;s.textContent='…';
+    const ok=await forwardTo(m,b.dataset.id);
+    if(ok){close();flash('Message transféré.')}else{delete s.dataset.busy;s.textContent='Envoyer'}
+  });
+}
+async function forwardTo(m,pid){
+  let conv=S.convs.find(x=>x.other?.id===pid),cid=conv?.id;
+  if(!cid){
+    const {data,error}=await sb.rpc('start_direct',{other:pid});
+    if(error){flash('Impossible : '+error.message);return false}
+    cid=data;await loadConvs();conv=S.convs.find(x=>x.id===cid);
+  }
+  const row={conversation_id:cid,sender_id:S.me.id,content:m.content||''};
+  let np=null;
+  if(m.att_path&&m.att_path!=='local'){
+    const safe=String(m.att_name||'fichier').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
+    np=`${cid}/${crypto.randomUUID()}-${safe}`;
+    const cp=await sb.storage.from('attachments').copy(m.att_path,np);
+    if(cp.error){flash('Impossible de transférer la pièce jointe.');return false}
+    Object.assign(row,{att_path:np,att_name:m.att_name,att_type:m.att_type,att_size:m.att_size});
+  }
+  const {data,error}=await sb.from('messages').insert(row).select(MCOLS).single();
+  if(error){if(np)sb.storage.from('attachments').remove([np]);flash('Envoi impossible : '+error.message);return false}
+  const arr=S.msgs[cid];if(arr&&!arr.some(x=>x.id===data.id))arr.push(data);
+  if(conv){conv.last=data;sortConvs()}
+  renderList();if(S.cur===cid)renderMsgs(true);
+  return true;
 }
 async function toggleReact(mid,emoji){
   const cid=S.cur,mine=(S.react[cid]||[]).find(r=>r.message_id===mid&&r.user_id===S.me.id);
@@ -1696,7 +1787,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.47';
+const APP_VERSION='2026-11-08.48';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
