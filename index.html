@@ -620,6 +620,13 @@ html[data-theme=dark] .info .act .ic2{color:#cfcdee}
 /* ===== Amis ===== */
 .frban{display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:6px 12px 4px;text-align:left;background:linear-gradient(100deg,rgba(106,92,255,.22),rgba(139,92,255,.12));box-shadow:inset 0 0 0 1px rgba(120,110,255,.35);border-radius:18px;padding:11px 14px;color:inherit}
 .frban.hidden{display:none}
+.ntinv{position:relative;margin:6px 12px 6px;background:linear-gradient(130deg,rgba(106,92,255,.22),rgba(139,92,255,.10));box-shadow:inset 0 0 0 1px rgba(120,110,255,.35);border-radius:20px;padding:16px}
+.ntinv.hidden{display:none}.ntinv .nix{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--mut);background:none;border:0}
+.ntinv .nib{width:44px;height:44px;border-radius:14px;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:10px}.ntinv .nib svg{width:24px;height:24px}
+.ntinv b{display:block;font-size:16px;margin-bottom:3px}.ntinv .nis{font-size:13px;color:var(--mut);line-height:1.4;padding-right:6px}
+.ntinv .nigo{margin-top:14px;width:100%;border:0;border-radius:22px;padding:12px;font:inherit;font-weight:700;font-size:14.5px;color:#fff;background:linear-gradient(90deg,#6A5CFF,#8b5cff)}
+.ntinv .nilat{display:block;margin:10px auto 0;background:none;border:0;font:inherit;font-weight:600;font-size:13px;color:var(--mut)}.ntinv .nierr{margin-top:8px;font-size:12.5px;color:#e5484d}
+.hint2.bad{color:#e5484d;font-weight:600}
 .fri{width:40px;height:40px;border-radius:13px;background:#6A5CFF;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 .frt{flex:1;min-width:0}.frt b{display:block;font-size:15px}.frt small{font-size:12.5px;color:var(--mut);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .frc{color:var(--mut);display:flex;transform:scaleX(-1)}.frc .ico{width:18px;height:18px}
@@ -687,6 +694,7 @@ html[data-theme=dark] .frlink{color:#c9c4ff}.frlink span{display:flex;align-item
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
   <button type="button" class="frban hidden" id="frBan"></button>
+  <div class="ntinv hidden" id="ntInv"></div>
   <div class="convs" id="convs"></div>
   <nav class="tbar"><button class="s" id="tbMsgs"><span class="tic"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><em class="tbd hidden" id="tbBadge"></em></span>Messages</button><button id="tbMe"><span class="tic" id="tbMeIc"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg></span>Moi</button></nav>
  </div>
@@ -847,7 +855,9 @@ async function boot(user){
   if(prefs.push&&pushSupported()&&Notification.permission==='granted')pushSubscribe().catch(()=>{});
   const wanted=new URLSearchParams(location.search).get('c');
   if(wanted&&S.convs.some(c=>c.id===wanted)){openConv(wanted);if(new URLSearchParams(location.search).get('reply'))setTimeout(()=>txt.focus(),400)}
+  if(new URLSearchParams(location.search).get('req'))setTimeout(openRequests,300);
   if(location.search)history.replaceState(history.state,'',location.pathname);
+  renderInv();
 }
 
 async function loadConvs(){
@@ -1618,7 +1628,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.44';
+const APP_VERSION='2026-11-08.45';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1912,12 +1922,18 @@ async function openSettings(tab){
       });
     },
     notif(b){
-      const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':Notification.permission==='denied'?'Bloquées dans les réglages du navigateur.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
+      const denied='Notification' in window&&Notification.permission==='denied';
+      const perm=!('Notification' in window)?'Non pris en charge par ce navigateur.':denied?'Bloquées dans les réglages du téléphone ou du navigateur : autorise-les pour PolyMess, puis réactive ici.':(isIOS()&&!isStandalone())?'Sur iPhone, installe d’abord l’appli sur l’écran d’accueil (Réglages, À propos).':'';
+      const on=prefs.notif&&!denied;
       b.innerHTML=`<div class="tg"><div><b>${ico('volume','mini')}Son à la réception</b><div class="hint2">Un bip quand un message arrive dans une autre conversation ou quand l’onglet est en arrière-plan.</div></div><button type="button" class="sw2 ${prefs.sound?'on':''}" id="tSound" aria-label="Son"></button></div>
-       <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet. ${esc(perm)}</div></div><button type="button" class="sw2 ${prefs.notif?'on':''}" id="tNotif" aria-label="Notifications"></button></div>
+       <div class="tg"><div><b>Notifications du navigateur</b><div class="hint2">Une alerte à chaque nouveau message, même appli fermée quand le navigateur le permet.</div>${perm?`<div class="hint2 ${denied?'bad':''}">${esc(perm)}</div>`:''}</div><button type="button" class="sw2 ${on?'on':''}" id="tNotif" aria-label="Notifications"></button></div>
+       <div class="tg"><div><b>Afficher l’aperçu des messages</b><div class="hint2">Si tu le désactives, l’alerte indique seulement « Nouveau message », sans le texte ni la photo.</div></div><button type="button" class="sw2 ${S.me.notify_preview!==false?'on':''}" id="tPrev" aria-label="Aperçu"></button></div>
+       <div class="tg"><div><b>Demandes d’amis</b><div class="hint2">Une alerte quand quelqu’un t’ajoute ou accepte ta demande.</div></div><button type="button" class="sw2 ${S.me.notify_friends!==false?'on':''}" id="tFr" aria-label="Demandes d’amis"></button></div>
        <div class="tg"><div><b>Réactions à mes messages</b><div class="hint2">Une alerte quand quelqu’un réagit avec un emoji à l’un de tes messages.</div></div><button type="button" class="sw2 ${S.me.notify_reactions!==false?'on':''}" id="tReact" aria-label="Réactions"></button></div>
        <button class="sbtn ghost" id="tTest" style="margin-top:14px">Envoyer une notification de test</button><div id="nm"></div>`;
       $('tReact').onclick=async()=>{const v=S.me.notify_reactions===false;S.me.notify_reactions=v;$('tReact').classList.toggle('on',v);const {error}=await sb.from('profiles').update({notify_reactions:v}).eq('id',S.me.id);if(error){S.me.notify_reactions=!v;$('tReact').classList.toggle('on',!v);note('nm','Impossible : '+error.message,'err')}};
+      const flag=(id,col)=>{$(id).onclick=async()=>{const v=S.me[col]===false;S.me[col]=v;$(id).classList.toggle('on',v);const {error}=await sb.from('profiles').update({[col]:v}).eq('id',S.me.id);if(error){S.me[col]=!v;$(id).classList.toggle('on',!v);note('nm','Enregistrement impossible : '+error.message,'err')}}};
+      flag('tPrev','notify_preview');flag('tFr','notify_friends');
       $('tTest').onclick=async()=>{
         if(!prefs.push){note('nm','Active d’abord les notifications du navigateur ci-dessus.','err');return}
         try{
@@ -1930,17 +1946,11 @@ async function openSettings(tab){
       };
       $('tSound').onclick=()=>{prefs.sound=!prefs.sound;savePrefs();$('tSound').classList.toggle('on',prefs.sound);if(prefs.sound)beep()};
       $('tNotif').onclick=async()=>{
-        if(prefs.notif){prefs.notif=false;prefs.push=false;savePrefs();$('tNotif').classList.remove('on');pushUnsubscribe();note('nm','','');return}
-        if(!('Notification' in window)){note('nm','Ce navigateur ne gère pas les notifications.','err');return}
-        let r=Notification.permission;
-        if(r!=='granted')r=await Notification.requestPermission();
-        if(r!=='granted'){note('nm','Autorisation refusée : active les notifications pour ce site dans les réglages du navigateur.','err');return}
-        prefs.push=false;
-        if(pushSupported()){
-          try{await pushSubscribe();prefs.push=true;note('nm','','')}
-          catch(e){note('nm','Alertes appli fermée indisponibles ('+(e.message||e)+'). Tu recevras les alertes seulement appli ouverte.','err')}
-        }
-        prefs.notif=true;savePrefs();$('tNotif').classList.add('on');
+        if(prefs.notif){prefs.notif=false;prefs.push=false;savePrefs();$('tNotif').classList.remove('on');pushUnsubscribe();note('nm','','');renderInv();return}
+        const r=await enableNotifs();
+        if(r.fatal){note('nm',r.msg,'err');return}
+        note('nm',r.msg,r.msg?'err':'');
+        $('tNotif').classList.add('on');
       };
     },
     privacy(b){
@@ -2061,6 +2071,39 @@ async function showNotif(title,body,tag){
   try{new Notification(title,{body,tag,icon:'icon-192.png?v=3'})}catch(e){}
 }
 
+// Activation des notifications (réglages ou carte d'invitation) : { fatal, msg }
+async function enableNotifs(){
+  if(!('Notification' in window))return {fatal:true,msg:'Ce navigateur ne gère pas les notifications.'};
+  let r=Notification.permission;
+  if(r!=='granted')r=await Notification.requestPermission();
+  if(r!=='granted')return {fatal:true,msg:'Autorisation refusée : active les notifications pour PolyMess dans les réglages du téléphone ou du navigateur.'};
+  prefs.push=false;let msg='';
+  if(pushSupported()){
+    try{await pushSubscribe();prefs.push=true}
+    catch(e){msg='Alertes appli fermée indisponibles ('+(e.message||e)+'). Tu recevras les alertes seulement appli ouverte.'}
+  }
+  prefs.notif=true;savePrefs();renderInv();
+  return {fatal:false,msg};
+}
+// Carte « Ne rate aucun message » : une fois, puis 7 jours de répit après « Plus tard »
+const INV_KEY='pm_inv_until';
+function renderInv(){
+  const b=$('ntInv');if(!b)return;
+  let until=0;try{until=+localStorage.getItem(INV_KEY)||0}catch(e){}
+  const iosWeb=isIOS()&&!isStandalone();
+  const ok=S.me&&'Notification' in window&&Notification.permission==='default'&&!prefs.notif&&Date.now()>until&&(pushSupported()||iosWeb);
+  if(!ok){b.classList.add('hidden');b.innerHTML='';return}
+  b.innerHTML=`<button type="button" class="nix" id="niX" aria-label="Fermer">${ico('close')}</button><div class="nib">${ico('bell')}</div><b>Ne rate aucun message</b><div class="nis">${iosWeb?'Sur iPhone, ajoute d’abord PolyMess à l’écran d’accueil pour recevoir les alertes.':'Reçois une alerte à chaque message, même quand l’appli est fermée.'}</div><button type="button" class="nigo" id="niGo">${iosWeb?'Voir comment faire':'Activer les notifications'}</button><button type="button" class="nilat" id="niLater">Plus tard</button><div class="nierr" id="niErr"></div>`;
+  b.classList.remove('hidden');
+  const later=()=>{try{localStorage.setItem(INV_KEY,String(Date.now()+7*864e5))}catch(e){}renderInv()};
+  $('niX').onclick=later;$('niLater').onclick=later;
+  $('niGo').onclick=async()=>{
+    if(iosWeb){openSettings('notif');return}
+    const r=await enableNotifs();
+    if(r.fatal){$('niErr').textContent=r.msg;try{localStorage.setItem(INV_KEY,String(Date.now()+7*864e5))}catch(e){}}
+  };
+}
+
 // Web Push : abonner / désabonner cet appareil
 const pushSupported=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&location.protocol.startsWith('http');
 const urlB64=s=>{const b=(s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
@@ -2087,7 +2130,7 @@ async function pushDetach(){
   const reg=await navigator.serviceWorker.getRegistration();const sub=await reg?.pushManager.getSubscription();
   if(sub)await sb.rpc('unregister_push',{p_endpoint:sub.endpoint});
 }
-navigator.serviceWorker?.addEventListener('message',e=>{if(e.data&&e.data.type==='open'&&e.data.id){openConv(e.data.id);if(e.data.focus)setTimeout(()=>txt.focus(),300)}});
+navigator.serviceWorker?.addEventListener('message',e=>{if(!e.data||e.data.type!=='open')return;if(e.data.req){openRequests();return}if(e.data.id){openConv(e.data.id);if(e.data.focus)setTimeout(()=>txt.focus(),300)}});
 
 // installation sur l'écran d'accueil
 let installEv=null;

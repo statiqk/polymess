@@ -21,10 +21,14 @@ self.addEventListener('push',e=>{
     if(d.kind==='msg'&&d.tag){
       const ex=(await self.registration.getNotifications({tag:d.tag}))[0];
       msgs=(((ex&&ex.data&&ex.data.msgs)||[]).concat(d.body||'')).slice(-5);
-      if(msgs.length>1){title=`${d.title} · ${msgs.length} messages`;body=msgs.join('\n')}
+      if(msgs.length>1){
+        // aperçu masqué : on compte seulement ; sinon on liste les derniers messages
+        if(d.hidden){title=d.title;body=`${msgs.length} nouveaux messages`}
+        else{title=`${d.title} · ${msgs.length} messages`;body=msgs.join('\n')}
+      }
     }
     const opts={body,tag:d.tag,renotify:!!d.tag,icon:'icon-192.png?v=3',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
-      data:{cid:d.cid,msgs,name:d.title}};
+      data:{cid:d.cid,msgs,name:d.title,req:!!d.req}};
     if(d.image)opts.image=d.image;
     if(d.kind==='msg')opts.actions=[{action:'reply',title:'Répondre',type:'text',placeholder:'Ta réponse…'},{action:'read',title:'Marquer comme lu'}];
     await self.registration.showNotification(title,opts);
@@ -44,8 +48,8 @@ self.addEventListener('notificationclick',e=>{
     const focus=e.action==='reply'; // navigateur sans champ de réponse : on ouvre la conversation, clavier prêt
     const list=await self.clients.matchAll({type:'window',includeUncontrolled:true});
     for(const c of list){
-      if('focus' in c){c.postMessage({type:'open',id:d.cid,focus});return c.focus()}
+      if('focus' in c){c.postMessage({type:'open',id:d.cid,focus,req:d.req});return c.focus()}
     }
-    return self.clients.openWindow('./'+(d.cid?'?c='+encodeURIComponent(d.cid)+(focus?'&reply=1':''):''));
+    return self.clients.openWindow('./'+(d.req?'?req=1':d.cid?'?c='+encodeURIComponent(d.cid)+(focus?'&reply=1':''):''));
   })());
 });
