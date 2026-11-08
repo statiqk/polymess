@@ -1836,7 +1836,9 @@ function bumpActive(){
 async function loadSeen(){
   try{const {data}=await sb.from('presence_seen').select('user_id,seen_at');if(data){S.seen={};data.forEach(r=>S.seen[r.user_id]=r.seen_at)}}catch(e){}
 }
-const touchSeen=()=>sb.rpc('touch_seen',{visible:true});
+// sb.rpc() ne part que si on l'attend : sans .then() la requête n'était jamais envoyée
+const seenCall=v=>{try{sb.rpc('touch_seen',{visible:v}).then(()=>{},()=>{})}catch(e){}};
+const touchSeen=()=>seenCall(true);
 function stopPresence(){
   clearInterval(seenTimer);clearTimeout(graceT);clearTimeout(idleT);rawOn=new Set();goneAt={};myAway=false;
   for(const id of Object.keys(pfr)){try{sb.removeChannel(pfr[id])}catch(e){}}pfr={};
@@ -1845,7 +1847,7 @@ function stopPresence(){
 function startPresence(){
   stopPresence();
   if(!S.me)return;
-  if(!statusOn()){sb.rpc('touch_seen',{visible:false});return}
+  if(!statusOn()){seenCall(false);return}
   pch=sb.channel('presence:'+S.me.id,{config:{private:true,presence:{key:S.me.id}}});
   pch.subscribe(st=>{if(st==='SUBSCRIBED')trackMe()});
   syncPresence();bumpActive();
@@ -2023,7 +2025,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.60';
+const APP_VERSION='2026-11-08.61';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
