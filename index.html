@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#f6f5fd">
-<link rel="icon" href="icon-192.png?v=2">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="icon" href="icon-192.png?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PolyMess">
@@ -302,7 +302,7 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
  .comp{margin:0 10px calc(10px + env(safe-area-inset-bottom))}
  #sbar{padding:8px 10px}
 }
-.logo{background:url(icon-192.png?v=2) center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:0 6px 16px rgba(60,40,160,.22)!important}
+.logo{background:url(icon-192.png?v=3) center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:0 6px 16px rgba(60,40,160,.22)!important}
 
 /* icônes v2 */
 .ico .f{fill:currentColor;stroke:none}.ico{stroke-width:1.8}
@@ -1618,7 +1618,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-07.43';
+const APP_VERSION='2026-11-08.44';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2057,8 +2057,8 @@ async function refreshAll(){
 
 // notifications : via le service worker quand c'est possible
 async function showNotif(title,body,tag){
-  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png?v=2',badge:'badge-96.png'});return}}catch(e){}
-  try{new Notification(title,{body,tag,icon:'icon-192.png?v=2'})}catch(e){}
+  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png?v=3',badge:'badge-96.png'});return}}catch(e){}
+  try{new Notification(title,{body,tag,icon:'icon-192.png?v=3'})}catch(e){}
 }
 
 // Web Push : abonner / désabonner cet appareil
