@@ -29,8 +29,9 @@
 <meta name="twitter:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet"></noscript>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--listw:340px;--p:#4b3fd6;--p2:#4b3fd6;--acc:#ff6b57;--ink:#1d1a3b;--mut:#7d7aa0;--line:#ece9fa;--bg:#f6f5fd;--rail:#1f2347;--ok:#34b46c;--red:#e5484d;--card:#fff;--soft:#f1effc;--page:#e9e7f7;--hov:#faf9ff;--hov2:#f4f2fd;--sel:#f0edff;--pill:#ebe8fa;--line2:#f0eefb;--chk:#d3d0ee;--tabtx:#6b6890;--toast:#1d1a3b;color-scheme:light}
@@ -902,11 +903,17 @@ sb.auth.onAuthStateChange((ev,session)=>{
 
 /* ---------- BOOT ---------- */
 async function boot(user){
-  const {data:prof,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
-  if(error||!prof){authMsg('Profil introuvable : '+(error?.message||''),'err');return}
+  // profil, conversations, amis et « Vu à » partent en même temps (au lieu d'une file d'attente)
+  S.me={id:user.id};
+  const profP=sb.from('profiles').select('*').eq('id',user.id).single();
+  const convP=loadConvs(),frP=loadFriends(),seenP=loadSeen();
+  const {data:prof,error}=await profP;
+  if(error||!prof){S.me=null;authMsg('Profil introuvable : '+(error?.message||''),'err');return}
   S.me=prof;S.email=user.email||'';renderMe();
   $('auth').classList.add('hidden');$('app').classList.remove('hidden');
-  await loadConvs();await loadFriends();await loadSeen();
+  await convP;renderAll();            // la liste s'affiche dès que les conversations sont là
+  await Promise.all([frP,seenP]);
+  S.convs.forEach(c=>{if(c.other&&!S.frp[c.other.id])S.frp[c.other.id]=c.other});
   subscribe();
   startPresence();
   renderAll();
@@ -2047,7 +2054,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.65';
+const APP_VERSION='2026-11-08.66';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2069,9 +2076,10 @@ async function checkUpdate(manual){
   }catch(e){return 'err'}
 }
 setInterval(checkUpdate,5*60*1000);
+let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){checkUpdate();refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.me&&statusOn())ackAfterTouch();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
-  else if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}
+  if(!document.hidden){checkUpdate();if(Date.now()-hiddenAt>30000)refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.me&&statusOn())ackAfterTouch();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
+  else{hiddenAt=Date.now();if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}}
 });
 addEventListener('online',refreshAll);
 addEventListener('pageshow',e=>{if(e.persisted)refreshAll()});
@@ -2476,7 +2484,7 @@ async function refreshAll(){
   if(!S.me||Date.now()-lastRef<4000)return;
   lastRef=Date.now();
   try{
-    await loadConvs();await loadFriends();await loadSeen();syncPresence();
+    await Promise.all([loadConvs(),loadFriends(),loadSeen()]);S.convs.forEach(c=>{if(c.other&&!S.frp[c.other.id])S.frp[c.other.id]=c.other});syncPresence();
     if(S.cur){
       const {data}=await sb.from('messages').select(MCOLS).eq('conversation_id',S.cur).order('created_at',{ascending:false}).limit(200);
       if(data)S.msgs[S.cur]=data.reverse();
@@ -2530,18 +2538,25 @@ function renderInv(){
 // Web Push : abonner / désabonner cet appareil
 const pushSupported=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&location.protocol.startsWith('http');
 const urlB64=s=>{const b=(s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
+const PUSH_REG='pm_push_reg';
 async function pushSubscribe(){
   const reg=await navigator.serviceWorker.ready;
-  const res=await fetch(SB_URL+'/functions/v1/push',{headers:{apikey:SB_KEY}});
-  if(!res.ok)throw new Error('serveur injoignable');
-  const {key}=await res.json();
   let sub=await reg.pushManager.getSubscription();
-  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64(key)});
+  // appareil déjà enregistré pour ce compte depuis moins de 7 jours : rien à renvoyer au serveur
+  try{const [u,e,t]=(localStorage.getItem(PUSH_REG)||'').split('|');if(sub&&S.me&&u===S.me.id&&e===sub.endpoint&&Date.now()-Number(t)<7*864e5)return}catch(e){}
+  if(!sub){
+    const res=await fetch(SB_URL+'/functions/v1/push',{headers:{apikey:SB_KEY}});
+    if(!res.ok)throw new Error('serveur injoignable');
+    const {key}=await res.json();
+    sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64(key)});
+  }
   const j=sub.toJSON();
   const {error}=await sb.rpc('register_push',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_ua:navigator.userAgent});
   if(error)throw error;
+  try{localStorage.setItem(PUSH_REG,[S.me.id,j.endpoint,Date.now()].join('|'))}catch(e){}
 }
 async function pushUnsubscribe(){
+  try{localStorage.removeItem(PUSH_REG)}catch(e){}
   try{
     const reg=await navigator.serviceWorker.getRegistration();const sub=await reg?.pushManager.getSubscription();
     if(sub){await sb.rpc('unregister_push',{p_endpoint:sub.endpoint});await sub.unsubscribe()}
@@ -2549,6 +2564,7 @@ async function pushUnsubscribe(){
 }
 // à la déconnexion : l'appareil ne reçoit plus les messages de ce compte
 async function pushDetach(){
+  try{localStorage.removeItem(PUSH_REG)}catch(e){}
   if(!pushSupported())return;
   const reg=await navigator.serviceWorker.getRegistration();const sub=await reg?.pushManager.getSubscription();
   if(sub)await sb.rpc('unregister_push',{p_endpoint:sub.endpoint});

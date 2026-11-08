@@ -1,9 +1,53 @@
-// Service worker : installation de l'appli + notifications (locales et Web Push).
-// Pas de cache : l'appli se met à jour via version.json.
+// Service worker : installation de l'appli + notifications (Web Push) + ouverture rapide (cache de l'appli).
+// L'appli se met à jour via version.json : la page est servie depuis le cache puis rafraîchie en arrière-plan.
 const PUSH_URL='https://qcogqpwjhtutxpyhrcld.supabase.co/functions/v1/push';
-self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch',()=>{});
+const SHELL='pm-shell-1',PAGE='./index.html';
+const STATIC=['manifest.json','icon-192.png?v=3','badge-96.png','logo-bubble.png'];
+self.addEventListener('install',e=>{
+  self.skipWaiting();
+  e.waitUntil(caches.open(SHELL).then(c=>Promise.allSettled([c.add(new Request(PAGE,{cache:'reload'})),...STATIC.map(u=>c.add(u))])));
+});
+self.addEventListener('activate',e=>e.waitUntil((async()=>{
+  for(const k of await caches.keys())if(k!==SHELL)await caches.delete(k);
+  await self.clients.claim();
+})()));
+const putCopy=(key,res)=>{try{if(!res||!(res.ok||res.type==='opaque'))return Promise.resolve();const cp=res.clone();return caches.open(SHELL).then(c=>c.put(key,cp)).catch(()=>{})}catch(_){return Promise.resolve()}};
+self.addEventListener('fetch',e=>{
+  const req=e.request;if(req.method!=='GET')return;
+  const u=new URL(req.url);
+  if(u.origin===location.origin){
+    if(u.pathname.endsWith('/version.json')||u.pathname.endsWith('/sw.js'))return; // toujours depuis le réseau
+    if(req.mode==='navigate'){
+      // mise à jour demandée (?v=…) : on va chercher la nouvelle page et on la garde ; sinon cache d'abord, rafraîchi en arrière-plan
+      if(u.searchParams.has('v')){
+        e.respondWith(fetch(req,{cache:'reload'}).then(r=>{putCopy(PAGE,r);return r}).catch(()=>caches.match(PAGE).then(c=>c||Response.error())));
+        return;
+      }
+      e.respondWith((async()=>{
+        const c=await caches.match(PAGE);
+        const net=fetch(PAGE,{cache:'no-cache'}).then(r=>{putCopy(PAGE,r);return r});
+        if(c){e.waitUntil(net.catch(()=>{}));return c}
+        return net.catch(()=>Response.error());
+      })());
+      return;
+    }
+    e.respondWith((async()=>{
+      const c=await caches.match(req);
+      const net=fetch(req).then(r=>{putCopy(req,r);return r});
+      if(c){e.waitUntil(net.catch(()=>{}));return c}
+      return net;
+    })());
+    return;
+  }
+  // bibliothèque Supabase (version figée) et polices : cache d'abord
+  if(u.hostname==='cdn.jsdelivr.net'||u.hostname==='fonts.googleapis.com'||u.hostname==='fonts.gstatic.com'){
+    e.respondWith((async()=>{
+      const c=await caches.match(req);
+      if(c){if(u.hostname==='fonts.googleapis.com')e.waitUntil(fetch(req).then(r=>putCopy(req,r)).catch(()=>{}));return c}
+      const r=await fetch(req);putCopy(req,r);return r;
+    })());
+  }
+});
 
 const setBadge=n=>{try{const nav=self.navigator;if(typeof n==='number'&&nav.setAppBadge)return (n>0?nav.setAppBadge(n):nav.clearAppBadge()).catch(()=>{})}catch(_){}};
 
