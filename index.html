@@ -627,6 +627,13 @@ html[data-theme=dark] .info .act .ic2{color:#cfcdee}
 .ntinv .nigo{margin-top:14px;width:100%;border:0;border-radius:22px;padding:12px;font:inherit;font-weight:700;font-size:14.5px;color:#fff;background:linear-gradient(90deg,#6A5CFF,#8b5cff)}
 .ntinv .nilat{display:block;margin:10px auto 0;background:none;border:0;font:inherit;font-weight:600;font-size:13px;color:var(--mut)}.ntinv .nierr{margin-top:8px;font-size:12.5px;color:#e5484d}
 .hint2.bad{color:#e5484d;font-weight:600}
+.av.on.away::after{background:#ffa42e}
+.ch .s.away{color:#d98200;font-weight:600}html[data-theme=dark] .ch .s.away{color:#ffb454}
+.info p.st.away{color:#d98200}html[data-theme=dark] .info p.st.away{color:#ffb454}
+.privok{display:flex;gap:12px;align-items:flex-start;margin-top:12px;padding:12px 14px;border-radius:16px;background:rgba(47,191,113,.10);box-shadow:inset 0 0 0 1.5px #2fbf71;color:#1f9d5c}
+.privok svg{width:22px;height:22px;flex:none;margin-top:1px}.privok b{display:block;color:var(--txt,inherit);font-size:14.5px;margin-bottom:2px}.privok span{display:block;font-size:12.5px;color:var(--mut);line-height:1.4}
+.legp{margin-top:18px}.lgr{display:flex;align-items:center;gap:10px;padding:7px 2px;font-size:14px}.lgr span{margin-left:auto;font-size:12.5px;color:var(--mut)}
+.lgd{display:inline-block;width:13px;height:13px;border-radius:50%}.lgd.g{background:#2fbf71}.lgd.o{background:#ffa42e}.lgd.x{background:#a9a7d0}
 .fri{width:40px;height:40px;border-radius:13px;background:#6A5CFF;color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
 .frt{flex:1;min-width:0}.frt b{display:block;font-size:15px}.frt small{font-size:12.5px;color:var(--mut);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .frc{color:var(--mut);display:flex;transform:scaleX(-1)}.frc .ico{width:18px;height:18px}
@@ -739,7 +746,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const ICONS={"chat": "<path d=\"M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z\"/><circle cx=\"8.4\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"12\" cy=\"11\" r=\".9\" class=\"f\"/><circle cx=\"15.6\" cy=\"11\" r=\".9\" class=\"f\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.6\"/><path d=\"M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "search": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.4 15.4L20 20\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"8.8\"/><path d=\"M12 11v5.5\"/><circle cx=\"12\" cy=\"7.8\" r=\".7\" class=\"f\"/>", "back": "<path d=\"M14.5 5.5L8 12l6.5 6.5\"/>", "close": "<path d=\"M6.5 6.5l11 11M17.5 6.5l-11 11\"/>", "up": "<path d=\"M6 14.5l6-6 6 6\"/>", "down": "<path d=\"M6 9.5l6 6 6-6\"/>", "sliders": "<path d=\"M4 7h8M18 7h2M4 17h2M12 17h8\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"9\" cy=\"17\" r=\"2.2\"/>", "clip": "<path d=\"M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4\"/>", "send": "<path d=\"M20.5 3.5L10.5 13.5\"/><path d=\"M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z\"/>", "tick": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"/>", "ticks": "<path d=\"M2.5 12.5L7 17l8.5-9.5\"/><path d=\"M10.5 15.5l1.5 1.5L21.5 7.5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5v4.7l3 1.8\"/>", "reply": "<path d=\"M9.5 6L4 11.5 9.5 17\"/><path d=\"M4 11.5h9.5a6.5 6.5 0 016.5 6.5v1\"/>", "copy": "<rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M5 15V7a2 2 0 012-2h8\"/>", "edit": "<path d=\"M4 20l1-4.5L16.3 4.2a2.1 2.1 0 013 3L8 18.5 4 20z\"/><path d=\"M14.5 6l3 3\"/>", "trash": "<path d=\"M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7M10 11v5M14 11v5\"/>", "pin": "<path d=\"M9 4h6l-1 5 3 3v1.5H7V12l3-3-1-5z\"/><path d=\"M12 13.5V20\"/>", "bell": "<path d=\"M6 16v-5.5a6 6 0 0112 0V16l1.5 2h-15L6 16z\"/><path d=\"M10 21h4\"/>", "bellOff": "<path d=\"M8.2 4.7A6 6 0 0118 10.5V16l1.5 2H9M6 9.5V16l-1.5 2H6\"/><path d=\"M10 21h4M4 4l16 16\"/>", "file": "<path d=\"M14 3.5H7.5a2 2 0 00-2 2v13a2 2 0 002 2h9a2 2 0 002-2V8L14 3.5z\"/><path d=\"M14 3.5V8h4.5M9 13h6M9 16.5h4\"/>", "image": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"3\"/><circle cx=\"9\" cy=\"10\" r=\"1.6\"/><path d=\"M4 17l5-4.5 4 3.5 3-2.5 4 3.5\"/>", "out": "<path d=\"M10 20.5H6.5a2 2 0 01-2-2v-13a2 2 0 012-2H10\"/><path d=\"M15.5 16.5L20 12l-4.5-4.5M20 12H9.5\"/>", "mail": "<rect x=\"3.5\" y=\"6\" width=\"17\" height=\"12\" rx=\"3\"/><path d=\"M4.5 8.5L12 13.5l7.5-5\"/>", "shield": "<path d=\"M12 3.5l7 2.5v5.5c0 4.3-2.8 7.4-7 9-4.2-1.6-7-4.7-7-9V6l7-2.5z\"/><path d=\"M9 12l2.2 2.2L15.5 10\"/>", "moon": "<path d=\"M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z\"/>", "smile": "<path d=\"M20.5 12.5A8.5 8.5 0 1111 3.5\"/><path d=\"M8.3 13.5c.8 1.4 2 2.1 3.2 2.1s2.4-.7 3.2-2.1\"/><circle cx=\"8.6\" cy=\"9.8\" r=\".8\" class=\"f\"/><circle cx=\"13.4\" cy=\"9.8\" r=\".8\" class=\"f\"/><path d=\"M18 2.5v5M15.5 5h5\"/>", "volume": "<path d=\"M4 9.5h3.5L12 5.5v13l-4.5-4H4z\"/><path d=\"M15.8 9a4 4 0 010 6M18.6 6.4a8 8 0 010 11.2\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4\"/>", "wave": "<path d=\"M5 18.5V8.5a2 2 0 014 0V13M9 13V6.5a2 2 0 014 0V13M13 13V7.5a2 2 0 014 0V14.5a6 6 0 01-6 6h-.5a6.5 6.5 0 01-5-2.4\"/>", "camera": "<path d=\"M4 8.5A2.5 2.5 0 016.5 6H8l1.3-2h5.4L16 6h1.5A2.5 2.5 0 0120 8.5v8a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 014 16.5v-8z\"/><circle cx=\"12\" cy=\"12.5\" r=\"3.3\"/>", "eye": "<path d=\"M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "share": "<path d=\"M12 15V3.5M8 7l4-4 4 4\"/><path d=\"M6 11H5.5A1.5 1.5 0 004 12.5v6A1.5 1.5 0 005.5 20h13a1.5 1.5 0 001.5-1.5v-6a1.5 1.5 0 00-1.5-1.5H18\"/>", "addsq": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"4\"/><path d=\"M12 8.5v7M8.5 12h7\"/>", "download": "<path d=\"M12 4v11M8 11l4 4 4-4M5 20h14\"/>", "flag": "<path d=\"M6 21V4M6 5h11l-2 4 2 4H6\"/>", "lock": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"9.5\" rx=\"2.5\"/><path d=\"M8 10.5V8a4 4 0 018 0v2.5\"/>"};
 const ico=(n,c='')=>`<svg class="ico ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
 const MCOLS='id,conversation_id,sender_id,content,created_at,reply_to,att_path,att_name,att_type,att_size,edited_at,deleted_at,att_expired_at,expires_at';
-const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false,sq:null,react:{},online:new Set(),reply:null,edit:null,att:null,urls:{},typing:null,fr:[],frp:{},frLoaded:false};
+const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false,sq:null,react:{},online:new Set(),away:new Set(),seen:{},reply:null,edit:null,att:null,urls:{},typing:null,fr:[],frp:{},frLoaded:false};
 const COLORS=['#6c63ff','#e8618c','#4aa3f0','#34b46c','#f6b84b','#f0795b','#3cc4c4','#8a63e6'];
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const AVB=SB_URL+'/storage/v1/object/public/avatars/';
@@ -834,7 +841,7 @@ sb.auth.onAuthStateChange((ev,session)=>{
     try{stopPresence()}catch(e){}
     try{if(tch){sb.removeChannel(tch);tch=null;tchId=null;tReady=false}}catch(e){}
     try{if(S.chan){sb.removeChannel(S.chan);S.chan=null}}catch(e){}
-    Object.assign(S,{me:null,convs:[],cur:null,msgs:{},react:{},urls:{},fr:[],frp:{},frLoaded:false,reply:null,edit:null,att:null,sq:null,typing:null,email:''});
+    Object.assign(S,{me:null,convs:[],cur:null,msgs:{},react:{},urls:{},fr:[],frp:{},frLoaded:false,online:new Set(),away:new Set(),seen:{},reply:null,edit:null,att:null,sq:null,typing:null,email:''});
     frRefresh=null;
     $('modalHost').innerHTML='';$('menu').classList.add('hidden');$('app').classList.remove('inchat','mobinfo');
     $('convs').innerHTML='';$('frBan').classList.add('hidden');
@@ -848,7 +855,7 @@ async function boot(user){
   if(error||!prof){authMsg('Profil introuvable : '+(error?.message||''),'err');return}
   S.me=prof;S.email=user.email||'';renderMe();
   $('auth').classList.add('hidden');$('app').classList.remove('hidden');
-  await loadConvs();await loadFriends();
+  await loadConvs();await loadFriends();await loadSeen();
   subscribe();
   startPresence();
   renderAll();
@@ -866,7 +873,7 @@ async function loadConvs(){
   const ids=mine.map(m=>m.conversation_id);
   if(!ids.length){S.convs=[];return}
   const [{data:mem},{data:recent}]=await Promise.all([
-    sb.from('conversation_members').select('conversation_id,user_id,last_read_at,profiles(id,username,display_name,first_name,last_name,color,last_seen_at,avatar_path)').in('conversation_id',ids),
+    sb.from('conversation_members').select('conversation_id,user_id,last_read_at,profiles(id,username,display_name,first_name,last_name,color,avatar_path)').in('conversation_id',ids),
     sb.from('messages').select(MCOLS).in('conversation_id',ids).order('created_at',{ascending:false}).limit(400)
   ]);
   const byConv={},readAt={};
@@ -1024,7 +1031,7 @@ function renderList(){
     const lastOk=c.last&&!msgGone(c.last)?c.last:null;
     const prev=lastOk?((lastOk.sender_id===S.me.id?'Toi : ':'')+prevText(lastOk)):'Aucun message';
     return `<button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
-      <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on':''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
+      <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on'+(S.away.has(c.other.id)?' away':''):''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
       <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.pinned?ico('pin','mini'):''}${c.muted?ico('bellOff','mini'):''}${lastOk?fmtList(lastOk.created_at):''}</span></div>
       <div class="p"><i>${lastOk&&!lastOk.deleted_at&&lastOk.att_path?(lastOk.sender_id===S.me.id?'Toi : ':'')+ico((lastOk.att_type||'').startsWith('image/')?'image':'file','mini')+esc((lastOk.att_type||'').startsWith('image/')?'Photo':(lastOk.att_name||'Fichier'))+(lastOk.content?' '+esc(lastOk.content):''):esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button>`;
   }).join('');
@@ -1066,8 +1073,8 @@ function renderChat(){
 }
 function subText(c,typing=true){
   if(typing&&S.typing===c.id)return 'écrit…';
-  if(statusOn()&&c.other&&S.online.has(c.other.id))return 'En ligne';
-  if(statusOn()&&c.other?.last_seen_at)return fmtSeen(c.other.last_seen_at);
+  if(statusOn()&&c.other&&S.online.has(c.other.id))return S.away.has(c.other.id)?'Absent':'En ligne';
+  if(statusOn()&&c.other&&S.seen[c.other.id])return fmtSeen(S.seen[c.other.id]);
   return '';
 }
 async function setFlag(c,k,v){
@@ -1082,10 +1089,10 @@ function renderInfo(c){
   c._mc=media.length;
   const imgs=media.filter(m=>(m.att_type||'').startsWith('image/')).slice(0,9),files=media.filter(m=>!(m.att_type||'').startsWith('image/')).slice(0,5);
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
-  const seenLong=statusOn()&&c.other?.last_seen_at?fmtSeenLong(c.other.last_seen_at):'';
+  const seenLong=statusOn()&&c.other&&S.seen[c.other.id]?fmtSeenLong(S.seen[c.other.id]):'';
   const stTxt=subText(c,false)||'Discussion privée';
-  $('info').innerHTML=`${back}<div class="av${on?' on':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
-   <h3>${esc(c.name)}</h3><p class="st${stTxt==='En ligne'?' live':''}" id="infoSt">${esc(stTxt)}</p>
+  $('info').innerHTML=`${back}<div class="av${on?' on':''}${on&&S.away.has(c.other.id)?' away':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
+   <h3>${esc(c.name)}</h3><p class="st${stTxt==='En ligne'?' live':stTxt==='Absent'?' away':''}" id="infoSt">${esc(stTxt)}</p>
    <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
    <div class="sec ephsec"><button type="button" class="ephr" id="aEph"><span class="ephi">${ico('clock')}</span><span class="ephx"><b>Messages éphémères</b><small>${EPH[c.eph]||'30 jours'}</small></span><span class="ephc">${ico('back')}</span></button><p class="ephh">Les messages de cette discussion sont supprimés automatiquement après la durée choisie.</p></div>
    ${friendSec(c)}
@@ -1441,36 +1448,80 @@ function updateSub(){
   const on=statusOn()&&c.other&&S.online.has(c.other.id),t=subText(c);
   $('chSub').textContent=t||'Discussion privée';
   $('chSub').classList.toggle('live',t==='En ligne'||t==='écrit…');
-  $('chAv').classList.toggle('on',!!on);
-  const e=$('infoSt');if(e){const tx=subText(c,false)||'Discussion privée';e.textContent=tx;e.classList.toggle('live',tx==='En ligne')}
-  const a=$('infoAv');if(a)a.classList.toggle('on',!!on);
+  $('chSub').classList.toggle('away',t==='Absent');
+  const aw=!!(on&&S.away.has(c.other.id));
+  $('chAv').classList.toggle('on',!!on);$('chAv').classList.toggle('away',aw);
+  const e=$('infoSt');if(e){const tx=subText(c,false)||'Discussion privée';e.textContent=tx;e.classList.toggle('live',tx==='En ligne');e.classList.toggle('away',tx==='Absent')}
+  const a=$('infoAv');if(a){a.classList.toggle('on',!!on);a.classList.toggle('away',aw)}
 }
 let pch=null,seenTimer=null;
-// Délai de grâce : un ami reste « en ligne » 2 min après avoir quitté l'appli (évite le clignotement entre deux applis)
-const GRACE=120000;let rawOn=new Set(),goneAt={},graceT=null;
+// Présence : un canal privé par personne (presence:<id>), lisible par ses amis seulement.
+// - Délai de grâce : un ami reste « en ligne » 2 min après avoir quitté l'appli (évite le clignotement)
+// - Absent : appli ouverte mais écran non touché depuis 5 min
+const GRACE=120000,IDLE=300000;
+let rawOn=new Set(),goneAt={},graceT=null,pfr={},idleT=null,myAway=false,lastBump=0;
+const friendIds=()=>S.fr.filter(r=>r.status==='accepted').map(frOther);
+const presFlat=ch=>Object.values(ch.presenceState()).flat();
 function calcOnline(){
   const now=Date.now(),s=new Set(rawOn);
   for(const id in goneAt){if(now-goneAt[id]<GRACE)s.add(id);else delete goneAt[id]}
   S.online=s;updateSub();renderList();
+  if(typeof frRefresh==='function'&&frRefresh)frRefresh();
   clearTimeout(graceT);const t=Object.values(goneAt);
   if(t.length)graceT=setTimeout(calcOnline,Math.max(1000,GRACE-(now-Math.min(...t)))+500);
 }
-function onPresenceSync(keys){
-  const nw=new Set(keys),now=Date.now();
-  for(const id of rawOn)if(!nw.has(id))goneAt[id]=now;
-  for(const id of nw)delete goneAt[id];
-  rawOn=nw;calcOnline();
+function setFriendPresence(id,entries){
+  if(entries.length){
+    rawOn.add(id);delete goneAt[id];
+    entries.some(e=>!e.away)?S.away.delete(id):S.away.add(id);
+  }else if(rawOn.has(id)){
+    rawOn.delete(id);goneAt[id]=Date.now();S.seen[id]=new Date().toISOString();
+  }
+  calcOnline();
+}
+// abonne aux canaux des amis (un par ami) et retire ceux qui ne le sont plus
+function syncPresence(){
+  if(!pch)return;
+  const want=new Set(friendIds());let changed=false;
+  for(const id of Object.keys(pfr))if(!want.has(id)){try{sb.removeChannel(pfr[id])}catch(e){}delete pfr[id];rawOn.delete(id);delete goneAt[id];S.away.delete(id);changed=true}
+  for(const id of want)if(!pfr[id]){
+    const ch=sb.channel('presence:'+id,{config:{private:true}});
+    ch.on('presence',{event:'sync'},()=>setFriendPresence(id,presFlat(ch))).subscribe();
+    pfr[id]=ch;
+  }
+  if(changed)calcOnline();
+}
+// retour dans l'appli : on repart de l'état réel des canaux, sans délai de grâce fantôme
+function resyncPresence(){
+  rawOn=new Set();goneAt={};
+  for(const id in pfr){const e=presFlat(pfr[id]);if(e.length){rawOn.add(id);e.some(x=>!x.away)?S.away.delete(id):S.away.add(id)}}
+  calcOnline();
+}
+const trackMe=()=>{if(pch&&!document.hidden)pch.track({at:Date.now(),away:myAway})};
+function setAway(v){if(v===myAway)return;myAway=v;trackMe()}
+function bumpActive(){
+  if(!pch)return;
+  const n=Date.now();if(!myAway&&n-lastBump<3000)return;lastBump=n;
+  clearTimeout(idleT);if(myAway)setAway(false);
+  idleT=setTimeout(()=>setAway(true),IDLE);
+}
+['pointerdown','keydown','touchstart','mousemove','scroll'].forEach(ev=>addEventListener(ev,bumpActive,{passive:true,capture:true}));
+async function loadSeen(){
+  try{const {data}=await sb.from('presence_seen').select('user_id,seen_at');if(data){S.seen={};data.forEach(r=>S.seen[r.user_id]=r.seen_at)}}catch(e){}
 }
 const touchSeen=()=>sb.rpc('touch_seen',{visible:true});
-function stopPresence(){clearInterval(seenTimer);clearTimeout(graceT);rawOn=new Set();goneAt={};if(pch){sb.removeChannel(pch);pch=null}S.online=new Set()}
+function stopPresence(){
+  clearInterval(seenTimer);clearTimeout(graceT);clearTimeout(idleT);rawOn=new Set();goneAt={};myAway=false;
+  for(const id of Object.keys(pfr)){try{sb.removeChannel(pfr[id])}catch(e){}}pfr={};
+  if(pch){sb.removeChannel(pch);pch=null}S.online=new Set();S.away=new Set();
+}
 function startPresence(){
   stopPresence();
   if(!S.me)return;
   if(!statusOn()){sb.rpc('touch_seen',{visible:false});return}
-  pch=sb.channel('presence',{config:{presence:{key:S.me.id}}});
-  pch.on('presence',{event:'sync'},()=>onPresenceSync(Object.keys(pch.presenceState())))
-     .on('presence',{event:'leave'},({key})=>{for(const c of S.convs)if(c.other?.id===key)c.other.last_seen_at=new Date().toISOString();updateSub()})
-     .subscribe(async st=>{if(st==='SUBSCRIBED'&&!document.hidden)await pch.track({at:Date.now()})});
+  pch=sb.channel('presence:'+S.me.id,{config:{private:true,presence:{key:S.me.id}}});
+  pch.subscribe(st=>{if(st==='SUBSCRIBED')trackMe()});
+  syncPresence();bumpActive();
   touchSeen();seenTimer=setInterval(()=>{if(!document.hidden)touchSeen()},60000);
 }
 
@@ -1502,19 +1553,21 @@ function openNew(){
     if(st==='sent')return `<span class="fbtn s">${ico('clock')}En attente</span>`;
     if(st==='received')return `<span class="fbtn pri fa" data-a="acc">${ico('tick')}Accepter</span>`;
     return `<span class="fbtn pri fa" data-a="add">${ico('user')}Ajouter</span>`};
-  const frow=(p,sub)=>`<button class="pick" data-id="${esc(p.id)}"><div class="av" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div class="pt"><b>${hl(p.display_name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div>${fbtn(p)}</button>`;
+  const presCls=id=>statusOn()&&S.online.has(id)?' on'+(S.away.has(id)?' away':''):'';
+  const presTxt=id=>!statusOn()||frState(id)!=='friends'?'':S.online.has(id)?(S.away.has(id)?'Absent':'En ligne'):S.seen[id]?fmtSeen(S.seen[id]):'';
+  const frow=(p,sub)=>`<button class="pick" data-id="${esc(p.id)}"><div class="av${presCls(p.id)}" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div class="pt"><b>${hl(p.display_name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div>${fbtn(p)}</button>`;
   const reqLink=()=>{const n=frIncoming().length+frOutgoing().length;return n?`<button type="button" class="frlink" id="frLink"><span>${ico('user')}Demandes d’amis</span><em>${n}</em></button>`:''};
   const friendsList=()=>S.fr.filter(r=>r.status==='accepted').map(r=>S.frp[frOther(r)]).filter(Boolean).sort((a,b)=>(a.display_name||'').localeCompare(b.display_name||'','fr'));
   const recents=()=>{
     const f=friendsList();
-    $('res').innerHTML=reqLink()+(f.length?`<div class="h5">Mes amis</div>`+f.map(p=>frow(p,statusOn()&&p.last_seen_at?fmtSeen(p.last_seen_at):'')).join(''):'')+`<div class="nhint">${f.length?'Ou cherche':'Cherche'} quelqu’un par son nom ou son prénom pour l’ajouter en ami.</div>`;
+    $('res').innerHTML=reqLink()+(f.length?`<div class="h5">Mes amis</div>`+f.map(p=>frow(p,presTxt(p.id))).join(''):'')+`<div class="nhint">${f.length?'Ou cherche':'Cherche'} quelqu’un par son nom ou son prénom pour l’ajouter en ami.</div>`;
     const l=$('frLink');if(l)l.onclick=()=>{host.innerHTML='';openRequests()};
   };
   const drawRes=()=>{
     if(!found.length){$('res').innerHTML=`<div class="nempty"><div class="eic">${ico('search')}</div><b>Personne ne correspond à « ${esc($('uq').value.trim())} »</b><span>Vérifie l’orthographe ou essaie le prénom.</span></div>`;return}
     const fr=found.filter(p=>frState(p.id)==='friends'),ot=found.filter(p=>frState(p.id)!=='friends');
     const sub=p=>{const st=frState(p.id);return st==='sent'?'Demande envoyée':st==='received'?'T’a envoyé une demande':exists(p.id)?'Discussion existante':'Pas encore ami'};
-    $('res').innerHTML=(fr.length?`<div class="h5">Mes amis</div>`+fr.map(p=>frow(p,'')).join(''):'')+(ot.length?`<div class="h5">${fr.length?'Autres personnes':found.length+' résultat'+(found.length>1?'s':'')}</div>`+ot.map(p=>frow(p,sub(p))).join('')+`<div class="nhint">Tu pourras écrire à une personne dès qu’elle accepte ta demande.</div>`:'');
+    $('res').innerHTML=(fr.length?`<div class="h5">Mes amis</div>`+fr.map(p=>frow(p,presTxt(p.id))).join(''):'')+(ot.length?`<div class="h5">${fr.length?'Autres personnes':found.length+' résultat'+(found.length>1?'s':'')}</div>`+ot.map(p=>frow(p,sub(p))).join('')+`<div class="nhint">Tu pourras écrire à une personne dès qu’elle accepte ta demande.</div>`:'');
   };
   frRefresh=()=>{if(!$('res')||!$('uq'))return;q.length<2?recents():drawRes()};
   recents();
@@ -1559,7 +1612,7 @@ async function loadFriends(){
   const need=[...new Set(S.fr.map(frOther))].filter(id=>!S.frp[id]);
   if(need.length){const {data:ps}=await sb.from('profiles').select(FPROF).in('id',need);(ps||[]).forEach(p=>S.frp[p.id]=p)}
   S.convs.forEach(c=>{if(c.other&&!S.frp[c.other.id])S.frp[c.other.id]=c.other});
-  S.frLoaded=true;renderFr();
+  S.frLoaded=true;renderFr();syncPresence();
   if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c){applyLock();renderInfo(c)}}
   if(typeof frRefresh==='function')frRefresh();
 }
@@ -1643,7 +1696,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.46';
+const APP_VERSION='2026-11-08.47';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1666,7 +1719,7 @@ async function checkUpdate(manual){
 }
 setInterval(checkUpdate,5*60*1000);
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){checkUpdate();refreshAll();rawOn=new Set();goneAt={};if(pch)pch.track({at:Date.now()});if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
+  if(!document.hidden){checkUpdate();refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
   else if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}
 });
 addEventListener('online',refreshAll);
@@ -1969,7 +2022,9 @@ async function openSettings(tab){
       };
     },
     privacy(b){
-      b.innerHTML=`<div class="tg"><div><b>Statut en ligne</b><div class="hint2">Montre quand tu es en ligne et ta dernière connexion. Si tu le désactives, tu ne vois pas non plus celui des autres.</div></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="tPres" aria-label="Statut en ligne"></button></div>
+      b.innerHTML=`<div class="tg"><div><b>Statut en ligne</b><div class="hint2">Montre quand tu es en ligne, absent ou ta dernière connexion. Si tu le désactives, tu ne vois pas non plus celui des autres.</div></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="tPres" aria-label="Statut en ligne"></button></div>
+       <div class="privok">${ico('shield')}<div><b>Visible par tes amis uniquement</b><span>Les personnes qui ne sont pas tes amis ne voient jamais si tu es en ligne ni ta dernière connexion.</span></div></div>
+       <div class="legp"><div class="h5">Les 3 états</div><div class="lgr"><i class="lgd g"></i><b>En ligne</b><span>appli utilisée</span></div><div class="lgr"><i class="lgd o"></i><b>Absent</b><span>5 min sans toucher l’écran</span></div><div class="lgr"><i class="lgd x"></i><b>Hors ligne</b><span>2 min après avoir quitté l’appli</span></div></div>
        <div class="hint2" style="margin-top:12px">Les confirmations de lecture (doubles coches) restent actives dans les conversations.</div>`;
       $('tPres').onclick=()=>{prefs.presence=!statusOn();savePrefs();$('tPres').classList.toggle('on',statusOn());startPresence();updateSub();renderList()};
     },
@@ -2068,7 +2123,7 @@ async function refreshAll(){
   if(!S.me||Date.now()-lastRef<4000)return;
   lastRef=Date.now();
   try{
-    await loadConvs();await loadFriends();
+    await loadConvs();await loadFriends();await loadSeen();syncPresence();
     if(S.cur){
       const {data}=await sb.from('messages').select(MCOLS).eq('conversation_id',S.cur).order('created_at',{ascending:false}).limit(200);
       if(data)S.msgs[S.cur]=data.reverse();
