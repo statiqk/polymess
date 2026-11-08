@@ -237,6 +237,12 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 /* ===== Design v2 ===== */
 .rail{display:none}
 .zoomable{cursor:zoom-in}
+.cw{position:relative;overflow:hidden;border-radius:16px}.cw .conv{margin:0;width:100%;touch-action:pan-y;position:relative}
+.swa{display:none;position:absolute;right:0;top:0;bottom:0;width:192px}.cw.open .swa{display:flex}
+.swa button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff}.swa small{font-size:11.5px;font-weight:600}.swa .ico{width:20px;height:20px}
+.swa .sp{background:#5b4ff0}.swa .sm{background:#e08a2c}.swa .sd{background:#e5484d}
+.ltk{display:inline-flex;margin-right:4px;color:var(--mut)}.ltk.rd{color:#7c6dff}.ltk .ico{margin:0!important}
+.dcb{display:block;width:100%;height:50px;border-radius:25px;margin-top:10px;background:var(--soft);color:var(--ink);font-weight:700;font-size:15.5px}.dcb.red{background:var(--red);color:#fff}
 #crop{position:fixed;inset:0;z-index:95;background:#06081a;color:#fff;display:flex;flex-direction:column;align-items:center;padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))}
 #crop .crt{width:100%;max-width:420px;display:flex;align-items:center;gap:12px;margin-bottom:16px}#crop .crt b{font-size:17px}
 #crop .crx{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center}
@@ -771,6 +777,8 @@ const ico=(n,c='')=>`<svg class="ico ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>
 const MCOLS='id,conversation_id,sender_id,content,created_at,reply_to,att_path,att_name,att_type,att_size,edited_at,deleted_at,att_expired_at,expires_at';
 const S={email:'',me:null,convs:[],cur:null,msgs:{},filter:'all',q:'',chan:null,signup:false,sq:null,react:{},online:new Set(),away:new Set(),seen:{},reply:null,edit:null,att:null,urls:{},typing:null,fr:[],frp:{},frLoaded:false};
 const COLORS=['#6c63ff','#e8618c','#4aa3f0','#34b46c','#f6b84b','#f0795b','#3cc4c4','#8a63e6'];
+// Majuscule initiale pour les mots tapés tout en majuscules ou tout en minuscules (même règle que la base)
+const niceName=s=>String(s||'').replace(/[A-Za-zÀ-ÖØ-öø-ÿ]+/g,w=>((w===w.toUpperCase()||w===w.toLowerCase())&&!(w.length<=2&&w===w.toUpperCase()))?w[0].toUpperCase()+w.slice(1).toLowerCase():w);
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const AVB=SB_URL+'/storage/v1/object/public/avatars/';
 const safeCol=c=>/^#[0-9a-f]{3,8}$/i.test(c||'')?c:'#6c63ff';
@@ -892,7 +900,7 @@ async function boot(user){
 }
 
 async function loadConvs(){
-  const {data:mine,error}=await sb.from('conversation_members').select('conversation_id,last_read_at,muted,pinned,conversations(id,created_at,eph_secs)').eq('user_id',S.me.id);
+  const {data:mine,error}=await sb.from('conversation_members').select('conversation_id,last_read_at,muted,pinned,cleared_at,conversations(id,created_at,eph_secs)').eq('user_id',S.me.id);
   if(error){console.error(error);return}
   const ids=mine.map(m=>m.conversation_id);
   if(!ids.length){S.convs=[];return}
@@ -907,9 +915,9 @@ async function loadConvs(){
   S.convs=mine.map(m=>{
     const c=m.conversations,members=byConv[c.id]||[];
     const other=members.find(p=>p.id!==S.me.id);
-    const msgs=(lastBy[c.id]||[]);
+    const msgs=(lastBy[c.id]||[]).filter(x=>!m.cleared_at||x.created_at>m.cleared_at);
     const unread=msgs.filter(x=>x.sender_id!==S.me.id&&x.created_at>m.last_read_at).length;
-    return {id:c.id,name:other?.display_name||'Utilisateur supprimé',color:colorOf(c.id,other?.color),other,members,last:msgs[0]||null,unread,created_at:c.created_at,eph:c.eph_secs||2592000,last_read_at:m.last_read_at,muted:!!m.muted,pinned:!!m.pinned,other_read:other?readAt[c.id+other.id]:null};
+    return {id:c.id,name:other?.display_name||'Utilisateur supprimé',color:colorOf(c.id,other?.color),other,members,last:msgs[0]||null,unread,created_at:c.created_at,eph:c.eph_secs||2592000,last_read_at:m.last_read_at,muted:!!m.muted,pinned:!!m.pinned,cleared:m.cleared_at||null,other_read:other?readAt[c.id+other.id]:null};
   });
   sortConvs();
 }
@@ -1014,7 +1022,9 @@ function onReaction(p){
 }
 function onMemberUpdate(r){
   const c=S.convs.find(x=>x.id===r.conversation_id);if(!c)return;
-  if(r.user_id===S.me.id){if(c.muted!==!!r.muted||c.pinned!==!!r.pinned){c.muted=!!r.muted;c.pinned=!!r.pinned;sortConvs();renderList();if(S.cur===c.id)renderInfo(c)}return}
+  if(r.user_id===S.me.id){
+    if((r.cleared_at||null)!==(c.cleared||null)){c.cleared=r.cleared_at||null;const a=(S.msgs[c.id]||[]).filter(x=>!c.cleared||x.created_at>c.cleared);S.msgs[c.id]=a;c.last=a[a.length-1]||null;c.unread=0;if(S.cur===c.id&&!c.last)closeChat();renderList();if(S.cur===c.id)renderMsgs(false);return}
+    if(c.muted!==!!r.muted||c.pinned!==!!r.pinned){c.muted=!!r.muted;c.pinned=!!r.pinned;sortConvs();renderList();if(S.cur===c.id)renderInfo(c)}return}
   c.other_read=r.last_read_at;if(S.cur===c.id)renderMsgs(false);
 }
 async function loadReactions(id){
@@ -1041,7 +1051,8 @@ function fmtDay(d){
 }
 function renderAll(){renderList();renderChat()}
 function renderList(){
-  let list=S.convs.filter(c=>{
+  const vis=S.convs.filter(c=>!(c.cleared&&!c.last));
+  let list=vis.filter(c=>{
     if(S.filter==='unread'&&!c.unread)return false;
     if(S.q&&!c.name.toLowerCase().includes(S.q))return false;
     return true;
@@ -1052,18 +1063,86 @@ function renderList(){
   document.title=(tot?`(${tot}) `:'')+'PolyMess';
   try{if(navigator.setAppBadge){tot?navigator.setAppBadge(tot):navigator.clearAppBadge()}}catch(e){}
   if(!list.length){
-    $('convs').innerHTML=`<div class="empty">${S.convs.length?'Aucune conversation ne correspond.':'Aucune conversation pour l’instant.<br>Appuie sur <b>+</b> pour écrire à quelqu’un.'}</div>`;return;
+    $('convs').innerHTML=`<div class="empty">${vis.length?'Aucune conversation ne correspond.':'Aucune conversation pour l’instant.<br>Appuie sur <b>+</b> pour écrire à quelqu’un.'}</div>`;return;
   }
   $('convs').innerHTML=list.map(c=>{
     const lastOk=c.last&&!msgGone(c.last)?c.last:null;
     const prev=lastOk?((lastOk.sender_id===S.me.id?'Toi : ':'')+prevText(lastOk)):'Aucun message';
-    return `<button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
+    const rd=lastOk&&isRead(c,lastOk);
+    const tk=lastOk&&!lastOk.deleted_at&&lastOk.sender_id===S.me.id?`<span class="ltk${rd?' rd':''}">${ico(lastOk.pending?'clock':rd?'ticks':'tick','mini')}</span>`:'';
+    return `<div class="cw" data-id="${esc(c.id)}"><div class="swa"><button type="button" data-a="pin" class="sp">${ico('pin')}<small>${c.pinned?'Désépingler':'Épingler'}</small></button><button type="button" data-a="mute" class="sm">${ico(c.muted?'bell':'bellOff')}<small>${c.muted?'Son':'Sourdine'}</small></button><button type="button" data-a="del" class="sd">${ico('trash')}<small>Supprimer</small></button></div>
+    <button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
       <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on'+(S.away.has(c.other.id)?' away':''):''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
       <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.pinned?ico('pin','mini'):''}${c.muted?ico('bellOff','mini'):''}${lastOk?fmtList(lastOk.created_at):''}</span></div>
-      <div class="p"><i>${lastOk&&!lastOk.deleted_at&&lastOk.att_path?(lastOk.sender_id===S.me.id?'Toi : ':'')+ico((lastOk.att_type||'').startsWith('image/')?'image':'file','mini')+esc((lastOk.att_type||'').startsWith('image/')?'Photo':(lastOk.att_name||'Fichier'))+(lastOk.content?' '+esc(lastOk.content):''):esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button>`;
+      <div class="p"><i>${tk}${lastOk&&!lastOk.deleted_at&&lastOk.att_path?(lastOk.sender_id===S.me.id?'Toi : ':'')+ico((lastOk.att_type||'').startsWith('image/')?'image':'file','mini')+esc((lastOk.att_type||'').startsWith('image/')?'Photo':(lastOk.att_name||'Fichier'))+(lastOk.content?' '+esc(lastOk.content):''):esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button></div>`;
   }).join('');
 }
-$('convs').onclick=e=>{const b=e.target.closest('.conv');if(b)openConv(b.dataset.id)};
+// ---- Balayage d'une ligne (écran tactile) : Épingler / Sourdine / Supprimer
+let swOpen=null,sw=null;
+const swClose=(animate=true)=>{if(!swOpen)return;const r=swOpen.querySelector('.conv');r.style.transition=animate?'transform .2s':'none';r.style.transform='';const w=swOpen;swOpen=null;setTimeout(()=>{if(w!==swOpen){w.classList.remove('open');r.style.background=''}},animate?210:0)};
+const SWW=192;
+$('convs').addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse')return;
+  const w=e.target.closest('.cw');
+  if(swOpen&&(!w||w!==swOpen||!e.target.closest('.swa'))&&!(w&&w===swOpen&&e.target.closest('.swa')))swClose();
+  if(!w||e.target.closest('.swa'))return;
+  sw={w,x:e.clientX,y:e.clientY,id:e.pointerId,drag:false,base:swOpen===w?-SWW:0,dx:0};
+},{passive:true});
+$('convs').addEventListener('pointermove',e=>{
+  if(!sw||e.pointerId!==sw.id)return;
+  const dx=e.clientX-sw.x,dy=e.clientY-sw.y;
+  if(!sw.drag){
+    if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.5){
+      sw.drag=true;const r=sw.w.querySelector('.conv');
+      let bg='',el=$('convs');while(el&&(!bg||bg==='transparent'||bg==='rgba(0, 0, 0, 0)')){bg=getComputedStyle(el).backgroundColor;el=el.parentElement}
+      r.style.background=bg;sw.w.classList.add('open');r.style.transition='none';try{$('convs').setPointerCapture(e.pointerId)}catch(_){}
+      if(swOpen&&swOpen!==sw.w)swClose(false);
+    }else if(Math.abs(dy)>12){sw=null;return}
+    else return;
+  }
+  sw.dx=Math.min(0,Math.max(-SWW-30,sw.base+dx));
+  sw.w.querySelector('.conv').style.transform=`translateX(${sw.dx}px)`;
+});
+const swEnd=e=>{
+  if(!sw||(e&&e.pointerId!==sw.id))return;
+  const s=sw;sw=null;if(!s.drag)return;
+  s.w.dataset.drag=1;setTimeout(()=>delete s.w.dataset.drag,350);
+  const r=s.w.querySelector('.conv');r.style.transition='transform .2s';
+  if(s.dx<-SWW/2){r.style.transform=`translateX(${-SWW}px)`;swOpen=s.w}
+  else{swOpen=s.w;swClose()}
+};
+['pointerup','pointercancel'].forEach(t=>$('convs').addEventListener(t,swEnd));
+$('convs').addEventListener('click',e=>{
+  const w=e.target.closest('.cw');
+  if(w&&w.dataset.drag){e.stopImmediatePropagation();e.preventDefault();return}
+  const b=e.target.closest('.swa button');
+  if(b){
+    e.stopImmediatePropagation();const c=S.convs.find(x=>x.id===w.dataset.id);if(!c)return;
+    swClose();
+    if(b.dataset.a==='pin')setFlag(c,'pinned',!c.pinned);
+    else if(b.dataset.a==='mute')setFlag(c,'muted',!c.muted);
+    else askDeleteConv(c);
+    return;
+  }
+  if(swOpen){e.stopImmediatePropagation();e.preventDefault();swClose()}
+},true);
+function askDeleteConv(c){
+  const d=document.createElement('div');d.id='ephs';
+  d.innerHTML=`<div class="ephbg"></div><div class="ephsh"><span class="ephgr"></span><h3>Supprimer la conversation ?</h3><p>Elle disparaît de ta liste et l’historique est effacé pour toi. ${esc(c.name)} garde ses messages. Si ${esc(c.name)} t’écrit de nouveau, la conversation réapparaît.</p><button type="button" class="dcb red">Supprimer</button><button type="button" class="dcb">Annuler</button></div>`;
+  document.body.appendChild(d);
+  const close=()=>d.remove();d.querySelector('.ephbg').onclick=close;
+  d.querySelectorAll('.dcb')[1].onclick=close;
+  d.querySelector('.dcb.red').onclick=async()=>{close();await deleteConv(c)};
+}
+async function deleteConv(c){
+  const t=new Date(Math.max(Date.now(),c.last?new Date(c.last.created_at).getTime()+1:0)).toISOString();
+  const {error}=await sb.from('conversation_members').update({cleared_at:t,last_read_at:t}).eq('conversation_id',c.id).eq('user_id',S.me.id);
+  if(error){flash('Impossible de supprimer : '+error.message);return}
+  c.cleared=t;c.last=null;c.unread=0;S.msgs[c.id]=[];S.react[c.id]=[];
+  if(S.cur===c.id)closeChat();
+  renderList();flash('Conversation supprimée.');
+}
+$('convs').addEventListener('click',e=>{const b=e.target.closest('.conv');if(b)openConv(b.dataset.id)});
 $('q').oninput=e=>{S.q=e.target.value.trim().toLowerCase();renderList()};
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');S.filter=t.dataset.f;renderList();
@@ -1077,7 +1156,8 @@ async function openConv(id){
   if(!S.msgs[id]){
     const {data,error}=await sb.from('messages').select(MCOLS).eq('conversation_id',id).order('created_at',{ascending:false}).limit(200);
     if(error){console.error(error);return}
-    S.msgs[id]=data.reverse();
+    const cl=(S.convs.find(x=>x.id===id)||{}).cleared;
+    S.msgs[id]=data.reverse().filter(x=>!cl||x.created_at>cl);
   }
   await loadReactions(id);
   joinTyping(id);
@@ -1855,7 +1935,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.54';
+const APP_VERSION='2026-11-08.55';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2087,7 +2167,7 @@ async function openSettings(tab){
       ['sFirst','sLast','sBirth'].forEach(i=>$(i).addEventListener('input',chk));$('sSave').disabled=true;
       b.querySelectorAll('.sw button').forEach(x=>x.onclick=()=>{color=x.dataset.c;b.querySelectorAll('.sw button').forEach(y=>y.classList.toggle('sel',y===x));$('pv').style.background=avBg(color,S.me.avatar_path);chk()});
       $('sSave').onclick=async()=>{
-        const f=$('sFirst').value.trim(),l=$('sLast').value.trim(),bv=$('sBirth').value;
+        const f=niceName($('sFirst').value.trim()),l=niceName($('sLast').value.trim()),bv=$('sBirth').value;
         if(!f){note('sm','Indique ton prénom.','err');return}
         if(!l){note('sm','Indique ton nom.','err');return}
         if(!validDate(bv)){note('sm','Indique une date de naissance valide.','err');return}
