@@ -241,7 +241,8 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 @media (hover:none){.conv{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
 #cdim{position:fixed;inset:0;z-index:79;background:rgba(5,6,20,.66)}
 #cpv{position:fixed;z-index:81;background:var(--bg);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.45);overflow:hidden}
-#cpv .pmb{padding:12px;display:flex;flex-direction:column;gap:7px;max-height:min(46vh,300px);overflow:hidden}
+#cpv .pmb{padding:12px 16px 12px 12px;display:flex;flex-direction:column;gap:7px;max-height:min(46vh,300px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:none}#cpv .pmb::-webkit-scrollbar{display:none}
+#cpv .pms{position:absolute;top:10px;bottom:10px;right:4px;width:4px;border-radius:2px;background:rgba(125,122,160,.18)}#cpv .pms i{position:absolute;left:0;right:0;top:0;border-radius:2px;background:var(--mut);opacity:.8}
 #cpv .pm{max-width:80%;border-radius:16px;padding:8px 12px;font-size:13.5px;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
 #cpv .pm small{display:block;text-align:right;font-size:10px;opacity:.65;margin-top:2px}
 #cpv .pm.in{background:var(--soft);align-self:flex-start}#cpv .pm.out{background:var(--p);color:#fff;align-self:flex-end}#cpv .pm.dl{font-style:italic;opacity:.7}
@@ -1160,18 +1161,18 @@ async function openConvMenu(w){
   const c=S.convs.find(x=>x.id===w.dataset.id);if(!c)return;
   let msgs=S.msgs[c.id];
   if(!msgs){
-    const {data}=await sb.from('messages').select(MCOLS).eq('conversation_id',c.id).order('created_at',{ascending:false}).limit(12);
+    const {data}=await sb.from('messages').select(MCOLS).eq('conversation_id',c.id).order('created_at',{ascending:false}).limit(25);
     msgs=(data||[]).reverse().filter(x=>!c.cleared||x.created_at>c.cleared);
   }
   c._pv=msgs;
-  const vis=msgs.filter(m=>!msgGone(m)).slice(-7);
+  const vis=msgs.filter(m=>!msgGone(m)).slice(-25);
   const incoming=msgs.filter(m=>m.sender_id!==S.me.id&&!m.deleted_at);
   const firstUnread=c.unread?vis.findIndex(m=>m.sender_id!==S.me.id&&m.created_at>c.last_read_at):-1;
   const bub=m=>`<div class="pm ${m.sender_id===S.me.id?'out':'in'}${m.deleted_at?' dl':''}">${esc(prevText(m)||'Message')}<small>${esc(fmtTime(m.created_at))}</small></div>`;
   const body=vis.length?vis.map((m,i)=>(i===firstUnread?`<div class="pmu">${c.unread} non lu${c.unread>1?'s':''}</div>`:'')+bub(m)).join(''):'<div class="pme">Aucun message</div>';
   const r=w.getBoundingClientRect();
   const dim=document.createElement('div');dim.id='cdim';const t0=Date.now();dim.onclick=()=>{if(Date.now()-t0>500)closeCMenu()};document.body.appendChild(dim);
-  const pv=document.createElement('div');pv.id='cpv';pv.innerHTML=`<div class="pmb">${body}</div>`;document.body.appendChild(pv);
+  const pv=document.createElement('div');pv.id='cpv';pv.innerHTML=`<div class="pmb">${body}</div><div class="pms"><i></i></div>`;document.body.appendChild(pv);
   const m=document.createElement('div');m.id='cmenu';
   const it=(a,ic,t,cls='')=>`<button type="button" class="it ${cls}" data-a="${a}">${ico(ic)}${t}</button>`;
   m.innerHTML=it('pin','pin',c.pinned?'Désépingler':'Épingler')+it('mute',c.muted?'bell':'bellOff',c.muted?'Réactiver le son':'Couper le son')+(c.unread?it('read','mail','Marquer comme lu'):incoming.length?it('unread','mail','Marquer comme non lu'):'')+it('prof','eye','Voir le profil')+it('del','trash','Supprimer','red');
@@ -1182,7 +1183,9 @@ async function openConvMenu(w){
   const ph=pv.offsetHeight,mh=m.offsetHeight;
   let top=r.top;if(top+ph+mh+18>innerHeight-10)top=Math.max(10,innerHeight-10-ph-mh-18);
   pv.style.top=top+'px';m.style.top=(top+ph+10)+'px';
-  const pb=pv.querySelector('.pmb');pb.scrollTop=pb.scrollHeight;
+  const pb=pv.querySelector('.pmb'),th=pv.querySelector('.pms i'),tr=pv.querySelector('.pms');
+  const sync=()=>{const sh=pb.scrollHeight,ch=pb.clientHeight;if(sh<=ch+2){tr.style.display='none';return}tr.style.display='';const th_=Math.max(28,ch*ch/sh);th.style.height=th_+'px';th.style.transform=`translateY(${(ch-th_)*pb.scrollTop/(sh-ch)}px)`};
+  pb.scrollTop=pb.scrollHeight;sync();pb.addEventListener('scroll',sync,{passive:true});
   m.onclick=async ev=>{
     const b=ev.target.closest('button');if(!b)return;closeCMenu();
     const a=b.dataset.a;
@@ -2011,7 +2014,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.56';
+const APP_VERSION='2026-11-08.57';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
