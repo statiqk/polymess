@@ -286,6 +286,10 @@ html[data-theme=dark] #auth{background:linear-gradient(160deg,#12122a,#1c1c3a)}
 .cm .t span{display:flex;align-items:center}
 .bd{background:var(--acc);font-size:12px;padding:2px 8px;border-radius:12px}
 .av.on::after{background:#2fbf71;border:2.5px solid var(--card)}
+.av.off::after{content:'';position:absolute;right:0;bottom:0;width:14px;height:14px;border-radius:50%;background:var(--card);border:2.5px solid var(--card);box-shadow:inset 0 0 0 2px var(--mut)}
+.ago{position:absolute;right:-6px;bottom:-3px;font-style:normal;font-size:10.5px;font-weight:700;line-height:1;padding:2px 5px;border-radius:9px;background:#1f6b46;color:#d4f7e3;border:2px solid var(--card);white-space:nowrap}
+.conv.on .ago{border-color:var(--sel)}
+.sn{font-size:12.5px;color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sn.live{color:#1f9d5c;font-weight:600}html[data-theme=dark] .sn.live{color:#4cd08a}
 .conv.on .av.on::after{border-color:var(--sel)}
 .ch{padding:14px 24px}.ch .s.live{color:#1f9d5c;font-weight:600}html[data-theme=dark] .ch .s.live{color:#4cd08a}
 .m{border-radius:20px;padding:11px 16px;font-size:15px;line-height:1.5}
@@ -1087,8 +1091,9 @@ function renderList(){
     const tk=lastOk&&!lastOk.deleted_at&&lastOk.sender_id===S.me.id?`<span class="ltk${rd?' rd':''}">${ico(lastOk.pending?'clock':rd?'ticks':'tick','mini')}</span>`:'';
     return `<div class="cw" data-id="${esc(c.id)}"><div class="swa"><button type="button" data-a="pin" class="sp">${ico('pin')}<small>${c.pinned?'Désépingler':'Épingler'}</small></button><button type="button" data-a="mute" class="sm">${ico(c.muted?'bell':'bellOff')}<small>${c.muted?'Son':'Sourdine'}</small></button><button type="button" data-a="del" class="sd">${ico('trash')}<small>Supprimer</small></button></div>
     <button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
-      <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on'+(S.away.has(c.other.id)?' away':''):''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
+      <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on'+(S.away.has(c.other.id)?' away':''):''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}${(()=>{const a=c.other?leftAgo(c.other.id):null;return a!=null?`<i class="ago">${fmtAgo(a)}</i>`:''})()}</div>
       <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.pinned?ico('pin','mini'):''}${c.muted?ico('bellOff','mini'):''}${lastOk?fmtList(lastOk.created_at):''}</span></div>
+      ${(()=>{const sn=c.other?subText(c,false):'';return sn?`<div class="sn${sn==='En ligne'?' live':''}">${esc(sn)}</div>`:''})()}
       <div class="p"><i>${tk}${lastOk&&!lastOk.deleted_at&&lastOk.att_path?(lastOk.sender_id===S.me.id?'Toi : ':'')+ico((lastOk.att_type||'').startsWith('image/')?'image':'file','mini')+esc((lastOk.att_type||'').startsWith('image/')?'Photo':(lastOk.att_name||'Fichier'))+(lastOk.content?' '+esc(lastOk.content):''):esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button></div>`;
   }).join('');
 }
@@ -1258,6 +1263,15 @@ function renderChat(){
   updateSub();
   renderMsgs(true);renderInfo(c);applyInfo();renderBar();applyLock();
 }
+// après le départ d'un ami : durée depuis sa dernière activité (24 h max) ; anneau gris pendant 1 h sur les petits avatars
+function leftAgo(id){
+  if(!statusOn()||!id||S.online.has(id))return null;
+  const t=S.seen[id];if(!t)return null;
+  const ms=Date.now()-new Date(t).getTime();
+  return ms<86400000?Math.max(0,ms):null;
+}
+const fmtAgo=ms=>{const m=Math.floor(ms/60000);return m<1?'1 min':m<60?m+' min':Math.floor(m/60)+' h'};
+const ringOn=id=>{const a=leftAgo(id);return a!=null&&a<3600000};
 function subText(c,typing=true){
   if(typing&&S.typing===c.id)return 'écrit…';
   if(statusOn()&&c.other&&S.online.has(c.other.id))return S.away.has(c.other.id)?'Absent':'En ligne';
@@ -1278,7 +1292,7 @@ function renderInfo(c){
   const on=statusOn()&&c.other&&S.online.has(c.other.id);
   const seenLong=statusOn()&&c.other&&S.seen[c.other.id]?fmtSeenLong(S.seen[c.other.id]):'';
   const stTxt=subText(c,false)||'Discussion privée';
-  $('info').innerHTML=`${back}<div class="av${on?' on':''}${on&&S.away.has(c.other.id)?' away':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
+  $('info').innerHTML=`${back}<div class="av${on?' on':''}${on&&S.away.has(c.other.id)?' away':''}${!on&&c.other&&ringOn(c.other.id)?' off':''}" id="infoAv" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}</div>
    <h3>${esc(c.name)}</h3><p class="st${stTxt==='En ligne'?' live':stTxt==='Absent'?' away':''}" id="infoSt">${esc(stTxt)}</p>
    <div class="act"><button id="aSearch"><span class="ic2">${ico('search')}</span>Rechercher</button><button id="aMute" class="${c.muted?'sel':''}"><span class="ic2">${ico(c.muted?'bellOff':'bell')}</span>${c.muted?'Réactiver':'Sourdine'}</button><button id="aPin" class="${c.pinned?'sel':''}"><span class="ic2">${ico('pin')}</span>${c.pinned?'Désépingler':'Épingler'}</button></div>
    <div class="sec ephsec"><button type="button" class="ephr" id="aEph"><span class="ephi">${ico('clock')}</span><span class="ephx"><b>Messages éphémères</b><small>${EPH[c.eph]||'30 jours'}</small></span><span class="ephc">${ico('back')}</span></button><p class="ephh">Les messages de cette discussion sont supprimés automatiquement après la durée choisie.</p></div>
@@ -1769,9 +1783,9 @@ function updateSub(){
   $('chSub').classList.toggle('live',t==='En ligne'||t==='écrit…');
   $('chSub').classList.toggle('away',t==='Absent');
   const aw=!!(on&&S.away.has(c.other.id));
-  $('chAv').classList.toggle('on',!!on);$('chAv').classList.toggle('away',aw);
+  $('chAv').classList.toggle('on',!!on);$('chAv').classList.toggle('away',aw);$('chAv').classList.toggle('off',!!(c.other&&ringOn(c.other.id)));
   const e=$('infoSt');if(e){const tx=subText(c,false)||'Discussion privée';e.textContent=tx;e.classList.toggle('live',tx==='En ligne');e.classList.toggle('away',tx==='Absent')}
-  const a=$('infoAv');if(a){a.classList.toggle('on',!!on);a.classList.toggle('away',aw)}
+  const a=$('infoAv');if(a){a.classList.toggle('on',!!on);a.classList.toggle('away',aw);a.classList.toggle('off',!!(c.other&&ringOn(c.other.id)))}
 }
 let pch=null,seenTimer=null;
 // Présence : un canal privé par personne (presence:<id>), lisible par ses amis seulement.
@@ -1797,6 +1811,8 @@ function syncSeenOne(id){
 // passage de minuit : « Vu à » devient « Vu hier à » sans attendre une autre mise à jour
 let seenDay=new Date().toDateString();
 setInterval(()=>{const d=new Date().toDateString();if(d!==seenDay){seenDay=d;if(S.me){updateSub();renderList()}}},30000);
+// les durées (« 5 min », « 3 h ») avancent d'elles-mêmes, sans toucher à une ligne en cours de balayage
+setInterval(()=>{if(S.me&&statusOn()&&!document.hidden&&!sw&&!swOpen){updateSub();renderList()}},60000);
 function setFriendPresence(id,entries){
   if(entries.length){
     rawOn.add(id);delete goneAt[id];
@@ -1882,7 +1898,7 @@ function openNew(){
     if(st==='sent')return `<span class="fbtn s">${ico('clock')}En attente</span>`;
     if(st==='received')return `<span class="fbtn pri fa" data-a="acc">${ico('tick')}Accepter</span>`;
     return `<span class="fbtn pri fa" data-a="add">${ico('user')}Ajouter</span>`};
-  const presCls=id=>statusOn()&&S.online.has(id)?' on'+(S.away.has(id)?' away':''):'';
+  const presCls=id=>statusOn()&&S.online.has(id)?' on'+(S.away.has(id)?' away':''):ringOn(id)?' off':'';
   const presTxt=id=>!statusOn()||frState(id)!=='friends'?'':S.online.has(id)?(S.away.has(id)?'Absent':'En ligne'):S.seen[id]?fmtSeen(S.seen[id]):'';
   const frow=(p,sub)=>`<button class="pick" data-id="${esc(p.id)}"><div class="av${presCls(p.id)}" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div><div class="pt"><b>${hl(p.display_name)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div>${fbtn(p)}</button>`;
   const reqLink=()=>{const n=frIncoming().length+frOutgoing().length;return n?`<button type="button" class="frlink" id="frLink"><span>${ico('user')}Demandes d’amis</span><em>${n}</em></button>`:''};
@@ -2025,7 +2041,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.61';
+const APP_VERSION='2026-11-08.62';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
