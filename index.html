@@ -251,9 +251,9 @@ html[data-theme=dark] #auth{background:linear-gradient(160deg,#12122a,#1c1c3a)}
 .conv.on::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--p)}
 .cm .t span{display:flex;align-items:center}
 .bd{background:var(--acc);font-size:12px;padding:2px 8px;border-radius:12px}
-.av.on::after{background:var(--acc);border:2.5px solid var(--card)}
+.av.on::after{background:#2fbf71;border:2.5px solid var(--card)}
 .conv.on .av.on::after{border-color:var(--sel)}
-.ch{padding:14px 24px}.ch .s.live{color:var(--acc);font-weight:600}
+.ch{padding:14px 24px}.ch .s.live{color:#1f9d5c;font-weight:600}html[data-theme=dark] .ch .s.live{color:#4cd08a}
 .m{border-radius:20px;padding:11px 16px;font-size:15px;line-height:1.5}
 .m small{font-size:12px;opacity:.7}
 .in{border-bottom-left-radius:6px;box-shadow:0 2px 8px rgba(60,50,140,.07)}
@@ -1446,14 +1446,29 @@ function updateSub(){
   const a=$('infoAv');if(a)a.classList.toggle('on',!!on);
 }
 let pch=null,seenTimer=null;
+// Délai de grâce : un ami reste « en ligne » 2 min après avoir quitté l'appli (évite le clignotement entre deux applis)
+const GRACE=120000;let rawOn=new Set(),goneAt={},graceT=null;
+function calcOnline(){
+  const now=Date.now(),s=new Set(rawOn);
+  for(const id in goneAt){if(now-goneAt[id]<GRACE)s.add(id);else delete goneAt[id]}
+  S.online=s;updateSub();renderList();
+  clearTimeout(graceT);const t=Object.values(goneAt);
+  if(t.length)graceT=setTimeout(calcOnline,Math.max(1000,GRACE-(now-Math.min(...t)))+500);
+}
+function onPresenceSync(keys){
+  const nw=new Set(keys),now=Date.now();
+  for(const id of rawOn)if(!nw.has(id))goneAt[id]=now;
+  for(const id of nw)delete goneAt[id];
+  rawOn=nw;calcOnline();
+}
 const touchSeen=()=>sb.rpc('touch_seen',{visible:true});
-function stopPresence(){clearInterval(seenTimer);if(pch){sb.removeChannel(pch);pch=null}S.online=new Set()}
+function stopPresence(){clearInterval(seenTimer);clearTimeout(graceT);rawOn=new Set();goneAt={};if(pch){sb.removeChannel(pch);pch=null}S.online=new Set()}
 function startPresence(){
   stopPresence();
   if(!S.me)return;
   if(!statusOn()){sb.rpc('touch_seen',{visible:false});return}
   pch=sb.channel('presence',{config:{presence:{key:S.me.id}}});
-  pch.on('presence',{event:'sync'},()=>{S.online=new Set(Object.keys(pch.presenceState()));updateSub();renderList()})
+  pch.on('presence',{event:'sync'},()=>onPresenceSync(Object.keys(pch.presenceState())))
      .on('presence',{event:'leave'},({key})=>{for(const c of S.convs)if(c.other?.id===key)c.other.last_seen_at=new Date().toISOString();updateSub()})
      .subscribe(async st=>{if(st==='SUBSCRIBED'&&!document.hidden)await pch.track({at:Date.now()})});
   touchSeen();seenTimer=setInterval(()=>{if(!document.hidden)touchSeen()},60000);
@@ -1628,7 +1643,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.45';
+const APP_VERSION='2026-11-08.46';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1651,7 +1666,7 @@ async function checkUpdate(manual){
 }
 setInterval(checkUpdate,5*60*1000);
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){checkUpdate();refreshAll();if(pch)pch.track({at:Date.now()});if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
+  if(!document.hidden){checkUpdate();refreshAll();rawOn=new Set();goneAt={};if(pch)pch.track({at:Date.now()});if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
   else if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}
 });
 addEventListener('online',refreshAll);
