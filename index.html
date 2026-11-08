@@ -924,11 +924,11 @@ async function loadConvs(){
   const ids=mine.map(m=>m.conversation_id);
   if(!ids.length){S.convs=[];return}
   const [{data:mem},{data:recent}]=await Promise.all([
-    sb.from('conversation_members').select('conversation_id,user_id,last_read_at,profiles(id,username,display_name,first_name,last_name,color,avatar_path)').in('conversation_id',ids),
+    sb.from('conversation_members').select('conversation_id,user_id,last_read_at,last_delivered_at,profiles(id,username,display_name,first_name,last_name,color,avatar_path)').in('conversation_id',ids),
     sb.from('messages').select(MCOLS).in('conversation_id',ids).order('created_at',{ascending:false}).limit(400)
   ]);
-  const byConv={},readAt={};
-  (mem||[]).forEach(m=>{if(m.profiles)(byConv[m.conversation_id]??=[]).push(m.profiles);readAt[m.conversation_id+m.user_id]=m.last_read_at});
+  const byConv={},readAt={},delivAt={};
+  (mem||[]).forEach(m=>{if(m.profiles)(byConv[m.conversation_id]??=[]).push(m.profiles);readAt[m.conversation_id+m.user_id]=m.last_read_at;delivAt[m.conversation_id+m.user_id]=m.last_delivered_at});
   const lastBy={};
   (recent||[]).forEach(m=>{(lastBy[m.conversation_id]??=[]).push(m)});
   S.convs=mine.map(m=>{
@@ -936,7 +936,7 @@ async function loadConvs(){
     const other=members.find(p=>p.id!==S.me.id);
     const msgs=(lastBy[c.id]||[]).filter(x=>!m.cleared_at||x.created_at>m.cleared_at);
     const unread=msgs.filter(x=>x.sender_id!==S.me.id&&x.created_at>m.last_read_at).length;
-    return {id:c.id,name:other?.display_name||'Utilisateur supprimé',color:colorOf(c.id,other?.color),other,members,last:msgs[0]||null,unread,created_at:c.created_at,eph:c.eph_secs||2592000,last_read_at:m.last_read_at,muted:!!m.muted,pinned:!!m.pinned,cleared:m.cleared_at||null,other_read:other?readAt[c.id+other.id]:null};
+    return {id:c.id,name:other?.display_name||'Utilisateur supprimé',color:colorOf(c.id,other?.color),other,members,last:msgs[0]||null,unread,created_at:c.created_at,eph:c.eph_secs||2592000,last_read_at:m.last_read_at,muted:!!m.muted,pinned:!!m.pinned,cleared:m.cleared_at||null,other_read:other?readAt[c.id+other.id]:null,other_deliv:other?delivAt[c.id+other.id]:null};
   });
   sortConvs();
 }
@@ -969,6 +969,7 @@ async function onNewMsg(m){
   if(!c){await loadConvs();c=S.convs.find(x=>x.id===m.conversation_id);if(!c){renderAll();return}}
   c.last=m;
   if(m.sender_id!==S.me.id){
+    ackDelivered();
     if(!c.muted&&prefs.sound&&(document.hidden||S.cur!==c.id))beep();
     if(!c.muted&&prefs.notif&&!prefs.push&&document.hidden&&'Notification' in window&&Notification.permission==='granted')
       showNotif(c.name,prevText(m).slice(0,140),c.id);
@@ -1045,7 +1046,7 @@ function onMemberUpdate(r){
   if(r.user_id===S.me.id){
     if((r.cleared_at||null)!==(c.cleared||null)){c.cleared=r.cleared_at||null;const a=(S.msgs[c.id]||[]).filter(x=>!c.cleared||x.created_at>c.cleared);S.msgs[c.id]=a;c.last=a[a.length-1]||null;c.unread=0;if(S.cur===c.id&&!c.last)closeChat();renderList();if(S.cur===c.id)renderMsgs(false);return}
     if(c.muted!==!!r.muted||c.pinned!==!!r.pinned){c.muted=!!r.muted;c.pinned=!!r.pinned;sortConvs();renderList();if(S.cur===c.id)renderInfo(c)}return}
-  c.other_read=r.last_read_at;if(S.cur===c.id)renderMsgs(false);
+  c.other_read=r.last_read_at;c.other_deliv=r.last_delivered_at;if(S.cur===c.id)renderMsgs(false);renderList();
 }
 async function loadReactions(id){
   const {data}=await sb.from('reactions').select('message_id,user_id,emoji,conversation_id').eq('conversation_id',id);
@@ -1089,7 +1090,7 @@ function renderList(){
     const lastOk=c.last&&!msgGone(c.last)?c.last:null;
     const prev=lastOk?((lastOk.sender_id===S.me.id?'Toi : ':'')+prevText(lastOk)):'Aucun message';
     const rd=lastOk&&isRead(c,lastOk);
-    const tk=lastOk&&!lastOk.deleted_at&&lastOk.sender_id===S.me.id?`<span class="ltk${rd?' rd':''}">${ico(lastOk.pending?'clock':rd?'ticks':'tick','mini')}</span>`:'';
+    const tk=lastOk&&!lastOk.deleted_at&&lastOk.sender_id===S.me.id?`<span class="ltk${rd?' rd':''}">${ico(lastOk.pending?'clock':(rd||isDeliv(c,lastOk))?'ticks':'tick','mini')}</span>`:'';
     return `<div class="cw" data-id="${esc(c.id)}"><div class="swa"><button type="button" data-a="pin" class="sp">${ico('pin')}<small>${c.pinned?'Désépingler':'Épingler'}</small></button><button type="button" data-a="mute" class="sm">${ico(c.muted?'bell':'bellOff')}<small>${c.muted?'Son':'Sourdine'}</small></button><button type="button" data-a="del" class="sd">${ico('trash')}<small>Supprimer</small></button></div>
     <button class="conv ${c.id===S.cur?'on':''}" data-id="${esc(c.id)}">
       <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on'+(S.away.has(c.other.id)?' away':''):''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}${(()=>{const a=c.other?leftAgo(c.other.id):null;return a!=null?`<i class="ago">${fmtAgo(a)}</i>`:''})()}</div>
@@ -1320,6 +1321,7 @@ function fmtSeenLong(d){
 const RX=['👍','❤️','😂','😮','😢','🙏'];
 const fmtSize=n=>!n?'':n<1024*1024?Math.max(1,Math.round(n/1024))+' Ko':(n/1048576).toFixed(1).replace('.',',')+' Mo';
 const isRead=(c,m)=>!!c.other_read&&new Date(c.other_read)>=new Date(m.created_at);
+const isDeliv=(c,m)=>isRead(c,m)||(!!c.other_deliv&&new Date(c.other_deliv)>=new Date(m.created_at));
 let stick=true;
 function cachedUrl(p){const e=S.urls[p];return e&&e.exp>Date.now()?e.url:null}
 async function signedUrl(p,dl){
@@ -1368,7 +1370,7 @@ function renderMsgs(scroll){
     const rs=rx[m.id]||[];let rh='';
     if(rs.length){const g={};rs.forEach(r=>{(g[r.emoji]??=[]).push(r.user_id)});
       rh=`<div class="rxs">${Object.entries(g).map(([e,u])=>`<button class="rx ${u.includes(S.me.id)?'mine':''}" data-e="${e}" data-id="${esc(m.id)}">${e}${u.length>1?' '+u.length:''}</button>`).join('')}</div>`}
-    const tick=mine?(m.pending?` <span class="tk">${ico('clock')}</span>`:(isRead(c,m)?` <span class="tk rd">${ico('ticks')}</span>`:` <span class="tk">${ico('tick')}</span>`)):'';
+    const tick=mine?(m.pending?` <span class="tk">${ico('clock')}</span>`:(isRead(c,m)?` <span class="tk rd">${ico('ticks')}</span>`:isDeliv(c,m)?` <span class="tk">${ico('ticks')}</span>`:` <span class="tk">${ico('tick')}</span>`)):'';
     html+=`<div class="m ${mine?'out':'in'} ${gap}" data-id="${esc(m.id)}">${avh}${q}${att}${m.content?esc(m.content):''}${rh}${msgLeft(m)<3600000?`<div class="te" data-x="${new Date(m.expires_at).getTime()}">${ico('clock','mini')}Disparaît dans ${fmtLeft(msgLeft(m))}</div>`:''}<small>${m.edited_at?'modifié · ':''}${fmtTime(m.created_at)}${tick}</small></div>`;
   }
   el.innerHTML=html||(S.msgs[c.id]?`<div class="empty">${ico('wave','big')}<br>Dis bonjour</div>`:'');
@@ -1455,7 +1457,7 @@ function openMsgInfo(m){
   const mine=m.sender_id===S.me.id;
   const row=(ic,t,s,cls='')=>`<div class="mir ${cls}">${ico(ic)}<div><b>${t}</b><span>${s}</span></div></div>`;
   let rows=row(mine?'send':'tick',mine?'Envoyé':'Reçu',esc(fmtWhen(m.created_at)));
-  if(mine)rows+=isRead(c,m)?row('ticks','Lu','Dernière lecture : '+esc(fmtWhen(c.other_read)),'g'):row('tick','Pas encore lu','Envoyé à '+esc(c.name));
+  if(mine)rows+=isRead(c,m)?row('ticks','Lu','Dernière lecture : '+esc(fmtWhen(c.other_read)),'g'):(isDeliv(c,m)?row('ticks','Reçu','Pas encore lu par '+esc(c.name)):row('tick','Pas encore reçu','Envoyé à '+esc(c.name)));
   if(m.att_path&&m.att_path!=='local')rows+=row('file','Pièce jointe',attExpired(m)?'Expirée (24 h après l’envoi)':'Disponible encore '+esc(fmtLeft(expLeft(m))));
   if(m.expires_at)rows+=row('clock','Disparaît',msgLeft(m)>0?'Dans '+esc(fmtLeft(msgLeft(m)))+' ('+esc(fmtWhen(m.expires_at))+')':'Bientôt');
   rows+=row('edit','Modifié',m.edited_at?esc(fmtWhen(m.edited_at)):'Non');
@@ -1856,6 +1858,9 @@ async function loadSeen(){
 // sb.rpc() ne part que si on l'attend : sans .then() la requête n'était jamais envoyée
 const seenCall=v=>{try{sb.rpc('touch_seen',{visible:v}).then(()=>{},()=>{})}catch(e){}};
 const touchSeen=()=>seenCall(true);
+// accusé de réception (« reçu ») : le serveur ne l'enregistre que si le statut en ligne est actif
+const ackDelivered=()=>{try{sb.rpc('mark_delivered').then(()=>{},()=>{})}catch(e){}};
+const ackAfterTouch=async()=>{try{await sb.rpc('touch_seen',{visible:true});await sb.rpc('mark_delivered')}catch(e){}};
 function stopPresence(){
   clearInterval(seenTimer);clearTimeout(graceT);clearTimeout(idleT);rawOn=new Set();goneAt={};myAway=false;
   for(const id of Object.keys(pfr)){try{sb.removeChannel(pfr[id])}catch(e){}}pfr={};
@@ -1868,7 +1873,7 @@ function startPresence(){
   pch=sb.channel('presence:'+S.me.id,{config:{private:true,presence:{key:S.me.id}}});
   pch.subscribe(st=>{if(st==='SUBSCRIBED')trackMe()});
   syncPresence();bumpActive();
-  touchSeen();seenTimer=setInterval(()=>{if(!document.hidden)touchSeen()},60000);
+  ackAfterTouch();seenTimer=setInterval(()=>{if(!document.hidden)touchSeen()},60000);
 }
 
 /* ---------- NOUVELLE DISCUSSION ---------- */
@@ -2042,7 +2047,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.64';
+const APP_VERSION='2026-11-08.65';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2065,7 +2070,7 @@ async function checkUpdate(manual){
 }
 setInterval(checkUpdate,5*60*1000);
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){checkUpdate();refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.me&&statusOn())touchSeen();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
+  if(!document.hidden){checkUpdate();refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.me&&statusOn())ackAfterTouch();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
   else if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}
 });
 addEventListener('online',refreshAll);

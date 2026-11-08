@@ -25,6 +25,8 @@ self.addEventListener('push',e=>{
     if(d.kind==='msg')opts.actions=[{action:'reply',title:'Répondre',type:'text',placeholder:'Ta réponse…'},{action:'read',title:'Marquer comme lu'}];
     await self.registration.showNotification(title,opts);
     setBadge(d.badge);
+    // accusé de réception : l'appareil a bien reçu le message (le serveur ignore ceux qui ont coupé leur statut en ligne)
+    if(d.kind==='msg'){try{const sub=await self.registration.pushManager.getSubscription();if(sub)await fetch(PUSH_URL,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint,action:'delivered'}),keepalive:true})}catch(_){}}
   })());
 });
 
