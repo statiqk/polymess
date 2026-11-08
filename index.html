@@ -574,6 +574,7 @@ html[data-theme=dark] .mlr.inv{background:linear-gradient(100deg,#2a2660,#3a2650
 .invb:active{transform:scale(.98)}
 .invb .ic{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex:none}
 .invb b{display:block;font-size:16px}.invb span.s{display:block;font-size:12.5px;opacity:.85;font-weight:500;margin-top:1px}
+.flash.err{background:#b3261e}
 .flash{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1d1a4b;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:99;max-width:86%;text-align:center}
 
 /* ===== Recherche + clavier ===== */
@@ -982,7 +983,7 @@ async function onNewMsg(m){
       showNotif(c.name,prevText(m).slice(0,140),c.id);
     clearTyping(c.id);
   }
-  if(S.msgs[c.id]&&!S.msgs[c.id].some(x=>x.id===m.id))S.msgs[c.id].push(m);
+  if(S.msgs[c.id]){const a=S.msgs[c.id],k=a.findIndex(x=>x.id===m.id);if(k<0)a.push(m);else if(a[k].pending)a[k]=m}
   if(S.cur===c.id){
     if(m.sender_id!==S.me.id){if(document.hidden)c.unread++;else markRead(c.id)}
     renderMsgs(true)
@@ -1253,6 +1254,7 @@ async function openConv(id){
     const cl=(S.convs.find(x=>x.id===id)||{}).cleared;
     S.msgs[id]=data.reverse().filter(x=>!cl||x.created_at>cl);
   }
+  outboxMerge(id);
   await loadReactions(id);
   joinTyping(id);
   if(S.cur!==id)return;
@@ -1290,7 +1292,7 @@ function subText(c,typing=true){
 async function setFlag(c,k,v){
   c[k]=v;sortConvs();renderList();renderInfo(c);
   const {error}=await sb.from('conversation_members').update({[k]:v}).eq('conversation_id',c.id).eq('user_id',S.me.id);
-  if(error){c[k]=!v;sortConvs();renderList();renderInfo(c);alert('Impossible : '+error.message)}
+  if(error){c[k]=!v;sortConvs();renderList();renderInfo(c);logErr('maj',error);flash(errMsg(error),'err')}
 }
 function closeInfoPanel(){if(curPM==='info')history.back();else hideMobInfo();S.infoOverlay=false;applyInfo()}
 function renderInfo(c){
@@ -1537,7 +1539,7 @@ $('bar').onclick=e=>{
 async function delMsg(m){
   if(!confirm('Supprimer ce message pour tout le monde ?'))return;
   const {error}=await sb.rpc('delete_message',{mid:m.id});
-  if(error){alert('Suppression impossible : '+error.message);return}
+  if(error){logErr('suppr',error);flash('Suppression impossible. '+errMsg(error),'err');return}
   if(m.att_path)sb.storage.from('attachments').remove([m.att_path]);
   onMsgUpdate({...m,content:'',deleted_at:new Date().toISOString(),att_path:null,att_name:null,att_type:null,att_size:null,reply_to:null});
 }
@@ -1629,7 +1631,7 @@ async function saveFile(path,name,share){
   downloadFile(path,name);
 }
 async function downloadFile(path,name){
-  const u=await signedUrl(path,name);if(!u){alert('Fichier indisponible.');return}
+  const u=await signedUrl(path,name);if(!u){flash('Fichier indisponible.','err');return}
   const a=document.createElement('a');a.href=u;a.download=name;a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
 }
 
@@ -1690,12 +1692,12 @@ async function squareAvatar(f){
 }
 $('file').onchange=async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
-  if(!OKT.test(f.type)){alert('Type de fichier non pris en charge (images, PDF, Word, Excel, PowerPoint, texte, zip).');return}
+  if(!OKT.test(f.type)){flash('Type de fichier non pris en charge (images, PDF, Word, Excel, PowerPoint, texte, zip).','err');return}
   let blob=f,type=f.type,name=f.name;const isImg=type.startsWith('image/');
   if(isImg&&type!=='image/gif'){
     try{const r=await shrink(f);if(r.size<f.size||type==='image/heic'){blob=r;type='image/jpeg';name=name.replace(/\.\w+$/,'')+'.jpg'}}catch(err){}
   }
-  if(blob.size>10*1024*1024){alert('Fichier trop lourd (10 Mo maximum).');return}
+  if(blob.size>10*1024*1024){flash('Fichier trop lourd (10 Mo maximum).','err');return}
   S.att={blob,type,name,isImg};renderBar();
 };
 
@@ -1713,7 +1715,7 @@ async function doEdit(content){
   const old=m.content,oldE=m.edited_at;m.content=content;m.edited_at=new Date().toISOString();
   renderMsgs(false);
   const {error}=await sb.rpc('edit_message',{mid:id,new_content:content});
-  if(error){m.content=old;m.edited_at=oldE;renderMsgs(false);alert('Modification impossible : '+error.message)}
+  if(error){m.content=old;m.edited_at=oldE;renderMsgs(false);logErr('modif',error);flash('Modification impossible. '+errMsg(error),'err')}
 }
 $('comp').onsubmit=async e=>{
   e.preventDefault();
@@ -1722,27 +1724,73 @@ $('comp').onsubmit=async e=>{
   if((!content&&!S.att)||!S.cur)return;
   const cid=S.cur,reply=S.reply,att=S.att;
   txt.value='';S.reply=null;S.att=null;renderBar();
-  const tmp={id:'tmp-'+Date.now(),conversation_id:cid,sender_id:S.me.id,content,created_at:new Date().toISOString(),pending:true,reply_to:reply?reply.id:null};
+  const tmp={id:att?'tmp-'+Date.now():crypto.randomUUID(),conversation_id:cid,sender_id:S.me.id,content,created_at:new Date().toISOString(),pending:true,reply_to:reply?reply.id:null};
   if(att)Object.assign(tmp,{att_path:'local',att_name:att.name,att_type:att.type,att_size:att.blob.size,localUrl:att.isImg?URL.createObjectURL(att.blob):null});
   (S.msgs[cid]??=[]).push(tmp);renderMsgs(true);
   const arr=S.msgs[cid];
-  const fail=msg=>{const i=arr.findIndex(x=>x.id===tmp.id);if(i>=0)arr.splice(i,1);renderMsgs(true);txt.value=content;S.reply=reply;S.att=att;renderBar();alert('Envoi impossible : '+msg)};
+  const fail=(msg,e)=>{logErr('envoi',e||msg);const i=arr.findIndex(x=>x.id===tmp.id);if(i>=0)arr.splice(i,1);renderMsgs(true);txt.value=content;fit();S.reply=reply;S.att=att;renderBar();flash('Message non envoyé. '+(e?errMsg(e):msg),'err')};
   const row={conversation_id:cid,sender_id:S.me.id,content,reply_to:reply?reply.id:null};
   if(att){
     const safe=att.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
     const path=`${cid}/${crypto.randomUUID()}-${safe}`;
     const up=await sb.storage.from('attachments').upload(path,att.blob,{contentType:att.type,upsert:false});
-    if(up.error){fail(up.error.message);return}
+    if(up.error){fail('',up.error);return}
     Object.assign(row,{att_path:path,att_name:att.name.slice(0,200),att_type:att.type,att_size:att.blob.size});
+    const {data,error}=await sb.from('messages').insert(row).select(MCOLS).single();
+    if(error){sb.storage.from('attachments').remove([row.att_path]);fail('',error);return}
+    const i=arr.findIndex(x=>x.id===tmp.id);
+    if(arr.some(x=>x.id===data.id)){if(i>=0)arr.splice(i,1)}else if(i>=0)arr[i]=data;
+    if(tmp.localUrl&&data.att_path)S.urls[data.att_path]={url:tmp.localUrl,exp:Date.now()+3000*1000};
+    const c=S.convs.find(x=>x.id===cid);if(c){c.last=data;sortConvs()}
+    renderMsgs(true);renderList();
+    return;
   }
-  const {data,error}=await sb.from('messages').insert(row).select(MCOLS).single();
-  if(error){if(row.att_path)sb.storage.from('attachments').remove([row.att_path]);fail(error.message);return}
-  const i=arr.findIndex(x=>x.id===tmp.id);
-  if(arr.some(x=>x.id===data.id)){if(i>=0)arr.splice(i,1)}else if(i>=0)arr[i]=data;
-  if(tmp.localUrl&&data.att_path)S.urls[data.att_path]={url:tmp.localUrl,exp:Date.now()+3000*1000};
-  const c=S.convs.find(x=>x.id===cid);if(c){c.last=data;sortConvs()}
-  renderMsgs(true);renderList();
+  // message texte : file d'attente persistante (envoi différé si hors-ligne)
+  row.id=tmp.id;
+  outboxAdd({id:tmp.id,cid,content,reply_to:row.reply_to,ts:tmp.created_at});
+  const c0=S.convs.find(x=>x.id===cid);if(c0){c0.last=tmp;sortConvs();renderList()}
+  flushOutbox();
 };
+/* ---------- FILE D'ATTENTE D'ENVOI (messages texte) ---------- */
+const OUT_KEY='pm_outbox';
+const outboxGet=()=>{try{return JSON.parse(localStorage.getItem(OUT_KEY)||'[]')}catch(e){return []}};
+const outboxSet=l=>{try{localStorage.setItem(OUT_KEY,JSON.stringify(l))}catch(e){}};
+const outboxAdd=o=>outboxSet(outboxGet().concat(o));
+const outboxDel=id=>outboxSet(outboxGet().filter(x=>x.id!==id));
+let flushing=false,flushT=0;
+async function flushOutbox(){
+  if(flushing||!S.me)return;flushing=true;clearTimeout(flushT);
+  try{
+    for(const o of outboxGet()){
+      const row={id:o.id,conversation_id:o.cid,sender_id:S.me.id,content:o.content,reply_to:o.reply_to};
+      const {data,error}=await sb.from('messages').insert(row).select(MCOLS).single();
+      const arr=S.msgs[o.cid];
+      if(error&&error.code!=='23505'){
+        if(isNet(error)){flushT=setTimeout(flushOutbox,8000);break}
+        logErr('envoi',error);outboxDel(o.id);
+        if(arr){const i=arr.findIndex(x=>x.id===o.id);if(i>=0)arr.splice(i,1)}
+        if(S.cur===o.cid&&!txt.value&&!S.edit){txt.value=o.content;fit()}
+        flash('Message non envoyé : '+(errMsg(error)),'err');
+        if(S.cur===o.cid)renderMsgs(true);
+        continue;
+      }
+      outboxDel(o.id);
+      if(data){
+        if(arr){const i=arr.findIndex(x=>x.id===o.id);if(i>=0)arr[i]=data;else if(!arr.some(x=>x.id===data.id))arr.push(data)}
+        const c=S.convs.find(x=>x.id===o.cid);if(c){c.last=data;sortConvs()}
+      }else if(arr){const m=arr.find(x=>x.id===o.id);if(m)m.pending=false}
+      if(S.cur===o.cid)renderMsgs(true);
+      renderList();
+    }
+  }finally{flushing=false}
+}
+// messages en attente : les réinjecter dans la conversation ouverte/chargée
+function outboxMerge(cid){
+  const a=S.msgs[cid];if(!a)return;
+  outboxGet().filter(o=>o.cid===cid&&!a.some(x=>x.id===o.id)).forEach(o=>a.push({id:o.id,conversation_id:cid,sender_id:S.me.id,content:o.content,created_at:o.ts,pending:true,reply_to:o.reply_to}));
+}
+addEventListener('online',()=>flushOutbox());
+setInterval(()=>{if(outboxGet().length)flushOutbox()},15000);
 
 /* ---------- RECHERCHE DANS LA CONVERSATION ---------- */
 function openSearch(){S.sq={q:'',ids:[],i:0};$('sbar').classList.remove('hidden');$('sq').value='';$('scnt').textContent='';$('sq').focus()}
@@ -1886,7 +1934,13 @@ function startPresence(){
 /* ---------- NOUVELLE DISCUSSION ---------- */
 $('newBtn').onclick=()=>openNew();
 const SHARE_URL='https://statiqk.github.io/polymess/';
-function flash(t){const d=document.createElement('div');d.className='flash';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+function flash(t,k){document.querySelectorAll('.flash').forEach(x=>x.remove());const d=document.createElement('div');d.className='flash'+(k==='err'?' err':'');d.setAttribute('role',k==='err'?'alert':'status');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),k==='err'?4500:2600)}
+window.addEventListener('unhandledrejection',e=>logErr('promesse',e.reason));window.addEventListener('error',e=>logErr('js',e.error||e.message));
+const ERR_KEY='pm_errlog';
+const logErr=(w,e)=>{try{const l=JSON.parse(localStorage.getItem(ERR_KEY)||'[]');l.push({t:new Date().toISOString(),w,m:String((e&&e.message)||e||'').slice(0,160),c:(e&&e.code)||''});localStorage.setItem(ERR_KEY,JSON.stringify(l.slice(-15)))}catch(x){}};
+const errLogText=()=>{try{return JSON.parse(localStorage.getItem(ERR_KEY)||'[]').map(x=>`${x.t.slice(11,19)} ${x.w} ${x.c} ${x.m}`).join('\n')}catch(x){return ''}};
+const isNet=e=>!navigator.onLine||(!!e&&!e.code&&!e.status&&/fetch|network|load failed|timeout|abort/i.test(e.message||''));
+const errMsg=e=>isNet(e)?'Pas de connexion.':/trop de/i.test((e&&e.message)||'')?e.message:'Le serveur a refusé. Réessaie.';
 async function inviteFriend(){
   const data={title:'PolyMess',text:'Rejoins-moi sur PolyMess, ma messagerie. Crée ton compte ici :',url:SHARE_URL};
   if(navigator.share){try{await navigator.share(data);return}catch(e){if(e&&e.name==='AbortError')return}}
@@ -1895,7 +1949,7 @@ async function inviteFriend(){
 function openNew(){
   let found=[],timer;
   const host=$('modalHost'),mob=isMob();
-  const field=`<div class="nsf">${ico('search','ms')}<input id="uq" placeholder="Nom ou prénom…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
+  const field=`<div class="nsf">${ico('search','ms')}<input id="uq" placeholder="Prénom et nom complets…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
   const inv=`<button type="button" class="invb" id="invb"><span class="ic">${ico('share')}</span><div><b>Inviter un ami</b><span class="s">Il n’est pas encore sur PolyMess ?</span></div></button>`;
   host.innerHTML=mob
    ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}${inv}<div class="res" id="res"></div></div></div>`
@@ -1904,7 +1958,7 @@ function openNew(){
   $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
   $('invb').onclick=inviteFriend;
   let q='';
-  const hl=n=>{const t=esc(n||'');if(q.length<2)return t;const i=(n||'').toLowerCase().indexOf(q);return i<0?t:esc(n.slice(0,i))+'<mark>'+esc(n.slice(i,i+q.length))+'</mark>'+esc(n.slice(i+q.length))};
+  const hl=n=>{const t=esc(n||'');if(q.length<3)return t;const i=(n||'').toLowerCase().indexOf(q);return i<0?t:esc(n.slice(0,i))+'<mark>'+esc(n.slice(i,i+q.length))+'</mark>'+esc(n.slice(i+q.length))};
   const exists=id=>S.convs.find(c=>c.other?.id===id);
   const fbtn=(p)=>{const st=frState(p.id);
     if(st==='friends')return `<span class="fbtn w">${ico('chat')}Écrire</span>`;
@@ -1918,24 +1972,26 @@ function openNew(){
   const friendsList=()=>S.fr.filter(r=>r.status==='accepted').map(r=>S.frp[frOther(r)]).filter(Boolean).sort((a,b)=>(a.display_name||'').localeCompare(b.display_name||'','fr'));
   const recents=()=>{
     const f=friendsList();
-    $('res').innerHTML=reqLink()+(f.length?`<div class="h5">Mes amis</div>`+f.map(p=>frow(p,presTxt(p.id))).join(''):'')+`<div class="nhint">${f.length?'Ou cherche':'Cherche'} quelqu’un par son nom ou son prénom pour l’ajouter en ami.</div>`;
+    $('res').innerHTML=reqLink()+(f.length?`<div class="h5">Mes amis</div>`+f.map(p=>frow(p,presTxt(p.id))).join(''):'')+`<div class="nhint">${f.length?'Ou cherche':'Cherche'} quelqu’un avec son prénom et son nom complets pour l’ajouter en ami.</div>`;
     const l=$('frLink');if(l)l.onclick=()=>{host.innerHTML='';openRequests()};
   };
   const drawRes=()=>{
-    if(!found.length){$('res').innerHTML=`<div class="nempty"><div class="eic">${ico('search')}</div><b>Personne ne correspond à « ${esc($('uq').value.trim())} »</b><span>Vérifie l’orthographe ou essaie le prénom.</span></div>`;return}
+    if(!found.length){$('res').innerHTML=`<div class="nempty"><div class="eic">${ico('search')}</div><b>Aucun résultat pour « ${esc($('uq').value.trim())} »</b><span>Tape le prénom et le nom complets, tels qu’ils sont dans son profil.</span></div>`;return}
     const fr=found.filter(p=>frState(p.id)==='friends'),ot=found.filter(p=>frState(p.id)!=='friends');
     const sub=p=>{const st=frState(p.id);return st==='sent'?'Demande envoyée':st==='received'?'T’a envoyé une demande':exists(p.id)?'Discussion existante':'Pas encore ami'};
     $('res').innerHTML=(fr.length?`<div class="h5">Mes amis</div>`+fr.map(p=>frow(p,presTxt(p.id))).join(''):'')+(ot.length?`<div class="h5">${fr.length?'Autres personnes':found.length+' résultat'+(found.length>1?'s':'')}</div>`+ot.map(p=>frow(p,sub(p))).join('')+`<div class="nhint">Tu pourras écrire à une personne dès qu’elle accepte ta demande.</div>`:'');
   };
-  frRefresh=()=>{if(!$('res')||!$('uq'))return;q.length<2?recents():drawRes()};
+  frRefresh=()=>{if(!$('res')||!$('uq'))return;q.length<3?recents():drawRes()};
   recents();
   $('uc').onclick=()=>{$('uq').value='';$('uq').dispatchEvent(new Event('input'));$('uq').focus()};
   $('uq').oninput=e=>{
     clearTimeout(timer);q=e.target.value.trim().toLowerCase().replace(/[%,()*\\]/g,'');
     $('uc').classList.toggle('hidden',!e.target.value);
-    if(q.length<2){found=[];recents();return}
+    if(q.length<3){found=[];recents();return}
     timer=setTimeout(async()=>{
-      const {data}=await sb.from('profiles').select('id,display_name,first_name,last_name,color,avatar_path').neq('id',S.me.id).or(`display_name.ilike.%${q}%,first_name.ilike.%${q}%,last_name.ilike.%${q}%`).limit(20);
+      const {data,error}=await sb.rpc('find_user',{q});
+      if(q!==$('uq').value.trim().toLowerCase().replace(/[%,()*\\]/g,''))return;
+      if(error){logErr('recherche',error);flash(errMsg(error),'err')}
       found=data||[];drawRes();
     },250);
   };
@@ -1948,7 +2004,7 @@ function openNew(){
     if(frState(b.dataset.id)!=='friends'&&!ex)return;
     if(ex){close();openConv(ex.id);return}
     const {data,error}=await sb.rpc('start_direct',{other:b.dataset.id});
-    if(error){alert(error.message);return}
+    if(error){logErr('start',error);flash(errMsg(error),'err');return}
     close();await loadConvs();renderList();openConv(data);
   };
   $('uq').focus();
@@ -2054,7 +2110,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.66';
+const APP_VERSION='2026-11-08.67';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2078,10 +2134,11 @@ async function checkUpdate(manual){
 setInterval(checkUpdate,5*60*1000);
 let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){checkUpdate();if(Date.now()-hiddenAt>30000)refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.me&&statusOn())ackAfterTouch();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
+  if(!document.hidden){checkUpdate();if(Date.now()-hiddenAt>30000)refreshAll();myAway=false;bumpActive();trackMe();resyncPresence();if(S.me&&statusOn())ackAfterTouch();flushOutbox();if(S.cur){const c=S.convs.find(x=>x.id===S.cur);if(c&&c.unread)markRead(c.id)}}
   else{hiddenAt=Date.now();if(S.me&&statusOn()){if(pch)pch.untrack();touchSeen()}}
 });
 addEventListener('online',refreshAll);
+setTimeout(()=>{try{flushOutbox()}catch(e){}},2500);
 addEventListener('pageshow',e=>{if(e.persisted)refreshAll()});
 setTimeout(checkUpdate,3000);
 
@@ -2161,13 +2218,13 @@ async function aboutPage(k,host){
   if(k==='help'){
     infoPage('Aide et contact',`<div class="faq">${FAQ.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div><button class="sbtn ghost" id="hRep" style="width:100%;margin-top:14px">Signaler un problème</button>`,()=>{$('hRep').onclick=()=>aboutPage('report',host)});
   }else if(k==='report'){
-    infoPage('Signaler un problème',`<label class="fld"><span>Décris le problème ou ta question</span><textarea id="rMsg" rows="6" maxlength="2000" placeholder="Que s’est-il passé ?"></textarea></label><div class="hint2">Ta version de l’appli et ton type d’appareil sont joints automatiquement.</div><div id="rm"></div><button class="sbtn" id="rSend" style="width:100%;margin-top:12px">Envoyer</button>`,()=>{
+    infoPage('Signaler un problème',`<label class="fld"><span>Décris le problème ou ta question</span><textarea id="rMsg" rows="6" maxlength="2000" placeholder="Que s’est-il passé ?"></textarea></label><div class="hint2">Ta version de l’appli, ton type d’appareil et les dernières erreurs sont joints automatiquement.</div><div id="rm"></div><button class="sbtn" id="rSend" style="width:100%;margin-top:12px">Envoyer</button>`,()=>{
       $('rSend').onclick=async()=>{
         const m=$('rMsg').value.trim();
         if(m.length<3){$('rm').innerHTML='<div class="msg err">Écris quelques mots avant d’envoyer.</div>';return}
         $('rSend').disabled=true;
-        const {error}=await sb.from('reports').insert({message:m,app_version:APP_VERSION,ua:navigator.userAgent.slice(0,300)});
-        if(error){$('rSend').disabled=false;$('rm').innerHTML=`<div class="msg err">Envoi impossible : ${esc(error.message)}</div>`;return}
+        const {error}=await sb.from('reports').insert({message:(m+(errLogText()?'\n\n--- journal ---\n'+errLogText():'')).slice(0,4000),app_version:APP_VERSION,ua:navigator.userAgent.slice(0,300)});
+        if(error){$('rSend').disabled=false;$('rm').innerHTML=`<div class="msg err">Envoi impossible. ${esc(errMsg(error))}</div>`;return}
         $('rMsg').value='';$('rm').innerHTML='<div class="msg ok">Merci, ton message a bien été envoyé.</div>';
       };
     });
