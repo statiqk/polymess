@@ -289,6 +289,7 @@ html[data-theme=dark] #auth{background:linear-gradient(160deg,#12122a,#1c1c3a)}
 .av.off::after{content:'';position:absolute;right:0;bottom:0;width:14px;height:14px;border-radius:50%;background:var(--card);border:2.5px solid var(--card);box-shadow:inset 0 0 0 2px var(--mut)}
 .ago{position:absolute;right:-6px;bottom:-3px;font-style:normal;font-size:10.5px;font-weight:700;line-height:1;padding:2px 5px;border-radius:9px;background:#1f6b46;color:#d4f7e3;border:2px solid var(--card);white-space:nowrap}
 .conv.on .ago{border-color:var(--sel)}
+.conv .av{width:58px;height:58px;font-size:20px}.conv .av.on::after{width:16px;height:16px}.conv .ago{font-size:11.5px}
 .sn{font-size:12.5px;color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sn.live{color:#1f9d5c;font-weight:600}html[data-theme=dark] .sn.live{color:#4cd08a}
 .conv.on .av.on::after{border-color:var(--sel)}
 .ch{padding:14px 24px}.ch .s.live{color:#1f9d5c;font-weight:600}html[data-theme=dark] .ch .s.live{color:#4cd08a}
@@ -2041,7 +2042,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.62';
+const APP_VERSION='2026-11-08.63';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
