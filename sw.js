@@ -17,24 +17,13 @@ self.addEventListener('push',e=>{
     // Appli déjà à l'écran : elle affiche le message elle-même (sauf iPhone, qui exige une notification à chaque push)
     if(!ios&&d.kind!=='test'&&list.some(c=>c.visibilityState==='visible'))return;
     // Une notification par message (elles s'empilent) ; tag unique pour qu'aucune n'en remplace une autre
-    // Conversation déjà ouverte sous les yeux : sur iPhone la notification est obligatoire, on la rend discrète (silencieuse) puis on la referme aussitôt
-    let seen=false;
-    if(ios&&d.kind==='msg'&&d.cid){
-      for(const c of list){
-        if(c.visibilityState!=='visible')continue;
-        const r=await new Promise(ok=>{const ch=new MessageChannel();const t=setTimeout(()=>ok(null),500);ch.port1.onmessage=ev=>{clearTimeout(t);ok(ev.data)};try{c.postMessage({type:'whereami'},[ch.port2])}catch(_){clearTimeout(t);ok(null)}});
-        if(r&&r.visible&&r.cid===d.cid){seen=true;break}
-      }
-    }
     const title=d.title||'PolyMess',body=d.body||'';
     const tag=d.tag?d.tag+'|'+Date.now():undefined;
     const opts={body,tag,icon:'icon-192.png?v=3',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
       data:{cid:d.cid,name:d.title,req:!!d.req}};
-    if(seen){opts.silent=true;opts.vibrate=undefined}
-    if(d.image&&!seen)opts.image=d.image;
+    if(d.image)opts.image=d.image;
     if(d.kind==='msg')opts.actions=[{action:'reply',title:'Répondre',type:'text',placeholder:'Ta réponse…'},{action:'read',title:'Marquer comme lu'}];
     await self.registration.showNotification(title,opts);
-    if(seen){await new Promise(r=>setTimeout(r,700));try{(await self.registration.getNotifications({tag})).forEach(n=>n.close())}catch(_){}}
     setBadge(d.badge);
   })());
 });
