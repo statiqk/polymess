@@ -236,6 +236,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 
 /* ===== Design v2 ===== */
 .rail{display:none}
+.av .sil,.mav2 .sil,#chAv .sil,#meBtn .sil,#meBtnM .sil,#pv .sil{width:58%;height:58%;stroke-width:1.8}
 .ico{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .mini{width:13px;height:13px;vertical-align:-2px;margin-right:4px;color:var(--mut)}
 #auth{background:linear-gradient(160deg,#e9e7f7,#f6f5fd)}
@@ -762,7 +763,8 @@ const AVB=SB_URL+'/storage/v1/object/public/avatars/';
 const safeCol=c=>/^#[0-9a-f]{3,8}$/i.test(c||'')?c:'#6c63ff';
 const safePath=p=>/^[0-9a-f-]{36}\/[A-Za-z0-9._-]{1,80}$/.test(p||'')?p:'';
 const avBg=(bg,p)=>{bg=safeCol(String(bg).replace(/&#39;|&quot;/g,''));p=safePath(p);return p?`${bg} url(${AVB}${p}) center/cover no-repeat`:bg};
-const avTxt=(name,p)=>safePath(p)?'':esc(initials(name));
+const SIL=ico('user','sil');
+const avTxt=(name,p)=>safePath(p)?'':SIL;
 const colorOf=(id,c)=>(/^#[0-9a-f]{6}$/i.test(c||'')?c:null)||COLORS[[...String(id)].reduce((a,ch)=>a+ch.charCodeAt(0),0)%COLORS.length];
 
 /* ---------- AUTH ---------- */
@@ -1075,7 +1077,7 @@ function renderChat(){
   $('blank').classList.toggle('hidden',!!c);
   $('chatBox').classList.toggle('hidden',!c);
   if(!c){$('info').innerHTML='';applyInfo();return}
-  $('chAv').style.background=avBg(c.color,c.other?.avatar_path);$('chAv').textContent=c.other?.avatar_path?'':initials(c.name);
+  $('chAv').style.background=avBg(c.color,c.other?.avatar_path);$('chAv').innerHTML=c.other?.avatar_path?'':SIL;
   $('chName').textContent=c.name;
   updateSub();
   renderMsgs(true);renderInfo(c);applyInfo();renderBar();applyLock();
@@ -1787,7 +1789,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-08.48';
+const APP_VERSION='2026-11-08.49';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -1850,8 +1852,8 @@ addEventListener('resize',applyInfo);
 const TBUSER=`<svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg>`;
 function renderMe(){
   if(!S.me)return;
-  const bg=colorOf(S.me.id,S.me.color),t=initials(S.me.display_name);
-  ['meBtn','meBtnM'].forEach(id=>{const e=$(id);e.style.background=avBg(bg,S.me.avatar_path);e.textContent=S.me.avatar_path?'':t});
+  const bg=colorOf(S.me.id,S.me.color),t=SIL;
+  ['meBtn','meBtnM'].forEach(id=>{const e=$(id);e.style.background=avBg(bg,S.me.avatar_path);e.innerHTML=S.me.avatar_path?'':t});
   const ti=$('tbMeIc');
   if(S.me.avatar_path){ti.innerHTML='<span class="tbph" style="background:'+avBg(esc(bg),S.me.avatar_path)+'"></span>';ti.classList.add('ph')}
   else if(ti.classList.contains('ph')){ti.classList.remove('ph');ti.innerHTML=TBUSER}
@@ -1991,9 +1993,9 @@ async function openSettings(tab){
        <label class="fld"><span>Date de naissance</span><input id="sBirth" type="date" min="1900-01-01" value="${esc(birth)}"></label>
        <div class="fld"><span>Couleur de l’avatar</span><div class="sw">${COLORS.map(c=>`<button type="button" data-c="${c}" class="${c===color?'sel':''}" style="background:${c}" aria-label="Couleur"></button>`).join('')}</div></div>
        <div id="sm"></div><button class="sbtn" id="sSave">Enregistrer</button>`;
-      const upd=()=>{if(!S.me.avatar_path)$('pv').textContent=initials(($('sFirst').value+' '+$('sLast').value).trim()||'?')};
+      const upd=()=>{if(!S.me.avatar_path)$('pv').innerHTML=SIL};
       $('sFirst').oninput=upd;$('sLast').oninput=upd;
-      const setAv=p=>{S.me.avatar_path=p;$('pv').style.background=avBg(color,p);$('pv').textContent=p?'':initials(($('sFirst').value+' '+$('sLast').value).trim()||'?');$('pAct').innerHTML=p?'<button type="button" id="pDel">Retirer la photo</button>':'';wireDel();renderMe();renderList()};
+      const setAv=p=>{S.me.avatar_path=p;$('pv').style.background=avBg(color,p);$('pv').innerHTML=p?'':SIL;$('pAct').innerHTML=p?'<button type="button" id="pDel">Retirer la photo</button>':'';wireDel();renderMe();renderList()};
       const wireDel=()=>{const d=$('pDel');if(d)d.onclick=async()=>{const old=S.me.avatar_path;const {error}=await sb.from('profiles').update({avatar_path:null}).eq('id',S.me.id);if(error){note('pm','Impossible : '+error.message,'err');return}if(old)sb.storage.from('avatars').remove([old]);setAv(null);note('pm','Photo retirée.','ok')}};
       wireDel();
       $('pCam').onclick=()=>$('pFile').click();
