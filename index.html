@@ -1154,9 +1154,10 @@ function subscribe(){
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'conversation_members',filter:'user_id=eq.'+S.me.id},async()=>{await loadConvs();renderAll()})
    .subscribe();
 }
-const EXP_MS=24*3600*1000;
-const attExpired=m=>!!m.att_path&&m.att_path!=='local'&&(!!m.att_expired_at||Date.now()-new Date(m.created_at).getTime()>=EXP_MS);
-const expLeft=m=>new Date(m.created_at).getTime()+EXP_MS-Date.now();
+const EXP_MS=24*3600*1000,EXP_VOX=12*3600*1000;
+const expMs=m=>(m.att_type||'').startsWith('audio/')&&/^vocal_/.test(m.att_name||'')?EXP_VOX:EXP_MS;
+const attExpired=m=>!!m.att_path&&m.att_path!=='local'&&(!!m.att_expired_at||Date.now()-new Date(m.created_at).getTime()>=expMs(m));
+const expLeft=m=>new Date(m.created_at).getTime()+expMs(m)-Date.now();
 const fmtLeft=ms=>{const h=Math.ceil(ms/3600000);if(ms>3600000)return h+' h';return Math.max(1,Math.ceil(ms/60000))+' min'};
 const SOON=3*3600*1000;
 const isVox=m=>!!m.att_path&&(m.att_type||'').startsWith('audio/')&&/^vocal_/.test(m.att_name||'');
@@ -1569,7 +1570,7 @@ function renderMsgs(scroll){
         if(vx)att=voxHtml(m);
         else if(isImg){const u=m.localUrl||cachedUrl(m.att_path);att=`<img class="pj" alt="${esc(m.att_name||'image')}" data-path="${esc(m.att_path)}"${u?` src="${esc(u)}"`:''}>`}
         else att=`<a class="file" href="#" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('file')}<span>${esc(m.att_name||'Fichier')}<small>${fmtSize(m.att_size)}</small></span></a>`;
-        if(m.att_path!=='local'){const l=expLeft(m);att+=`<div class="pjex${l<SOON?' soon':''}" data-t="${new Date(m.created_at).getTime()}">${ico('clock','mini')}<span>Expire dans ${fmtLeft(l)}</span>${vx?'':`<button type="button" class="sv" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('download','mini')}Enregistrer</button>`}</div>`}
+        if(m.att_path!=='local'){const l=expLeft(m);att+=`<div class="pjex${l<SOON?' soon':''}" data-t="${new Date(m.created_at).getTime()}" data-e="${expMs(m)}">${ico('clock','mini')}<span>Expire dans ${fmtLeft(l)}</span>${vx?'':`<button type="button" class="sv" data-path="${esc(m.att_path)}" data-name="${esc(m.att_name||'fichier')}">${ico('download','mini')}Enregistrer</button>`}</div>`}
       }
     }
     const rs=rx[m.id]||[];let rh='';
@@ -1675,7 +1676,7 @@ function openMsgInfo(m){
   const row=(ic,t,s,cls='')=>`<div class="mir ${cls}">${ico(ic)}<div><b>${t}</b><span>${s}</span></div></div>`;
   let rows=row(mine?'send':'tick',mine?'Envoyé':'Reçu',esc(fmtWhen(m.created_at)));
   if(mine)rows+=isRead(c,m)?row('ticks','Lu','Dernière lecture : '+esc(fmtWhen(c.other_read)),'g'):(isDeliv(c,m)?row('ticks','Reçu','Pas encore lu par '+esc(c.name)):row('tick','Pas encore reçu','Envoyé à '+esc(c.name)));
-  if(m.att_path&&m.att_path!=='local')rows+=row('file','Pièce jointe',attExpired(m)?'Expirée (24 h après l’envoi)':'Disponible encore '+esc(fmtLeft(expLeft(m))));
+  if(m.att_path&&m.att_path!=='local')rows+=row('file','Pièce jointe',attExpired(m)?'Expirée ('+(isVox(m)?'12':'24')+' h après l’envoi)':'Disponible encore '+esc(fmtLeft(expLeft(m))));
   if(m.expires_at)rows+=row('clock','Disparaît',msgLeft(m)>0?'Dans '+esc(fmtLeft(msgLeft(m)))+' ('+esc(fmtWhen(m.expires_at))+')':'Bientôt');
   rows+=row('edit','Modifié',m.edited_at?esc(fmtWhen(m.edited_at)):'Non');
   const d=document.createElement('div');d.id='ephs';
@@ -2470,7 +2471,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.94';
+const APP_VERSION='2026-11-09.95';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -3124,7 +3125,7 @@ setInterval(()=>{
 },60000);
 setInterval(()=>{
   let gone=false;
-  document.querySelectorAll('.pjex[data-t]').forEach(e=>{const l=+e.dataset.t+EXP_MS-Date.now();if(l<=0){gone=true;return}e.querySelector('span').textContent='Expire dans '+fmtLeft(l);e.classList.toggle('soon',l<SOON)});
+  document.querySelectorAll('.pjex[data-t]').forEach(e=>{const l=+e.dataset.t+(+e.dataset.e||EXP_MS)-Date.now();if(l<=0){gone=true;return}e.querySelector('span').textContent='Expire dans '+fmtLeft(l);e.classList.toggle('soon',l<SOON)});
   if(gone&&S.cur)renderMsgs();
 },60000);
 
