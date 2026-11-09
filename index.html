@@ -820,7 +820,7 @@ html[data-theme=dark] .plus{color:#fff}
 #mmenu .mc{width:228px;padding:4px;border-radius:18px;background:var(--raised);box-shadow:0 14px 40px rgba(0,0,0,.4)}
 
 /* Design v3 : barre d’écriture flottante */
-#app .comp{position:relative;z-index:2;background:none!important;box-shadow:none!important;border-radius:0;padding:0;align-items:flex-end;gap:8px;margin:-70px 12px calc(12px + env(safe-area-inset-bottom))}
+#app .comp{position:relative;z-index:2;background:none!important;box-shadow:none!important;border-radius:0;padding:0;align-items:flex-end;gap:8px;margin:-70px 12px max(10px,calc(env(safe-area-inset-bottom) + 2px))}
 #app .bar:not(.hidden)~.comp{margin-top:0}
 #app .comp::before{content:'';position:absolute;left:-12px;right:-12px;top:-30px;bottom:calc(-12px - env(safe-area-inset-bottom) - 40px);background:linear-gradient(transparent,var(--bg) 45%);pointer-events:none;z-index:-1}
 #app .comp .clip,#app .comp .send{width:48px;height:48px;border-radius:50%;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;flex:none;display:flex;align-items:center;justify-content:center}
@@ -2258,7 +2258,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.83';
+const APP_VERSION='2026-11-09.84';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
