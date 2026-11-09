@@ -836,7 +836,7 @@ html[data-theme=dark] .plus{color:#fff}
 
 /* Design v3 : barre d’onglets flottante compacte */
 @media(max-width:900px){
- #app .tbar{position:relative;z-index:5;margin:-76px 18px max(10px,calc(env(safe-area-inset-bottom) + 2px));padding:8px 10px;background:var(--raised);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 12px 30px rgba(0,0,0,.32)}
+ #app .tbar{position:absolute;left:0;right:0;bottom:0;z-index:5;margin:0 18px max(10px,calc(env(safe-area-inset-bottom) + 2px));padding:8px 10px;background:var(--raised);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 12px 30px rgba(0,0,0,.32)}
   .list{position:relative}
  #app .convs{padding-bottom:96px}
 }
@@ -2281,7 +2281,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.90';
+const APP_VERSION='2026-11-09.91';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
