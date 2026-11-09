@@ -2295,7 +2295,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.92';
+const APP_VERSION='2026-11-09.93';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2492,6 +2492,7 @@ $('tbFr').onclick=()=>setTab('fr');
 $('tbMe').onclick=()=>setTab('me');
 addEventListener('resize',()=>{if(!isMob()&&S.tab!=='msgs')setTab('msgs')});
 async function chatWith(id){
+  S.backTab=S.tab&&S.tab!=='msgs'?S.tab:null;
   const ex=S.convs.find(c=>c.other?.id===id);
   if(ex){setTab('msgs');openConv(ex.id);return}
   const {data,error}=await sb.rpc('start_direct',{other:id});
@@ -2794,7 +2795,7 @@ async function openSettings(tab){
 let curPM=null;
 function pushPM(k){if(innerWidth<=900){history.pushState({pm:k},'');curPM=k}}
 function hideMobInfo(){$('app').classList.remove('mobinfo')}
-function closeChat(){S.cur=null;$('app').classList.remove('inchat');hideMobInfo();renderAll()}
+function closeChat(){S.cur=null;$('app').classList.remove('inchat');hideMobInfo();renderAll();if(S.backTab&&isMob()){const t=S.backTab;S.backTab=null;setTab(t)}}
 function showMobInfo(){
   if(innerWidth>900||!S.cur)return;
   renderInfo(S.convs.find(x=>x.id===S.cur));
