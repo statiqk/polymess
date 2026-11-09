@@ -820,15 +820,19 @@ html[data-theme=dark] .plus{color:#fff}
 #mmenu .mc{width:228px;padding:4px;border-radius:18px;background:var(--raised);box-shadow:0 14px 40px rgba(0,0,0,.4)}
 
 /* Design v3 : barre d’écriture flottante */
-#app .comp{position:relative;z-index:2;background:none!important;box-shadow:none!important;border-radius:0;padding:0;align-items:flex-end;gap:8px;margin:-70px 12px max(10px,calc(env(safe-area-inset-bottom) + 2px))}
-#app .bar:not(.hidden)~.comp{margin-top:0}
+#chatBox{position:relative}
+#app .comp{position:absolute;left:0;right:0;bottom:0;z-index:2;background:none!important;box-shadow:none!important;border-radius:0;padding:0 12px max(10px,calc(env(safe-area-inset-bottom) + 2px));margin:0;align-items:flex-end;gap:8px;pointer-events:none}
+#app .comp>*{pointer-events:auto}
+#app .comp.hidden{display:none}
+#app #bar:not(.hidden){position:absolute;left:12px;right:12px;bottom:var(--ov,0px);margin:0 0 8px;z-index:2}
 #app .comp .clip,#app .comp .send{width:48px;height:48px;border-radius:50%;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;flex:none;display:flex;align-items:center;justify-content:center}
 #app .comp .clip{color:var(--p)}
 #app .comp textarea{min-height:48px;border-radius:24px;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;padding:13px 18px;max-height:130px}
 #app .comp .send:disabled{background:var(--raised)!important}#app .comp .send:disabled .ico{stroke:var(--mut)}
 #app .comp .send:not(:disabled){background:linear-gradient(135deg,#6a5af0,#8a7cff)!important;box-shadow:0 8px 22px rgba(106,90,240,.5)!important}
-@media(max-width:900px){#app .comp:focus-within{margin-bottom:8px}.msgs{padding-bottom:84px}}
-@media(min-width:901px){#app .comp{margin:-70px 22px 18px}.msgs{padding-bottom:84px}}
+@media(max-width:900px){#app .comp:focus-within{padding-bottom:8px}}
+@media(min-width:901px){#app .comp{padding:0 22px 18px}#app #bar:not(.hidden){left:22px;right:22px}}
+#app .msgs{padding-bottom:calc(var(--ov,0px) + var(--ovb,0px) + 14px)}
 
 /* Design v3 : barre d’onglets flottante compacte */
 @media(max-width:900px){
@@ -1857,6 +1861,19 @@ $('file').onchange=async e=>{
 /* ---------- ENVOI ---------- */
 const txt=$('txt');
 const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeight,120)+'px';$('sendBtn').disabled=!txt.value.trim()&&!S.att};
+(function(){
+  const cb=$('chatBox'),cp=$('comp'),br=$('bar'),ms=$('msgs');
+  const upd=()=>{
+    const atEnd=ms.scrollHeight-ms.scrollTop-ms.clientHeight<90;
+    const c=cp.classList.contains('hidden')?0:cp.offsetHeight,b=br.classList.contains('hidden')?0:br.offsetHeight+8;
+    cb.style.setProperty('--ov',c+'px');cb.style.setProperty('--ovb',b+'px');
+    if(atEnd)ms.scrollTop=ms.scrollHeight;
+  };
+  try{const ro=new ResizeObserver(upd);ro.observe(cp);ro.observe(br);
+    new MutationObserver(upd).observe(cp,{attributes:true,attributeFilter:['class']});
+    new MutationObserver(upd).observe(br,{attributes:true,attributeFilter:['class']})}catch(e){}
+  addEventListener('resize',upd);
+})();
 let lastTypeSent=0;
 txt.oninput=()=>{fit();if(tReady&&tch&&txt.value&&!S.edit&&Date.now()-lastTypeSent>2500){lastTypeSent=Date.now();tch.send({type:'broadcast',event:'typing',payload:{uid:S.me.id}})}};
 txt.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('comp').requestSubmit()}};
@@ -2264,7 +2281,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.89';
+const APP_VERSION='2026-11-09.90';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
