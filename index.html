@@ -799,6 +799,18 @@ html[data-theme=dark] .plus{color:#fff}
 #offb{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);z-index:98;max-width:calc(100vw - 28px);padding:9px 16px;border-radius:20px;background:#ffb35c;color:#2a1a00;font-size:13px;font-weight:700;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.28)}
 #upd{background:var(--raised);color:var(--ink);border-radius:22px;padding:10px 12px 10px 18px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.32)}
 #upd button{border-radius:16px;padding:9px 16px}
+
+/* Design v3 : menu d’un message */
+#mmenu{min-width:220px;max-width:calc(100vw - 16px);padding:4px}
+#mmenu .em{padding:4px 2px 6px;gap:0;flex-wrap:wrap}#mmenu .em button{font-size:21px;width:34px;height:34px;border-radius:50%}
+#mmenu .em button.on{background:var(--sel,var(--soft));box-shadow:inset 0 0 0 1.5px var(--p)}
+#mmenu .em .emp{font-size:20px;font-weight:700;color:var(--p);background:var(--soft)}
+#mmenu .em2{border-bottom:0;margin-bottom:2px;padding-top:0}
+#mmenu .it{padding:0 12px;min-height:42px;font-size:15px;font-weight:600;border-radius:12px}
+#mmenu .it.red{color:var(--red,#ff6b6b)}html:not([data-theme=dark]) #mmenu .it.red{color:#d93a55}
+#mmenu .msep{border:0;height:1px;background:var(--line2);margin:3px 10px}
+#mdim{background:rgba(5,6,20,.7)}
+.mclone{box-shadow:0 0 0 3px #a9a2ff,0 12px 30px rgba(0,0,0,.5)!important}
 </style>
 </head>
 <body>
@@ -1433,6 +1445,7 @@ function fmtSeenLong(d){
   return x.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+', '+t;
 }
 const RX=['👍','❤️','😂','😮','😢','🙏'];
+const RX2=['🔥','🎉','👏','😍','🤔','😅','😡','🙌','💯','👀','😴','🤝'];
 const fmtSize=n=>!n?'':n<1024*1024?Math.max(1,Math.round(n/1024))+' Ko':(n/1048576).toFixed(1).replace('.',',')+' Mo';
 const isRead=(c,m)=>!!c.other_read&&new Date(c.other_read)>=new Date(m.created_at);
 const isDeliv=(c,m)=>isRead(c,m)||(!!c.other_deliv&&new Date(c.other_deliv)>=new Date(m.created_at));
@@ -1542,8 +1555,8 @@ function openMsgMenu(el){
   const myR=(S.react[S.cur]||[]).find(r=>r.message_id===id&&r.user_id===S.me.id)?.emoji;
   const d=document.createElement('div');d.id='mmenu';
   const att=!!m.att_path&&m.att_path!=='local';
-  d.innerHTML=`<div class="em">${RX.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}</div>
-   <button class="it" data-a="reply">${ico('reply')}Répondre</button>${m.content?`<button class="it" data-a="copy">${ico('copy')}Copier</button>`:''}${att?`<button class="it" data-a="save">${ico('download')}Enregistrer</button>`:''}<button class="it" data-a="fwd">${ico('share')}Transférer</button><button class="it" data-a="info">${ico('info')}Infos</button>${mine&&!m.att_path?`<button class="it" data-a="edit">${ico('edit')}Modifier</button>`:''}${mine?`<button class="it red" data-a="del">${ico('trash')}Supprimer</button>`:''}`;
+  d.innerHTML=`<div class="em">${RX.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}<button type="button" class="emp" data-a="more" aria-label="Plus d’émojis">+</button></div><div class="em em2 hidden">${RX2.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}</div>
+   <button class="it" data-a="reply">${ico('reply')}Répondre</button>${m.content?`<button class="it" data-a="copy">${ico('copy')}Copier</button>`:''}${att?`<button class="it" data-a="save">${ico('download')}Enregistrer</button>`:''}<button class="it" data-a="fwd">${ico('share')}Transférer</button><button class="it" data-a="info">${ico('info')}Infos</button>${mine&&!m.att_path?`<button class="it" data-a="edit">${ico('edit')}Modifier</button>`:''}${mine?`<hr class="msep"><button class="it red" data-a="del">${ico('trash')}Supprimer</button>`:''}`;
   // le reste de l'écran s'assombrit, le message touché reste net et surligné
   const r0=el.getBoundingClientRect();
   const dim=document.createElement('div');dim.id='mdim';const t0=Date.now();dim.onclick=()=>{if(Date.now()-t0>500)closeMenu()};document.body.appendChild(dim);
@@ -1551,11 +1564,20 @@ function openMsgMenu(el){
   cl.style.cssText=`position:fixed;left:${r0.left}px;top:${r0.top}px;width:${r0.width}px;margin:0;`;
   document.body.appendChild(cl);
   document.body.appendChild(d);
-  const r=r0,w=d.offsetWidth,h=d.offsetHeight;
-  let top=r.top-h-6;if(top<8)top=Math.max(8,Math.min(r.bottom+6,innerHeight-h-8));
-  let left=mine?r.right-w:r.left;left=Math.max(8,Math.min(left,innerWidth-w-8));
-  d.style.top=top+'px';d.style.left=left+'px';
-  d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;closeMenu();
+  const r=r0;
+  const place=()=>{
+    d.style.maxHeight='';const w=d.offsetWidth,h=d.offsetHeight,sp=r.top-8,sb2=innerHeight-r.bottom-8;
+    let top;
+    if(h+6<=sp)top=r.top-h-6;
+    else if(h+6<=sb2)top=r.bottom+6;
+    else{const up=sp>sb2;const mh=Math.max(160,up?sp-6:sb2-6);d.style.maxHeight=mh+'px';d.style.overflowY='auto';top=up?Math.max(8,r.top-mh-6):r.bottom+6}
+    let left=mine?r.right-w:r.left;left=Math.max(8,Math.min(left,innerWidth-w-8));
+    d.style.top=top+'px';d.style.left=left+'px';
+  };
+  place();
+  d.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;
+    if(b.dataset.a==='more'){d.querySelector('.em2').classList.toggle('hidden');place();return}
+    closeMenu();
     if(b.dataset.e)toggleReact(id,b.dataset.e);
     else if(b.dataset.a==='reply')startReply(m);
     else if(b.dataset.a==='copy'){try{navigator.clipboard.writeText(m.content)}catch(e){}}
@@ -2216,7 +2238,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.78';
+const APP_VERSION='2026-11-09.79';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
