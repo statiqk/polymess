@@ -751,6 +751,40 @@ html[data-theme=dark] .plus{color:#fff}
  #app .tbar .tbd{top:-5px;right:-2px;background:var(--acc);color:#2a1a00;box-shadow:0 0 0 2px var(--raised)}
  .comp{margin:0 12px calc(12px + env(safe-area-inset-bottom))}
 }
+
+/* Design v3 : onglets Amis et Moi */
+.tpg{display:none}
+@media(max-width:900px){
+ #app.tab-fr #pgFr,#app.tab-me #pgMe{display:flex;flex-direction:column;flex:1;min-height:0}
+ #app.tab-fr .list>.lh,#app.tab-me .list>.lh,#app.tab-fr .frban,#app.tab-me .frban,#app.tab-fr .ntinv,#app.tab-me .ntinv,#app.tab-fr .convs,#app.tab-me .convs{display:none!important}
+ .tpg .tpb{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 110px;-webkit-overflow-scrolling:touch}
+ .tpg .h5{margin:18px 4px 8px;font-size:13px;font-weight:700;color:var(--mut)}
+ .onrow{display:flex;gap:14px;overflow-x:auto;padding:2px 4px 6px}
+ .onb{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink);flex:none}
+ .onb .av{width:54px;height:54px}
+ .rqc,.frw{display:flex;align-items:center;gap:12px;padding:10px 4px}
+ .rqc{flex-wrap:wrap;background:var(--soft);border-radius:18px;padding:12px;margin-bottom:8px}
+ .rqc .pt,.frw .pt{flex:1;min-width:0;display:flex;flex-direction:column}
+ .tpg .pt b{font-size:16px;color:var(--ink)}.tpg .pt span{font-size:13px;color:var(--mut)}
+ .rqb{display:flex;gap:8px;width:100%}.rqb .fbtn{flex:1;justify-content:center;min-height:40px}
+ .wbtn{width:42px;height:42px;border-radius:50%;background:var(--soft);color:var(--p);display:grid;place-items:center;flex:none}
+ .wbtn .ico{width:20px;height:20px}
+ .tpg .invb{margin-top:16px;width:100%}
+ .mcard{display:flex;align-items:center;gap:14px;width:100%;padding:14px;border-radius:20px;background:var(--soft);text-align:left;margin-top:4px}
+ .mcard .mav{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;background-size:cover;background-position:center;flex:none}
+ .mcard .wt{flex:1;min-width:0;display:flex;flex-direction:column}.mcard .wt b{font-size:18px;color:var(--ink)}.mcard .wt span{font-size:13px;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
+ .mcard .chv,.mrow .chv{width:18px;height:18px;transform:rotate(180deg);color:var(--mut);flex:none}
+ .tpg .pres{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:var(--soft)}
+ .tpg .pres>div{flex:1;display:flex;flex-direction:column}.tpg .pres b{color:var(--ink);font-size:16px}.tpg .pres small{color:var(--mut);font-size:12.5px}
+ .tpg .mseg{display:flex;gap:6px;padding:4px;border-radius:16px;background:var(--soft)}
+ .tpg .mseg button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:40px;border-radius:12px;font-weight:700;font-size:14px;color:var(--mut)}
+ .tpg .mseg button.on{background:var(--p);color:#fff}
+ .mrow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;margin-bottom:6px;border-radius:16px;background:var(--soft);text-align:left}
+ .mrow b{flex:1;font-size:16px;color:var(--ink)}.mrow .ic{width:34px;height:34px;border-radius:11px;background:var(--raised);display:grid;place-items:center;color:var(--p)}
+ .mrow .ic .ico{width:19px;height:19px}
+ .mrow.mo-out{margin-top:14px}.mrow.mo-out b,.mrow.mo-out .ic{color:var(--red)}
+ .mver{text-align:center;font-size:12px;color:var(--mut);margin:18px 0 0}
+}
 </style>
 </head>
 <body>
@@ -802,7 +836,8 @@ html[data-theme=dark] .plus{color:#fff}
   <button type="button" class="frban hidden" id="frBan"></button>
   <div class="ntinv hidden" id="ntInv"></div>
   <div class="convs" id="convs"></div>
-  <nav class="tbar"><button class="s" id="tbMsgs"><span class="tic"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><em class="tbd hidden" id="tbBadge"></em></span>Messages</button><button id="tbMe"><span class="tic" id="tbMeIc"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg></span>Moi</button></nav>
+  <div class="tpg" id="pgFr"></div><div class="tpg" id="pgMe"></div>
+  <nav class="tbar"><button class="s" id="tbMsgs"><span class="tic"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><em class="tbd hidden" id="tbBadge"></em></span>Messages</button><button id="tbFr"><span class="tic"><svg class="ico " viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M3 19.5c.8-3.3 3.3-5 6-5s5.2 1.7 6 5"/><path d="M16.5 5.6a3.3 3.3 0 010 5.8M18 14.8c1.7.7 2.8 2.2 3.3 4.4"/></svg><em class="tbd hidden" id="tbFrBadge"></em></span>Amis</button><button id="tbMe"><span class="tic" id="tbMeIc"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg></span>Moi</button></nav>
  </div>
 
  <div class="chat" id="chat">
@@ -1137,6 +1172,7 @@ function renderList(){
   });
   const tot=S.convs.reduce((a,c)=>a+c.unread,0);
   const rb=$('railBadge');rb.textContent=tot;rb.classList.toggle('hidden',!tot);
+  if(S.tab==='fr'&&typeof renderFrPage==='function')renderFrPage();
   const tb=$('tbBadge');tb.textContent=tot>99?'99+':tot;tb.classList.toggle('hidden',!tot);
   document.title=(tot?`(${tot}) `:'')+'PolyTalk';
   try{if(navigator.setAppBadge){tot?navigator.setAppBadge(tot):navigator.clearAppBadge()}}catch(e){}
@@ -2084,6 +2120,7 @@ async function loadFriends(){
 }
 function renderFr(){
   const n=frIncoming(),b=$('frBan');
+  if(typeof renderTabs==='function')renderTabs();
   if(!n.length){b.classList.add('hidden');b.innerHTML='';return}
   const names=n.map(r=>(S.frp[r.requester]||{}).display_name||'').filter(Boolean);
   b.innerHTML=`<span class="fri">${ico('user')}</span><span class="frt"><b>${n.length} demande${n.length>1?'s':''} d’ami${n.length>1?'s':''}</b><small>${esc(names.slice(0,2).join(', ')+(names.length>2?'…':''))}</small></span><span class="frc">${ico('back')}</span>`;
@@ -2162,7 +2199,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.76';
+const APP_VERSION='2026-11-09.77';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2227,6 +2264,7 @@ addEventListener('resize',applyInfo);
 const TBUSER=`<svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg>`;
 function renderMe(){
   if(!S.me)return;
+  if(S.tab==='me')renderMePage();
   const bg=colorOf(S.me.id,S.me.color),t=SIL;
   ['meBtn','meBtnM'].forEach(id=>{const e=$(id);e.style.background=avBg(bg,S.me.avatar_path);e.innerHTML=S.me.avatar_path?'':t});
   const ti=$('tbMeIc');
@@ -2247,7 +2285,7 @@ function confirmLogout(){
 const FAQ=[
  ['Comment installer PolyTalk sur iPhone ?','Dans Safari, touche Partager, puis « Sur l’écran d’accueil », puis Ajouter. Ouvre ensuite PolyTalk depuis son icône.'],
  ['Comment recevoir les notifications ?','Sur iPhone, installe d’abord l’appli sur l’écran d’accueil. Ouvre ensuite Réglages, Notifications, active « Notifications du navigateur » et autorise-les quand l’iPhone le demande.'],
- ['Comment changer le thème ?','Touche « Moi », puis choisis Auto, Clair ou Sombre dans la feuille qui s’ouvre.'],
+ ['Comment changer le thème ?','Touche « Moi », puis choisis Auto, Clair ou Sombre dans Apparence.'],
  ['Comment supprimer mon compte ?','Réglages, Compte, puis « Zone de danger ». La suppression est définitive.'],
  ['Un problème, une question ?','Utilise « Signaler un problème » : ton message est envoyé directement à l’éditeur de l’appli.']
 ];
@@ -2340,10 +2378,71 @@ new MutationObserver(()=>{
   let bd=$('mbd');
   if(open&&!bd){bd=document.createElement('div');bd.id='mbd';document.body.appendChild(bd)}
   if(!open&&bd)bd.remove();
-  $('tbMe').classList.toggle('s',open);$('tbMsgs').classList.toggle('s',!open);
 }).observe($('menu'),{attributes:true,attributeFilter:['class']});
-['meBtn','meBtnM','tbMe'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();toggleMenu()});
-$('tbMsgs').onclick=()=>{$('convs').scrollTop=0};
+['meBtn','meBtnM'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();isMob()?setTab('me'):toggleMenu()});
+S.tab='msgs';
+function setTab(t){
+  S.tab=t;
+  const a=$('app');a.classList.toggle('tab-fr',t==='fr');a.classList.toggle('tab-me',t==='me');
+  $('tbMsgs').classList.toggle('s',t==='msgs');$('tbFr').classList.toggle('s',t==='fr');$('tbMe').classList.toggle('s',t==='me');
+  if(t==='fr')renderFrPage();if(t==='me')renderMePage();
+}
+function renderTabs(){
+  const n=frIncoming().length,b=$('tbFrBadge');b.textContent=n;b.classList.toggle('hidden',!n);
+  if(S.tab==='fr')renderFrPage();
+}
+$('tbMsgs').onclick=()=>{if(S.tab!=='msgs')setTab('msgs');else $('convs').scrollTop=0};
+$('tbFr').onclick=()=>setTab('fr');
+$('tbMe').onclick=()=>setTab('me');
+addEventListener('resize',()=>{if(!isMob()&&S.tab!=='msgs')setTab('msgs')});
+async function chatWith(id){
+  const ex=S.convs.find(c=>c.other?.id===id);
+  if(ex){setTab('msgs');openConv(ex.id);return}
+  const {data,error}=await sb.rpc('start_direct',{other:id});
+  if(error){logErr('start',error);flash(errMsg(error),'err');return}
+  await loadConvs();renderList();setTab('msgs');openConv(data);
+}
+function renderFrPage(){
+  const pg=$('pgFr');if(!pg||!S.me)return;
+  const friends=S.fr.filter(r=>r.status==='accepted').map(r=>S.frp[frOther(r)]).filter(Boolean).sort((a,b)=>(a.display_name||'').localeCompare(b.display_name||'','fr'));
+  const inc=frIncoming();
+  const isOn=id=>statusOn()&&S.online.has(id);
+  const cls=id=>isOn(id)?' on'+(S.away.has(id)?' away':''):'';
+  const av=p=>`<div class="av${cls(p.id)}" style="background:${avBg(esc(colorOf(p.id,p.color)),p.avatar_path)}">${avTxt(p.display_name,p.avatar_path)}</div>`;
+  const sub=p=>!statusOn()?'':isOn(p.id)?(S.away.has(p.id)?'Absent':'En ligne'):S.seen[p.id]?fmtSeen(S.seen[p.id]):'';
+  const onl=friends.filter(p=>isOn(p.id));
+  let h=`<div class="lh"><h2><span class="hlft">Amis</span><span class="hbtns"><button class="plus" id="fpAdd" aria-label="Ajouter un ami">${ico('user')}</button></span></h2></div><div class="tpb">`;
+  if(onl.length)h+=`<div class="h5">En ligne maintenant</div><div class="onrow">${onl.map(p=>`<button type="button" class="onb" data-w="${esc(p.id)}">${av(p)}<span>${esc((p.first_name||p.display_name||'').split(' ')[0])}</span></button>`).join('')}</div>`;
+  if(inc.length)h+=`<div class="h5">Demande${inc.length>1?'s':''} d’ami${inc.length>1?'s':''}</div>`+inc.map(r=>{const p=S.frp[r.requester]||{id:r.requester,display_name:'Utilisateur'};return `<div class="rqc">${av(p)}<div class="pt"><b>${esc(p.display_name)}</b><span>Veut devenir ton ami</span></div><div class="rqb"><button type="button" class="fbtn pri" data-a="ok" data-id="${esc(r.id)}">Accepter</button><button type="button" class="fbtn" data-a="no" data-id="${esc(r.id)}">Refuser</button></div></div>`}).join('');
+  h+=`<div class="h5">Mes amis${friends.length?' · '+friends.length:''}</div>`;
+  h+=friends.length?friends.map(p=>`<div class="frw">${av(p)}<div class="pt"><b>${esc(p.display_name)}</b>${sub(p)?`<span>${esc(sub(p))}</span>`:''}</div><button type="button" class="wbtn" data-w="${esc(p.id)}" aria-label="Écrire à ${esc(p.display_name)}">${ico('chat')}</button></div>`).join(''):`<div class="nempty"><div class="eic">${ico('user')}</div><b>Pas encore d’amis</b><span>Cherche quelqu’un avec son prénom et son nom complets.</span></div>`;
+  h+=`<button type="button" class="invb" id="fpInv"><span class="ic">${ico('share')}</span><div><b>Inviter un ami</b><span class="s">Il n’est pas encore sur PolyTalk ?</span></div></button></div>`;
+  pg.innerHTML=h;
+  $('fpAdd').onclick=openNew;$('fpInv').onclick=inviteFriend;
+  pg.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>chatWith(b.dataset.w));
+  pg.querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{b.disabled=true;await frAnswer(b.dataset.id,b.dataset.a==='ok')});
+}
+function renderMePage(){
+  const pg=$('pgMe');if(!pg||!S.me)return;
+  const col=colorOf(S.me.id,S.me.color);
+  const seg=[['auto','sliders','Auto'],['light','sun','Clair'],['dark','moon','Sombre']].map(([k,i,l])=>`<button type="button" class="${prefs.theme===k?'on':''}" data-th="${k}">${ico(i)}${l}</button>`).join('');
+  const row=(id,i,t)=>`<button type="button" class="mrow" id="${id}"><span class="ic">${ico(i)}</span><b>${t}</b>${ico('back','chv')}</button>`;
+  pg.innerHTML=`<div class="lh"><h2><span class="hlft">Moi</span></h2></div><div class="tpb">
+   <button type="button" class="mcard" id="mpProf"><div class="mav" style="background:${avBg(esc(col),S.me.avatar_path)}">${avTxt(S.me.display_name,S.me.avatar_path)}</div><div class="wt"><b>${esc(S.me.display_name)}</b><span>${esc(S.email)}</span></div>${ico('back','chv')}</button>
+   <div class="h5">Confidentialité</div>
+   <div class="pres"><div><b>Visible en ligne</b><small>Les autres voient quand tu es connecté</small></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="mpPres" aria-label="Visible en ligne"></button></div>
+   <div class="h5">Apparence</div><div class="mseg">${seg}</div>
+   <div class="h5">Compte</div>
+   ${row('mpNot','bell','Notifications')}${row('mpPriv','shield','Données et vie privée')}${row('mpHelp','info','Aide et contact')}${row('mpSet','sliders','Tous les réglages')}
+   <button type="button" class="mrow mo-out" id="mpOut"><span class="ic">${ico('out')}</span><b>Se déconnecter</b></button>
+   <p class="mver">PolyTalk · version ${esc(APP_VERSION)}</p></div>`;
+  $('mpProf').onclick=()=>openSettings('profil');
+  $('mpNot').onclick=()=>openSettings('notif');$('mpPriv').onclick=()=>openSettings('privacy');
+  $('mpHelp').onclick=()=>aboutPage('help');$('mpSet').onclick=()=>openSettings();
+  $('mpOut').onclick=askLogout;
+  const p=$('mpPres');p.onclick=()=>{prefs.presence=!statusOn();savePrefs();p.classList.toggle('on',statusOn());startPresence();updateSub();renderList()};
+  pg.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{prefs.theme=b.dataset.th;savePrefs();applyTheme();renderMePage()});
+}
 document.addEventListener('click',e=>{
   if(!e.target.closest('#menu'))$('menu').classList.add('hidden');
   if(S.infoOverlay&&innerWidth<1400&&!e.target.closest('.info')&&!e.target.closest('#infoBtn')){S.infoOverlay=false;applyInfo()}
