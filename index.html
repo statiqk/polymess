@@ -811,6 +811,13 @@ html[data-theme=dark] .plus{color:#fff}
 #mmenu .msep{border:0;height:1px;background:var(--line2);margin:3px 10px}
 #mdim{background:rgba(5,6,20,.7)}
 .mclone{box-shadow:0 0 0 3px #a9a2ff,0 12px 30px rgba(0,0,0,.5)!important}
+
+/* menu message : pastille d’émojis + carte d’actions séparées */
+#mmenu{background:none!important;box-shadow:none!important;padding:0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+#mmenu.mine{align-items:flex-end}
+#mmenu .em{display:flex;flex-wrap:wrap;width:max-content;max-width:calc(100vw - 16px);margin:0;padding:6px 8px;border:0;border-radius:24px;background:var(--raised);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#mmenu .em .em2{display:flex;flex-wrap:wrap;width:100%;padding-top:2px;margin:0;border:0}#mmenu .em .em2.hidden{display:none}
+#mmenu .mc{width:228px;padding:4px;border-radius:18px;background:var(--raised);box-shadow:0 14px 40px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
@@ -1555,8 +1562,9 @@ function openMsgMenu(el){
   const myR=(S.react[S.cur]||[]).find(r=>r.message_id===id&&r.user_id===S.me.id)?.emoji;
   const d=document.createElement('div');d.id='mmenu';
   const att=!!m.att_path&&m.att_path!=='local';
-  d.innerHTML=`<div class="em">${RX.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}<button type="button" class="emp" data-a="more" aria-label="Plus d’émojis">+</button></div><div class="em em2 hidden">${RX2.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}</div>
-   <button class="it" data-a="reply">${ico('reply')}Répondre</button>${m.content?`<button class="it" data-a="copy">${ico('copy')}Copier</button>`:''}${att?`<button class="it" data-a="save">${ico('download')}Enregistrer</button>`:''}<button class="it" data-a="fwd">${ico('share')}Transférer</button><button class="it" data-a="info">${ico('info')}Infos</button>${mine&&!m.att_path?`<button class="it" data-a="edit">${ico('edit')}Modifier</button>`:''}${mine?`<hr class="msep"><button class="it red" data-a="del">${ico('trash')}Supprimer</button>`:''}`;
+  d.innerHTML=`<div class="em">${RX.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}<button type="button" class="emp" data-a="more" aria-label="Plus d’émojis">+</button><div class="em2 hidden">${RX2.map(e=>`<button data-e="${e}" class="${e===myR?'on':''}">${e}</button>`).join('')}</div></div>
+   <div class="mc"><button class="it" data-a="reply">${ico('reply')}Répondre</button>${m.content?`<button class="it" data-a="copy">${ico('copy')}Copier</button>`:''}${att?`<button class="it" data-a="save">${ico('download')}Enregistrer</button>`:''}<button class="it" data-a="fwd">${ico('share')}Transférer</button><button class="it" data-a="info">${ico('info')}Infos</button>${mine&&!m.att_path?`<button class="it" data-a="edit">${ico('edit')}Modifier</button>`:''}${mine?`<hr class="msep"><button class="it red" data-a="del">${ico('trash')}Supprimer</button>`:''}</div>`;
+  d.classList.toggle('mine',mine);
   // le reste de l'écran s'assombrit, le message touché reste net et surligné
   const r0=el.getBoundingClientRect();
   const dim=document.createElement('div');dim.id='mdim';const t0=Date.now();dim.onclick=()=>{if(Date.now()-t0>500)closeMenu()};document.body.appendChild(dim);
@@ -2238,7 +2246,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.79';
+const APP_VERSION='2026-11-09.80';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
