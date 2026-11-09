@@ -818,6 +818,18 @@ html[data-theme=dark] .plus{color:#fff}
 #mmenu .em{display:flex;flex-wrap:wrap;width:max-content;max-width:calc(100vw - 16px);margin:0;padding:6px 8px;border:0;border-radius:24px;background:var(--raised);box-shadow:0 10px 30px rgba(0,0,0,.35)}
 #mmenu .em .em2{display:flex;flex-wrap:wrap;width:100%;padding-top:2px;margin:0;border:0}#mmenu .em .em2.hidden{display:none}
 #mmenu .mc{width:228px;padding:4px;border-radius:18px;background:var(--raised);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+
+/* Design v3 : barre d’écriture flottante */
+#app .comp{position:relative;z-index:2;background:none!important;box-shadow:none!important;border-radius:0;padding:0;align-items:flex-end;gap:8px;margin:-70px 12px calc(12px + env(safe-area-inset-bottom))}
+#app .bar:not(.hidden)~.comp{margin-top:0}
+#app .comp::before{content:'';position:absolute;left:-12px;right:-12px;top:-26px;bottom:-12px;background:linear-gradient(transparent,var(--bg) 62%);pointer-events:none;z-index:-1}
+#app .comp .clip,#app .comp .send{width:48px;height:48px;border-radius:50%;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;flex:none;display:flex;align-items:center;justify-content:center}
+#app .comp .clip{color:var(--p)}
+#app .comp textarea{min-height:48px;border-radius:24px;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;padding:13px 18px;max-height:130px}
+#app .comp .send:disabled{background:var(--raised)!important}#app .comp .send:disabled .ico{stroke:var(--mut)}
+#app .comp .send:not(:disabled){background:linear-gradient(135deg,#6a5af0,#8a7cff)!important;box-shadow:0 8px 22px rgba(106,90,240,.5)!important}
+@media(max-width:900px){#app .comp:focus-within{margin-bottom:8px}.msgs{padding-bottom:84px}}
+@media(min-width:901px){#app .comp{margin:-70px 22px 18px}.msgs{padding-bottom:84px}}
 </style>
 </head>
 <body>
@@ -2246,7 +2258,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.81';
+const APP_VERSION='2026-11-09.82';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
