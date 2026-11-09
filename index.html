@@ -833,9 +833,8 @@ html[data-theme=dark] .plus{color:#fff}
 
 /* Design v3 : barre d’onglets flottante compacte */
 @media(max-width:900px){
- #app .tbar{position:relative;z-index:5;margin:-76px 18px max(10px,calc(env(safe-area-inset-bottom) + 2px));padding:8px 10px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(30,20,90,.25),0 0 0 1px rgba(106,90,240,.12)}
- html[data-theme=dark] #app .tbar{background:rgba(38,34,79,.92);box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 1px rgba(150,140,255,.12)}
- .list{position:relative}.list::after{content:'';position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(transparent,var(--bg) 55%);pointer-events:none;z-index:4}
+ #app .tbar{position:relative;z-index:5;margin:-76px 18px max(10px,calc(env(safe-area-inset-bottom) + 2px));padding:8px 10px;background:var(--raised);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 12px 30px rgba(0,0,0,.32)}
+  .list{position:relative}
  #app .convs{padding-bottom:96px}
 }
 </style>
@@ -2266,7 +2265,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.87';
+const APP_VERSION='2026-11-09.88';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
