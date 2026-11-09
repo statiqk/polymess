@@ -1574,11 +1574,11 @@ function openMsgMenu(el){
   document.body.appendChild(d);
   const r=r0;
   const place=()=>{
-    d.style.maxHeight='';const w=d.offsetWidth,h=d.offsetHeight,sp=r.top-8,sb2=innerHeight-r.bottom-8;
+    d.style.maxHeight='';const w=d.offsetWidth,h=d.offsetHeight,G=16,sp=r.top-8,sb2=innerHeight-r.bottom-8;
     let top;
-    if(h+6<=sp)top=r.top-h-6;
-    else if(h+6<=sb2)top=r.bottom+6;
-    else{const up=sp>sb2;const mh=Math.max(160,up?sp-6:sb2-6);d.style.maxHeight=mh+'px';d.style.overflowY='auto';top=up?Math.max(8,r.top-mh-6):r.bottom+6}
+    if(h+G<=sp)top=r.top-h-G;
+    else if(h+G<=sb2)top=r.bottom+G;
+    else{const up=sp>sb2;const mh=Math.max(160,up?sp-G:sb2-G);d.style.maxHeight=mh+'px';d.style.overflowY='auto';top=up?Math.max(8,r.top-mh-G):r.bottom+G}
     let left=mine?r.right-w:r.left;left=Math.max(8,Math.min(left,innerWidth-w-8));
     d.style.top=top+'px';d.style.left=left+'px';
   };
@@ -2246,7 +2246,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.80';
+const APP_VERSION='2026-11-09.81';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
