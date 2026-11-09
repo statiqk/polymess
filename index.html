@@ -830,6 +830,15 @@ html[data-theme=dark] .plus{color:#fff}
 #app .comp .send:not(:disabled){background:linear-gradient(135deg,#6a5af0,#8a7cff)!important;box-shadow:0 8px 22px rgba(106,90,240,.5)!important}
 @media(max-width:900px){#app .comp:focus-within{margin-bottom:8px}.msgs{padding-bottom:84px}}
 @media(min-width:901px){#app .comp{margin:-70px 22px 18px}.msgs{padding-bottom:84px}}
+
+/* Design v3 : barre d’onglets flottante compacte */
+@media(max-width:900px){
+ #app .tbar{align-self:center;position:relative;z-index:5;margin:-76px 0 max(10px,calc(env(safe-area-inset-bottom) + 2px));padding:6px;gap:2px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(30,20,90,.25),0 0 0 1px rgba(106,90,240,.12)}
+ html[data-theme=dark] #app .tbar{background:rgba(38,34,79,.92);box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 1px rgba(150,140,255,.12)}
+ .list{position:relative}.list::after{content:'';position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(transparent,var(--bg) 55%);pointer-events:none;z-index:4}
+ #app .tbar button{padding:0 14px;min-width:46px}#app .tbar button.s{padding:0 18px}
+ #app .convs{padding-bottom:96px}
+}
 </style>
 </head>
 <body>
@@ -2258,7 +2267,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.84';
+const APP_VERSION='2026-11-09.86';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
