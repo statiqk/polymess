@@ -1975,7 +1975,7 @@ $('comp').onsubmit=async e=>{
 };
 
 /* ---------- MESSAGES VOCAUX ---------- */
-const VOX_MAX=300,VOX_N=30;
+const VOX_MAX=60,VOX_N=30;
 function voxMeta(m){
   const p=String(m.att_name||'').match(/^vocal_(\d+)_(\d+)/);
   const dur=p?+p[1]:0,pk=(p?p[2]:'').split('').map(Number);
@@ -2471,7 +2471,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-09.95';
+const APP_VERSION='2026-11-09.96';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
