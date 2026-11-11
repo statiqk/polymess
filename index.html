@@ -832,7 +832,7 @@ html[data-theme=dark] .plus{color:#fff}
 #app .comp .send:not(:disabled){background:linear-gradient(135deg,#6a5af0,#8a7cff)!important;box-shadow:0 8px 22px rgba(106,90,240,.5)!important}
 @media(max-width:900px){#app .comp:focus-within{padding-bottom:8px}}
 @media(min-width:901px){#app .comp{padding:0 22px 18px}#app #bar:not(.hidden){left:22px;right:22px}}
-#app .msgs{padding-bottom:calc(var(--ov,0px) + var(--ovb,0px) + 14px)}
+#app .msgs{padding-bottom:calc(max(var(--ov,0px),calc(64px + env(safe-area-inset-bottom))) + var(--ovb,0px) + 18px)}
 
 /* Design v3 : barre d’onglets flottante compacte */
 @media(max-width:900px){
@@ -901,7 +901,7 @@ html[data-theme=dark] .plus{color:#fff}
 .convs .td u:nth-child(2){animation-delay:.18s}.convs .td u:nth-child(3){animation-delay:.36s}
 @media(prefers-reduced-motion:reduce){.msgs .typb i,.convs .td u{animation:none}}
 
-.comp .txt{outline:none;-webkit-tap-highlight-color:transparent;white-space:pre-wrap;word-break:break-word;overflow-y:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text;box-sizing:border-box}
+.comp .txt{box-sizing:border-box;outline:none;-webkit-tap-highlight-color:transparent;white-space:pre-wrap;word-break:break-word;overflow-y:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text;box-sizing:border-box}
 .comp .txt:empty:before{content:attr(data-ph);color:var(--mut,#8a8aa3);pointer-events:none}
 
 .ce{outline:none;white-space:nowrap;overflow:hidden;-webkit-user-select:text;user-select:text;-webkit-tap-highlight-color:transparent;cursor:text;line-height:1.3;box-sizing:border-box}
@@ -1956,6 +1956,9 @@ const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeigh
     new MutationObserver(upd).observe(cp,{attributes:true,attributeFilter:['class']});
     new MutationObserver(upd).observe(br,{attributes:true,attributeFilter:['class']})}catch(e){}
   addEventListener('resize',upd);
+  try{visualViewport.addEventListener('resize',()=>{upd();if(document.activeElement===$('txt'))ms.scrollTop=ms.scrollHeight})}catch(e){}
+  cp.addEventListener('focusout',()=>setTimeout(upd,250));
+  setInterval(()=>{if(S.cur&&!document.hidden)upd()},1500);
 })();
 let lastTypeSent=0;
 txt.oninput=()=>{fit();if(txt.value&&!S.edit&&Date.now()-lastTypeSent>2500){lastTypeSent=Date.now();sendTyping('t')}};
@@ -2521,7 +2524,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.102';
+const APP_VERSION='2026-11-11.103';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
