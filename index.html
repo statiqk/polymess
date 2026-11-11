@@ -1215,7 +1215,7 @@ function onConvUpdate(r){
 }
 const EPH={172800:'48 heures',604800:'7 jours',2592000:'30 jours'};
 const EPH_SUB={172800:'Deux jours',604800:'Une semaine',2592000:'Un mois'};
-const msgGone=m=>!!m.expires_at&&new Date(m.expires_at).getTime()<=Date.now();
+const msgGone=m=>(!!m.expires_at&&new Date(m.expires_at).getTime()<=Date.now())||(isVox(m)&&Date.now()-new Date(m.created_at).getTime()>=EXP_VOX);
 const msgLeft=m=>m.expires_at?new Date(m.expires_at).getTime()-Date.now():Infinity;
 function openEph(c){
   const d=document.createElement('div');d.id='ephs';
@@ -2506,7 +2506,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.98';
+const APP_VERSION='2026-11-11.99';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
