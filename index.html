@@ -185,7 +185,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 @media(max-width:900px){
  #app,#app.noinfo{grid-template-columns:1fr;position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100dvh)}
  html,body{overflow:hidden;overscroll-behavior:none}
- input,textarea,.txt{font-size:16px!important}
+ input,textarea,.txt,.ce{font-size:16px!important}
  .rail{display:none}
  .info{display:none}
  #app.mobinfo .info{display:block;position:fixed;left:0;right:0;top:0;bottom:0;width:auto;max-width:none;z-index:45;box-shadow:none;padding-top:64px}
@@ -314,7 +314,7 @@ html[data-theme=dark] #auth{background:linear-gradient(160deg,#12122a,#1c1c3a)}
 .send{width:44px;height:44px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:0}
 .send .ico{stroke:#fff;stroke-width:2}
 #sbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
-#sbar input{flex:1;min-width:0;background:var(--soft);border-radius:12px;padding:9px 12px;font-size:14px}
+#sbar input,#sbar .ce{flex:1;min-width:0;background:var(--soft);border-radius:12px;padding:9px 12px;font-size:14px}
 #sbar span{font-size:12.5px;color:var(--mut);min-width:44px;text-align:right}
 #sbar .ibtn{width:36px;height:36px}
 .info{padding:28px 20px}.info .av{width:92px;height:92px}
@@ -467,7 +467,7 @@ html[data-theme=dark] .comp textarea,html[data-theme=dark] .comp .txt{background
 /* nouvelle discussion v2 */
 .nsf{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:16px;height:46px;padding:0 14px;color:var(--mut);margin-top:2px}
 .nsf:focus-within{box-shadow:0 0 0 2px var(--p)}.nsf .ms{width:20px;height:20px;flex:none}
-.nsf input{flex:1;min-width:0;font-size:16px;color:var(--ink)}
+.nsf input,.nsf .ce{flex:1;min-width:0;font-size:16px;color:var(--ink)}
 .nclr{width:22px;height:22px;border-radius:50%;background:var(--chk);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}.nclr .ico{width:13px;height:13px;stroke-width:2.4}
 .modal .res .h5,.mp .res .h5{margin:18px 4px 6px}
 .mp .res{overflow-y:auto;flex:1;margin-top:4px}
@@ -846,7 +846,7 @@ html[data-theme=dark] .plus{color:#fff}
 .tpg .frp.press{background:var(--soft)}
 .tpg .sentr .fbtn{flex:none;min-height:34px;padding:0 14px}
 .tpg .frsr{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:0 12px;height:40px;border-radius:12px;background:var(--soft);color:var(--mut)}
-.tpg .frsr .ico{width:18px;height:18px}.tpg .frsr input{flex:1;min-width:0;border:0;background:transparent;outline:0;font:inherit;font-size:16px;color:var(--ink)}
+.tpg .frsr .ico{width:18px;height:18px}.tpg .frsr input,.tpg .frsr .ce{flex:1;min-width:0;border:0;background:transparent;outline:0;font:inherit;font-size:16px;color:var(--ink)}
 .tpg .nres{padding:18px 4px;color:var(--mut);font-size:14px;text-align:center}
 .tpg .emp2{margin-top:36px}.tpg .emp2 .pri2{width:auto;margin:14px 0 0;padding:12px 26px;justify-content:center;display:inline-flex;font-weight:700;font-size:15px;box-shadow:none}
 .ctxb{position:fixed;inset:0;z-index:900;background:transparent}
@@ -903,6 +903,10 @@ html[data-theme=dark] .plus{color:#fff}
 
 .comp .txt{outline:none;-webkit-tap-highlight-color:transparent;white-space:pre-wrap;word-break:break-word;overflow-y:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text;box-sizing:border-box}
 .comp .txt:empty:before{content:attr(data-ph);color:var(--mut,#8a8aa3);pointer-events:none}
+
+.ce{outline:none;white-space:nowrap;overflow:hidden;-webkit-user-select:text;user-select:text;-webkit-tap-highlight-color:transparent;cursor:text;line-height:1.3;box-sizing:border-box}
+.ce:empty:before{content:attr(data-ph);color:var(--mut);opacity:.8;pointer-events:none}
+.search.ce{display:block}
 </style>
 </head>
 <body>
@@ -948,7 +952,7 @@ html[data-theme=dark] .plus{color:#fff}
  <div class="list">
   <div class="lh">
    <h2><span class="hlft">Messages<i class="hlogo" aria-hidden="true"></i></span><span class="hbtns"><button class="meav mob" id="meBtnM" title="Mon compte"></button><button class="plus" id="newBtn" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="ico " viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></h2>
-   <div class="qrow" id="qrow"><input class="search" id="q" placeholder="Rechercher une conversation…" enterkeyhint="search" autocomplete="off"><button type="button" class="qcancel" id="qCancel">Annuler</button></div>
+   <div class="qrow" id="qrow"><div class="search ce" id="q" contenteditable="true" role="searchbox" aria-label="Rechercher une conversation" data-ph="Rechercher une conversation…" enterkeyhint="search" autocapitalize="off" spellcheck="false"></div><button type="button" class="qcancel" id="qCancel">Annuler</button></div>
    <div class="tabs"><button class="tab on" data-f="all">Tous</button><button class="tab" data-f="unread">Non lus</button></div>
   </div>
   <button type="button" class="frban hidden" id="frBan"></button>
@@ -967,7 +971,7 @@ html[data-theme=dark] .plus{color:#fff}
     <div id="chInfo"><div class="n" id="chName"></div><div class="s" id="chSub"></div></div>
     <span class="sp"></span><button class="ibtn" id="srchBtn" title="Rechercher dans la conversation" aria-label="Rechercher"><svg class="ico " viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4L20 20"/></svg></button><button class="ibtn" id="infoBtn" title="Informations sur la conversation" aria-label="Informations" style="margin-left:8px"><svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".7" class="f"/></svg></button>
    </div>
-   <div id="sbar" class="hidden"><input id="sq" placeholder="Rechercher dans la conversation…" autocomplete="off"><span id="scnt"></span><button class="ibtn" id="sPrev" aria-label="Plus ancien"><svg class="ico " viewBox="0 0 24 24"><path d="M6 14.5l6-6 6 6"/></svg></button><button class="ibtn" id="sNext" aria-label="Plus récent"><svg class="ico " viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button><button class="ibtn" id="sX" aria-label="Fermer"><svg class="ico " viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
+   <div id="sbar" class="hidden"><div id="sq" class="ce" contenteditable="true" role="searchbox" aria-label="Rechercher dans la conversation" data-ph="Rechercher dans la conversation…" enterkeyhint="search" autocapitalize="off" spellcheck="false"></div><span id="scnt"></span><button class="ibtn" id="sPrev" aria-label="Plus ancien"><svg class="ico " viewBox="0 0 24 24"><path d="M6 14.5l6-6 6 6"/></svg></button><button class="ibtn" id="sNext" aria-label="Plus récent"><svg class="ico " viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg></button><button class="ibtn" id="sX" aria-label="Fermer"><svg class="ico " viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
    <div class="msgs" id="msgs"></div>
    <div class="bar hidden" id="bar"></div>
    <div class="frlock hidden" id="frLock"></div>
@@ -1930,6 +1934,11 @@ $('file').onchange=async e=>{
 };
 
 /* ---------- ENVOI ---------- */
+/* ---------- champs de saisie sans barre d'accessoires iOS ---------- */
+Object.defineProperty(HTMLElement.prototype,'value',{configurable:true,get(){return this.classList.contains('ce')?this.innerText.replace(/\n/g,''):undefined},set(v){if(this.classList.contains('ce'))this.textContent=v==null?'':String(v)}});
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('ce')&&!t.textContent)t.innerHTML=''},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('ce'))e.preventDefault()},true);
+document.addEventListener('paste',e=>{const t=e.target;if(t.classList&&t.classList.contains('ce')){e.preventDefault();document.execCommand('insertText',false,((e.clipboardData||window.clipboardData).getData('text/plain')||'').replace(/\s+/g,' '))}},true);
 const txt=$('txt');
 Object.defineProperty(txt,'value',{get(){return txt.innerText.replace(/\n$/,'')},set(v){txt.textContent=v||''}});
 txt.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
@@ -2350,7 +2359,7 @@ async function inviteFriend(){
 function openNew(){
   let found=[],timer;
   const host=$('modalHost'),mob=isMob();
-  const field=`<div class="nsf">${ico('search','ms')}<input id="uq" placeholder="Prénom et nom complets…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
+  const field=`<div class="nsf">${ico('search','ms')}<div id="uq" class="ce" contenteditable="true" role="searchbox" aria-label="Prénom et nom complets" data-ph="Prénom et nom complets…" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div><button type="button" class="nclr hidden" id="uc" aria-label="Effacer">${ico('close')}</button></div>`;
   const inv=`<button type="button" class="invb" id="invb"><span class="ic">${ico('share')}</span><div><b>Inviter un ami</b><span class="s">Il n’est pas encore sur PolyTalk ?</span></div></button>`;
   host.innerHTML=mob
    ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Retour</em></button></div><h2 class="mh2">Nouvelle discussion</h2>${field}${inv}<div class="res" id="res"></div></div></div>`
@@ -2512,7 +2521,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.101';
+const APP_VERSION='2026-11-11.102';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2733,7 +2742,7 @@ function renderFrPage(){
   if(out.length)h+=`<div class="h5">Envoyées · ${out.length}</div>`+out.map(({p})=>`<div class="frw sentr">${av(p)}<div class="pt"><b>${esc(p.display_name)}</b><span>En attente</span></div><button type="button" class="fbtn" data-c="${esc(p.id)}">Annuler</button></div>`).join('');
   if(friends.length){
     h+=`<div class="h5">Mes amis · ${friends.length}</div>`;
-    if(friends.length>=5)h+=`<label class="frsr"><span class="ic">${ico('search')}</span><input type="search" id="fpQ" placeholder="Rechercher parmi mes amis" autocomplete="off" value="${esc(frQ)}"></label>`;
+    if(friends.length>=5)h+=`<label class="frsr"><span class="ic">${ico('search')}</span><div id="fpQ" class="ce" contenteditable="true" role="searchbox" aria-label="Rechercher parmi mes amis" data-ph="Rechercher parmi mes amis" autocapitalize="off" spellcheck="false">${esc(frQ)}</div></label>`;
     h+=`<div id="fpList">`+friends.map(p=>`<div class="frw frp" data-f="${esc(p.id)}" data-n="${esc((p.display_name||'').toLowerCase())}">${av(p)}<div class="pt"><b>${esc(p.display_name)}</b>${sub(p)?`<span>${esc(sub(p))}</span>`:''}</div></div>`).join('')+`<div class="nres" id="fpNo" hidden>Aucun ami trouvé</div></div>`;
   }else if(!out.length&&!inc.length){
     h+=`<div class="nempty emp2"><div class="eic">${ico('users')}</div><b>Pas encore d’amis</b><span>Cherche quelqu’un avec son prénom et son nom complets, ou invite un proche à rejoindre PolyTalk.</span><button type="button" class="invb pri2" id="fpAdd2">Ajouter un ami</button></div>`;
