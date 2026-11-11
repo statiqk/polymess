@@ -105,7 +105,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .out{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
 .m.gap{margin-top:8px}
 .comp{background:var(--card);margin:0 22px 18px;border-radius:18px;padding:8px 10px;display:flex;align-items:flex-end;gap:8px;box-shadow:0 4px 18px rgba(30,40,90,.08)}
-.comp textarea{flex:1;resize:none;max-height:120px;padding:10px 8px;font-size:15px;line-height:1.4}
+.comp textarea,.comp .txt{flex:1;min-width:0;resize:none;max-height:120px;padding:10px 8px;font-size:15px;line-height:1.4}
 .send{width:42px;height:42px;border-radius:14px;background:var(--p);color:#fff;font-size:18px;flex:none}
 .send:disabled{opacity:.5}
 .blank{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);gap:10px;text-align:center;padding:20px}
@@ -185,7 +185,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 @media(max-width:900px){
  #app,#app.noinfo{grid-template-columns:1fr;position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100dvh)}
  html,body{overflow:hidden;overscroll-behavior:none}
- input,textarea{font-size:16px!important}
+ input,textarea,.txt{font-size:16px!important}
  .rail{display:none}
  .info{display:none}
  #app.mobinfo .info{display:block;position:fixed;left:0;right:0;top:0;bottom:0;width:auto;max-width:none;z-index:45;box-shadow:none;padding-top:64px}
@@ -310,7 +310,7 @@ html[data-theme=dark] #auth{background:linear-gradient(160deg,#12122a,#1c1c3a)}
 .m .file .ico{width:22px;height:22px}
 .comp{border-radius:22px;padding:9px 10px;align-items:center;box-shadow:0 10px 30px rgba(60,50,140,.12)}
 .clip{width:42px;height:42px;border-radius:14px;background:var(--soft)}
-.comp textarea{padding:10px 6px}
+.comp textarea,.comp .txt{padding:10px 6px}
 .send{width:44px;height:44px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:0}
 .send .ico{stroke:#fff;stroke-width:2}
 #sbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
@@ -358,8 +358,8 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
 .conv .p i .mini{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
 
 /* zone d'écriture v2 */
-.comp textarea{background:var(--soft);border-radius:15px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--line);caret-color:var(--p)}
-html[data-theme=dark] .comp textarea{caret-color:#9a90ff;box-shadow:inset 0 0 0 1px rgba(150,140,255,.18)}
+.comp textarea,.comp .txt{background:var(--soft);border-radius:15px;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--line);caret-color:var(--p)}
+html[data-theme=dark] .comp textarea,html[data-theme=dark] .comp .txt{caret-color:#9a90ff;box-shadow:inset 0 0 0 1px rgba(150,140,255,.18)}
 .send{transition:transform .1s,background .15s,box-shadow .15s}
 .send:not(:disabled){background:linear-gradient(135deg,#4b3fd6,#6a5cff);box-shadow:0 6px 16px rgba(75,63,214,.4)}
 .send:not(:disabled):active{transform:scale(.92)}
@@ -455,8 +455,8 @@ html:not([data-theme=dark]) .m.del.in{background:var(--soft)}
 html[data-theme=dark] .comp{background:#1c1c3a}
 .comp .clip{width:42px;height:42px;border-radius:50%;background:rgba(120,110,255,.18);color:var(--p)}
 html[data-theme=dark] .comp .clip{color:#b3acff}
-.comp textarea{background:var(--card);box-shadow:none!important;border-radius:22px;padding:11px 16px}
-html[data-theme=dark] .comp textarea{background:#262650}
+.comp textarea,.comp .txt{background:var(--card);box-shadow:none!important;border-radius:22px;padding:11px 16px}
+html[data-theme=dark] .comp textarea,html[data-theme=dark] .comp .txt{background:#262650}
 .comp .send{border-radius:50%;width:42px;height:42px}
 .comp .send:disabled{background:rgba(120,110,255,.18)}
 
@@ -827,7 +827,7 @@ html[data-theme=dark] .plus{color:#fff}
 #app #bar:not(.hidden){position:absolute;left:12px;right:12px;bottom:var(--ov,0px);margin:0 0 8px;z-index:2}
 #app .comp .clip,#app .comp .send{width:48px;height:48px;border-radius:50%;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;flex:none;display:flex;align-items:center;justify-content:center}
 #app .comp .clip{color:var(--p)}
-#app .comp textarea{min-height:48px;border-radius:24px;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;padding:13px 18px;max-height:130px}
+#app .comp textarea,#app .comp .txt{min-height:48px;border-radius:24px;background:var(--raised)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;padding:13px 18px;max-height:130px}
 #app .comp .send:disabled{background:var(--raised)!important}#app .comp .send:disabled .ico{stroke:var(--mut)}
 #app .comp .send:not(:disabled){background:linear-gradient(135deg,#6a5af0,#8a7cff)!important;box-shadow:0 8px 22px rgba(106,90,240,.5)!important}
 @media(max-width:900px){#app .comp:focus-within{padding-bottom:8px}}
@@ -900,6 +900,9 @@ html[data-theme=dark] .plus{color:#fff}
 .convs .td{display:inline-flex;gap:3px;margin-left:3px}.convs .td u{width:5px;height:5px;border-radius:50%;background:currentColor;display:block;text-decoration:none;animation:tdb 1.2s infinite both}
 .convs .td u:nth-child(2){animation-delay:.18s}.convs .td u:nth-child(3){animation-delay:.36s}
 @media(prefers-reduced-motion:reduce){.msgs .typb i,.convs .td u{animation:none}}
+
+.comp .txt{outline:none;-webkit-tap-highlight-color:transparent;white-space:pre-wrap;word-break:break-word;overflow-y:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text;box-sizing:border-box}
+.comp .txt:empty:before{content:attr(data-ph);color:var(--mut,#8a8aa3);pointer-events:none}
 </style>
 </head>
 <body>
@@ -971,7 +974,7 @@ html[data-theme=dark] .plus{color:#fff}
    <form class="comp" id="comp">
     <button type="button" class="clip" id="clipBtn" title="Joindre un fichier" aria-label="Joindre un fichier"><svg class="ico " viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.2-8.2a3.3 3.3 0 014.7 4.7l-8.2 8.2a1.7 1.7 0 01-2.4-2.4l7.4-7.4"/></svg></button>
     <input type="file" id="file" class="hidden" accept="image/*,.pdf,.txt,.zip,.doc,.docx,.xls,.xlsx,.pptx">
-    <textarea id="txt" rows="1" enterkeyhint="send" placeholder="Écrire un message…" maxlength="4000"></textarea>
+    <div id="txt" class="txt" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Message" enterkeyhint="send" data-ph="Écrire un message…" autocapitalize="sentences" spellcheck="true"></div>
     <button class="mic" id="micBtn" type="button" aria-label="Message vocal"><svg class="ico " viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0013 0M12 18v2.5"/></svg></button>
     <div class="recui hidden" id="recUi"></div>
     <button class="send" id="sendBtn" type="submit" disabled aria-label="Envoyer"><svg class="ico " viewBox="0 0 24 24"><path d="M20.5 3.5L10.5 13.5"/><path d="M20.5 3.5l-6.3 17-3.7-7-7-3.7 17-6.3z"/></svg></button>
@@ -1928,6 +1931,9 @@ $('file').onchange=async e=>{
 
 /* ---------- ENVOI ---------- */
 const txt=$('txt');
+Object.defineProperty(txt,'value',{get(){return txt.innerText.replace(/\n$/,'')},set(v){txt.textContent=v||''}});
+txt.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
+txt.addEventListener('input',()=>{if(!txt.textContent)txt.innerHTML='';else if(txt.textContent.length>4000){txt.textContent=txt.textContent.slice(0,4000)}});
 const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeight,120)+'px';$('sendBtn').disabled=!txt.value.trim()&&!S.att;$('comp').classList.toggle('vo',!txt.value.trim()&&!S.att&&!S.edit&&!!window.MediaRecorder)};
 (function(){
   const cb=$('chatBox'),cp=$('comp'),br=$('bar'),ms=$('msgs');
@@ -2506,7 +2512,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.100';
+const APP_VERSION='2026-11-11.101';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
