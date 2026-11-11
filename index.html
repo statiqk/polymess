@@ -1018,6 +1018,15 @@ html[data-theme=dark] .plus{color:#fff}
  .modal.setw .stabs .tab{width:100%;justify-content:flex-start;text-align:left;padding:12px 14px;border-radius:12px;font-size:14.5px}
  .modal.setw .sbody{grid-column:2;grid-row:2;overflow-y:auto;min-height:0;padding-right:4px}
 }
+/* Desktop : Moi en fenêtre flottante au-dessus de l'avatar */
+@media(min-width:901px){
+ #app.me-pop #pgMe{display:block;position:fixed;left:80px;bottom:16px;width:340px;max-height:calc(100vh - 32px);overflow-y:auto;border-radius:24px;background:var(--raised);box-shadow:0 24px 70px rgba(0,0,0,.45),inset 0 0 0 1px var(--line);padding:12px 14px 16px;z-index:60;animation:popIn .16s ease both}
+ #app.me-pop #pgMe .lh{display:none}
+ #app.me-pop #pgMe .tpb{padding:0;overflow:visible}
+ #app.me-pop #pgMe .h5{margin:14px 4px 6px}
+ #app.me-pop #pgMe .h5:first-child{margin-top:4px}
+}
+@keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -2704,7 +2713,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.114';
+const APP_VERSION='2026-11-11.115';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2769,7 +2778,7 @@ addEventListener('resize',applyInfo);
 const TBUSER=`<svg class="ico " viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c.9-3.7 4-5.5 7.5-5.5s6.6 1.8 7.5 5.5"/></svg>`;
 function renderMe(){
   if(!S.me)return;
-  if(S.tab==='me')renderMePage();
+  if(S.tab==='me'||$('app').classList.contains('me-pop'))renderMePage();
   const bg=colorOf(S.me.id,S.me.color),t=SIL;
   ['meBtn','meBtnM'].forEach(id=>{const e=$(id);e.style.background=avBg(bg,S.me.avatar_path);e.innerHTML=S.me.avatar_path?'':t});
   const ti=$('tbMeIc');
@@ -2884,13 +2893,17 @@ new MutationObserver(()=>{
   if(open&&!bd){bd=document.createElement('div');bd.id='mbd';document.body.appendChild(bd)}
   if(!open&&bd)bd.remove();
 }).observe($('menu'),{attributes:true,attributeFilter:['class']});
-['meBtn','meBtnM'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();setTab('me')});
+const mePop=on=>{const a=$('app');const v=on===undefined?!a.classList.contains('me-pop'):on;a.classList.toggle('me-pop',v);$('meBtn').classList.toggle('on',v||S.tab==='me');if(v)renderMePage()};
+$('meBtn').onclick=e=>{e.stopPropagation();isMob()?setTab('me'):mePop()};
+$('meBtnM').onclick=e=>{e.stopPropagation();setTab('me')};
+document.addEventListener('click',e=>{const a=$('app');if(!a.classList.contains('me-pop'))return;const path=e.composedPath?e.composedPath():[];if(!path.includes($('pgMe'))&&!path.includes($('meBtn'))){mePop(false);return}if(path.some(n=>n.classList&&(n.classList.contains('mrow')||n.classList.contains('mcard'))))setTimeout(()=>mePop(false),0)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('app').classList.contains('me-pop'))mePop(false)});
 S.tab='msgs';
 function setTab(t){
   S.tab=t;
   const a=$('app');a.classList.toggle('tab-fr',t==='fr');a.classList.toggle('tab-me',t==='me');
   $('tbMsgs').classList.toggle('s',t==='msgs');$('tbFr').classList.toggle('s',t==='fr');$('tbMe').classList.toggle('s',t==='me');
-  $('rMsgs').classList.toggle('on',t==='msgs');$('rFr').classList.toggle('on',t==='fr');$('meBtn').classList.toggle('on',t==='me');
+  $('rMsgs').classList.toggle('on',t==='msgs');$('rFr').classList.toggle('on',t==='fr');$('meBtn').classList.toggle('on',t==='me'||$('app').classList.contains('me-pop'));
   if(t==='fr')renderFrPage();if(t==='me')renderMePage();
 }
 function renderTabs(){
@@ -2901,8 +2914,8 @@ function renderTabs(){
 $('tbMsgs').onclick=()=>{if(S.tab!=='msgs')setTab('msgs');else $('convs').scrollTop=0};
 $('tbFr').onclick=()=>setTab('fr');
 $('tbMe').onclick=()=>setTab('me');
-$('rMsgs').onclick=()=>{if(S.tab!=='msgs')setTab('msgs');else $('convs').scrollTop=0};
-$('rFr').onclick=()=>setTab('fr');
+$('rMsgs').onclick=()=>{$('app').classList.remove('me-pop');if(S.tab!=='msgs')setTab('msgs');else $('convs').scrollTop=0};
+$('rFr').onclick=()=>{$('app').classList.remove('me-pop');setTab('fr')};
 async function chatWith(id){
   S.backTab=S.tab&&S.tab!=='msgs'?S.tab:null;
   const ex=S.convs.find(c=>c.other?.id===id);
