@@ -978,6 +978,10 @@ html[data-theme=dark] .plus{color:#fff}
 @keyframes aDot{0%,80%,100%{opacity:.25;transform:none}40%{opacity:1;transform:translateY(-3px)}}
 #auth:not(.am-login) .alive{display:none}
 @media(prefers-reduced-motion:reduce){#auth .alive .acd.pop,#auth .adots i{animation:none}}
+/* Auth : formulaire ancré en bas (zone du pouce) */
+#auth .aw{min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column}
+#auth #authForm{margin-top:auto}
+#auth #aLive{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -2654,7 +2658,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.107';
+const APP_VERSION='2026-11-11.108';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
