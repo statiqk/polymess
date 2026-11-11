@@ -991,6 +991,8 @@ html[data-theme=dark] .plus{color:#fff}
 #auth.am-login .abig{display:none}
 #auth #authForm{margin-top:0;flex:none}
 #auth.am-login #authForm{margin-top:auto}
+/* Logo du titre : aligné sur la hauteur du texte (haut des majuscules → bas des descendantes) */
+.lh h2 .hlogo{position:relative;top:.065em}
 </style>
 </head>
 <body>
@@ -2676,7 +2678,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.111';
+const APP_VERSION='2026-11-11.112';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
