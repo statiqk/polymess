@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#f3f7ff">
-<link rel="icon" href="icon-192.png?v=3">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="icon" href="icon-192.png?v=4">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PolyTalk">
@@ -19,14 +19,14 @@
 <meta property="og:title" content="PolyTalk · Messagerie instantanée">
 <meta property="og:description" content="Écris à ceux qui comptent. Crée ton compte en quelques secondes.">
 <meta property="og:url" content="https://statiqk.github.io/polymess/">
-<meta property="og:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
+<meta property="og:image" content="https://statiqk.github.io/polymess/og.jpg?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="PolyTalk : écris à ceux qui comptent">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PolyTalk · Messagerie instantanée">
 <meta name="twitter:description" content="Écris à ceux qui comptent. Crée ton compte en quelques secondes.">
-<meta name="twitter:image" content="https://statiqk.github.io/polymess/og.jpg?v=1">
+<meta name="twitter:image" content="https://statiqk.github.io/polymess/og.jpg?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -343,7 +343,7 @@ html[data-theme=dark] .act .sel .ic2{color:#fff}
  .comp{margin:0 10px calc(10px + env(safe-area-inset-bottom))}
  #sbar{padding:8px 10px}
 }
-.logo{background:url(icon-192.png?v=3) center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:0 6px 16px rgba(40,84,160,.22)!important}
+.logo{background:url(icon-192.png?v=4) center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:0 6px 16px rgba(40,84,160,.22)!important}
 
 /* icônes v2 */
 .ico .f{fill:currentColor;stroke:none}.ico{stroke-width:1.8}
@@ -481,7 +481,7 @@ html[data-theme=dark] .wr{color:#accdff;background:rgba(110,168,255,.2)}
 .nempty{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:70px;gap:8px;padding:0 20px}.nempty b{font-size:16px}.nempty span{font-size:14px;color:var(--mut)}
 .eic{width:64px;height:64px;border-radius:50%;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;margin-bottom:6px}.eic .ico{width:28px;height:28px}
 
-.hlogo{width:30px;height:30px;background:url(logo-bubble.png?v=1) center/contain no-repeat;flex:none;display:inline-block}
+.hlogo{width:30px;height:30px;background:url(logo-bubble.png?v=2) center/contain no-repeat;flex:none;display:inline-block}
 .lh h2 .hlft{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 
 @media(max-width:900px){
@@ -2524,7 +2524,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.104';
+const APP_VERSION='2026-11-11.105';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -3073,8 +3073,8 @@ async function refreshAll(){
 
 // notifications : via le service worker quand c'est possible
 async function showNotif(title,body,tag){
-  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png?v=3',badge:'badge-96.png'});return}}catch(e){}
-  try{new Notification(title,{body,tag,icon:'icon-192.png?v=3'})}catch(e){}
+  try{const reg=await navigator.serviceWorker?.getRegistration();if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png?v=4',badge:'badge-96.png?v=2'});return}}catch(e){}
+  try{new Notification(title,{body,tag,icon:'icon-192.png?v=4'})}catch(e){}
 }
 
 // Activation des notifications (réglages ou carte d'invitation) : { fatal, msg }

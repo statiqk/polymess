@@ -1,8 +1,8 @@
 // Service worker : installation de l'appli + notifications (Web Push) + ouverture rapide (cache de l'appli).
 // L'appli se met à jour via version.json : la page est servie depuis le cache puis rafraîchie en arrière-plan.
 const PUSH_URL='https://qcogqpwjhtutxpyhrcld.supabase.co/functions/v1/push';
-const SHELL='pm-shell-1',PAGE='./index.html';
-const STATIC=['manifest.json','icon-192.png?v=3','badge-96.png','logo-bubble.png'];
+const SHELL='pm-shell-2',PAGE='./index.html';
+const STATIC=['manifest.json','icon-192.png?v=4','badge-96.png?v=2','logo-bubble.png?v=2'];
 self.addEventListener('install',e=>{
   self.skipWaiting();
   e.waitUntil(caches.open(SHELL).then(c=>Promise.allSettled([c.add(new Request(PAGE,{cache:'reload'})),...STATIC.map(u=>c.add(u))])));
@@ -63,7 +63,7 @@ self.addEventListener('push',e=>{
     // Une notification par message (elles s'empilent) ; tag unique pour qu'aucune n'en remplace une autre
     const title=d.title||'PolyTalk',body=d.body||'';
     const tag=d.tag?d.tag+'|'+Date.now():undefined;
-    const opts={body,tag,icon:'icon-192.png?v=3',badge:'badge-96.png',vibrate:[120,60,120],timestamp:Date.now(),
+    const opts={body,tag,icon:'icon-192.png?v=4',badge:'badge-96.png?v=2',vibrate:[120,60,120],timestamp:Date.now(),
       data:{cid:d.cid,name:d.title,req:!!d.req}};
     if(d.image)opts.image=d.image;
     if(d.kind==='msg')opts.actions=[{action:'reply',title:'Répondre',type:'text',placeholder:'Ta réponse…'},{action:'read',title:'Marquer comme lu'}];
