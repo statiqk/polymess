@@ -965,12 +965,15 @@ html[data-theme=dark] .plus{color:#fff}
 #auth.rec #aStack{display:block}
 
 /* aperçu vivant : une carte à la fois, puis « écrit… » */
-#auth .alive{margin:22px 0 10px;min-height:118px}
+#auth .alive{margin:22px 0 12px;display:flex;flex-direction:column;gap:10px;flex:none}
 #auth .alive .acd{position:relative;left:auto;right:auto;top:auto;width:auto;background:#16213f;box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 14px 30px rgba(0,0,0,.35);transform:none;opacity:1;filter:none}
+#auth .alive .acd{transition:opacity .45s,transform .45s}
 #auth .alive .acd.pop{animation:aPop .5s cubic-bezier(.2,.9,.3,1.2) both}
+#auth .alive .acd.out{opacity:0!important;transform:scale(.92)!important}
 #auth .alive .aav.sm{width:28px;height:28px;font-size:11px}
-#auth .atyp{display:flex;align-items:flex-end;gap:8px;margin:10px 0 0 4px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
-#auth .atyp.on{opacity:1;transform:none}
+#auth .atyp{display:none;align-items:flex-end;gap:8px;margin:0 0 0 4px}
+#auth .atyp.on{display:flex;animation:aIn .3s ease both}
+@keyframes aIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 #auth .adots{display:flex;gap:5px;background:#16213f;border-radius:18px;border-bottom-left-radius:6px;padding:13px 15px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.09)}
 #auth .adots i{width:7px;height:7px;border-radius:50%;background:#7cc4ff;display:block;animation:aDot 1.1s infinite both}
 #auth .adots i:nth-child(2){animation-delay:.16s}#auth .adots i:nth-child(3){animation-delay:.32s}
@@ -981,7 +984,6 @@ html[data-theme=dark] .plus{color:#fff}
 /* Auth : formulaire ancré en bas (zone du pouce) */
 #auth .aw{min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column}
 #auth #authForm{margin-top:auto}
-#auth #aLive{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -992,7 +994,6 @@ html[data-theme=dark] .plus{color:#fff}
   <div class="atop"><button type="button" id="aBack" class="abk" aria-label="Retour"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="al"><i class="hlogo"></i><b>PolyTalk</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span><span class="astep" id="aStep"></span></div>
   <div class="aprog" id="aProg"><i></i><i></i></div>
   <div class="alive" id="aLive" aria-hidden="true">
-   <div class="acd" id="aCard"></div>
    <div class="atyp" id="aTyp"><span class="aav sm" id="aTypAv"></span><div class="adots"><i></i><i></i><i></i></div></div>
   </div>
   <form id="authForm" autocomplete="on" novalidate>
@@ -1156,21 +1157,27 @@ function pwMeter(){
 }
 $('fPass').addEventListener('input',pwMeter);
 $('authForm').addEventListener('input',()=>{const m=document.querySelector('#authMsg .msg.err');if(m)$('authMsg').innerHTML=''});
-/* aperçu vivant (écran de connexion) */
+/* aperçu vivant (écran de connexion) : cartes empilées, puis effacées de la plus récente à la plus ancienne */
 (()=>{
   const D=[['ML','#e0568b','Marie','Parfait, jeudi 14h 👍','09:06',2],['CR','#2fa37a','Camille','Photo reçue','08:12',0],['TP','#4a7fc9','Thomas','On se call demain ?','Hier',0]];
-  const card=$('aCard'),typ=$('aTyp'),av=$('aTypAv');let i=0,t=null;
-  const paint=()=>{const [ini,col,n,m,h,b]=D[i];
-    card.innerHTML=`<span class="aav" style="background:${col}">${ini}</span><div class="aat"><b>${n}</b><span>${m}</span></div><div class="acm"><small>${h}</small>${b?`<em>${b}</em>`:''}</div>`;
-    card.classList.remove('pop');void card.offsetWidth;card.classList.add('pop')};
+  const box=$('aLive'),typ=$('aTyp'),av=$('aTypAv');let i=0,t=null;const cards=[];
   const live=()=>!$('auth').classList.contains('hidden')&&$('auth').classList.contains('am-login')&&!document.hidden;
-  const step=()=>{
-    if(!live()){t=setTimeout(step,1500);return}
-    const nx=(i+1)%D.length;av.textContent=D[nx][0];av.style.background=D[nx][1];typ.classList.add('on');
-    t=setTimeout(()=>{typ.classList.remove('on');i=nx;paint();t=setTimeout(step,3400)},1500);
+  const dim=()=>cards.forEach((c,k)=>{const d=cards.length-1-k;c.style.opacity=d===0?1:d===1?.85:.6;c.style.transform=d===0?'':d===1?'scale(.98)':'scale(.95)'});
+  const add=n=>{const [ini,col,nm,m,h,b]=D[n];const c=document.createElement('div');c.className='acd pop';
+    c.innerHTML=`<span class="aav" style="background:${col}">${ini}</span><div class="aat"><b>${nm}</b><span>${m}</span></div><div class="acm"><small>${h}</small>${b?`<em>${b}</em>`:''}</div>`;
+    typ.before(c);cards.push(c);dim()};
+  const after=(ms,f)=>{t=setTimeout(()=>live()?f():after(1500,f),ms)};
+  const erase=()=>{
+    if(!cards.length){after(900,next);return}
+    const c=cards.pop();c.classList.add('out');setTimeout(()=>c.remove(),460);dim();t=setTimeout(erase,560);
   };
-  paint();
-  if(!matchMedia('(prefers-reduced-motion:reduce)').matches)t=setTimeout(step,2600);
+  const next=()=>{
+    if(i>=D.length){i=0;after(3200,erase);return}
+    av.textContent=D[i][0];av.style.background=D[i][1];typ.classList.add('on');
+    t=setTimeout(()=>{typ.classList.remove('on');add(i);i++;after(900,next)},1400);
+  };
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){D.forEach((_,n)=>add(n));cards.forEach(c=>c.classList.remove('pop'));return}
+  after(500,next);
 })();
 $('aBack').onclick=()=>setAm(S.am==='s2'?'s1':'login');
 /* icônes + connexion réseau + mot de passe oublié */
@@ -2658,7 +2665,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.108';
+const APP_VERSION='2026-11-11.109';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
