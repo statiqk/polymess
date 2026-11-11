@@ -754,7 +754,7 @@ html[data-theme=dark] .plus{color:#fff}
 
 /* Design v3 : onglets Amis et Moi */
 .tpg{display:none}
-@media(max-width:900px){
+@media screen{
  #app.tab-fr #pgFr,#app.tab-me #pgMe{display:flex;flex-direction:column;flex:1;min-height:0}
  #app.tab-fr .list>.lh,#app.tab-me .list>.lh,#app.tab-fr .frban,#app.tab-me .frban,#app.tab-fr .ntinv,#app.tab-me .ntinv,#app.tab-fr .convs,#app.tab-me .convs{display:none!important}
  .tpg .tpb{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 110px;-webkit-overflow-scrolling:touch}
@@ -993,6 +993,23 @@ html[data-theme=dark] .plus{color:#fff}
 #auth.am-login #authForm{margin-top:auto}
 /* Logo du titre : aligné sur la hauteur du texte (haut des majuscules → bas des descendantes) */
 .lh h2 .hlogo{position:relative;top:.065em}
+/* Desktop : rail de navigation (Messages, Amis, Moi) */
+@media(min-width:901px){
+ .rail{display:flex;width:72px;box-sizing:border-box;padding:16px 0;gap:8px;background:var(--rail);border-right:1px solid var(--line)}
+ #app{grid-template-columns:72px var(--listw) 1fr 300px}
+ #app.noinfo{grid-template-columns:72px var(--listw) 1fr}
+ .rail .hlogo{width:38px;height:38px;margin:2px 0 10px}
+ .rail .ric{border:0;background:none;cursor:pointer;color:#8da2c9;transition:background .15s,color .15s}
+ .rail .ric:hover{background:rgba(255,255,255,.07)}
+ .rail .ric.on{background:rgba(255,255,255,.14);color:#fff}
+ .rail .sp{flex:1}
+ .rail .meav{width:40px;height:40px;font-size:14px;box-shadow:none;cursor:pointer}
+ .rail .meav.on{box-shadow:0 0 0 2px var(--rail),0 0 0 4px var(--p)}
+ .lh .meav.mob{display:none}
+ .tpg .tpb{padding-bottom:24px}
+ html[data-theme=dark] .rail{background:#070d1a}
+}
+@media(min-width:901px) and (max-width:1399px){#app,#app.noinfo{grid-template-columns:72px var(--listw) 1fr}}
 </style>
 </head>
 <body>
@@ -1037,10 +1054,11 @@ html[data-theme=dark] .plus{color:#fff}
 <!-- APP -->
 <div id="app" class="hidden">
  <div class="rail">
-  <div class="logo">P</div>
-  <div class="ric on"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><span class="b hidden" id="railBadge"></span></div>
+  <i class="hlogo" aria-hidden="true"></i>
+  <button type="button" class="ric on" id="rMsgs" title="Messages" aria-label="Messages"><svg class="ico " viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.6 20.5l3.8-2c.8.2 1.7.3 2.6.3 4.7 0 8.5-3.2 8.5-7.1S16.7 3.5 12 3.5z"/><circle cx="8.4" cy="11" r=".9" class="f"/><circle cx="12" cy="11" r=".9" class="f"/><circle cx="15.6" cy="11" r=".9" class="f"/></svg><span class="b hidden" id="railBadge"></span></button>
+  <button type="button" class="ric" id="rFr" title="Amis" aria-label="Amis"><svg class="ico " viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M3 19.5c.8-3.3 3.3-5 6-5s5.2 1.7 6 5"/><path d="M16.5 5.6a3.3 3.3 0 010 5.8M18 14.8c1.7.7 2.8 2.2 3.3 4.4"/></svg><span class="b hidden" id="rFrBadge"></span></button>
   <div class="sp"></div>
-  <button class="meav" id="meBtn" title="Mon compte"></button>
+  <button class="meav" id="meBtn" title="Mon compte" aria-label="Mon compte"></button>
  </div>
 
  <div class="list">
@@ -2678,7 +2696,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.112';
+const APP_VERSION='2026-11-11.113';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2858,22 +2876,25 @@ new MutationObserver(()=>{
   if(open&&!bd){bd=document.createElement('div');bd.id='mbd';document.body.appendChild(bd)}
   if(!open&&bd)bd.remove();
 }).observe($('menu'),{attributes:true,attributeFilter:['class']});
-['meBtn','meBtnM'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();isMob()?setTab('me'):toggleMenu()});
+['meBtn','meBtnM'].forEach(id=>$(id).onclick=e=>{e.stopPropagation();setTab('me')});
 S.tab='msgs';
 function setTab(t){
   S.tab=t;
   const a=$('app');a.classList.toggle('tab-fr',t==='fr');a.classList.toggle('tab-me',t==='me');
   $('tbMsgs').classList.toggle('s',t==='msgs');$('tbFr').classList.toggle('s',t==='fr');$('tbMe').classList.toggle('s',t==='me');
+  $('rMsgs').classList.toggle('on',t==='msgs');$('rFr').classList.toggle('on',t==='fr');$('meBtn').classList.toggle('on',t==='me');
   if(t==='fr')renderFrPage();if(t==='me')renderMePage();
 }
 function renderTabs(){
   const n=frIncoming().length,b=$('tbFrBadge');b.textContent=n;b.classList.toggle('hidden',!n);
+  const rb=$('rFrBadge');rb.textContent=n;rb.classList.toggle('hidden',!n);
   if(S.tab==='fr')renderFrPage();
 }
 $('tbMsgs').onclick=()=>{if(S.tab!=='msgs')setTab('msgs');else $('convs').scrollTop=0};
 $('tbFr').onclick=()=>setTab('fr');
 $('tbMe').onclick=()=>setTab('me');
-addEventListener('resize',()=>{if(!isMob()&&S.tab!=='msgs')setTab('msgs')});
+$('rMsgs').onclick=()=>{if(S.tab!=='msgs')setTab('msgs');else $('convs').scrollTop=0};
+$('rFr').onclick=()=>setTab('fr');
 async function chatWith(id){
   S.backTab=S.tab&&S.tab!=='msgs'?S.tab:null;
   const ex=S.convs.find(c=>c.other?.id===id);
