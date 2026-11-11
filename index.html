@@ -907,31 +907,98 @@ html[data-theme=dark] .plus{color:#fff}
 .ce{outline:none;white-space:nowrap;overflow:hidden;-webkit-user-select:text;user-select:text;-webkit-tap-highlight-color:transparent;cursor:text;line-height:1.3;box-sizing:border-box}
 .ce:empty:before{content:attr(data-ph);color:var(--mut);opacity:.8;pointer-events:none}
 .search.ce{display:block}
+
+/* ---- connexion / inscription : palette Minuit, cartes en fond ---- */
+#auth{background:#0a1020!important}
+#auth:before{background:linear-gradient(170deg,#0f1d44 0%,#0a1020 55%,#060a14 100%),#0a1020}
+#auth:after{background:radial-gradient(420px 300px at 85% -2%,rgba(47,134,255,.38),transparent 70%),radial-gradient(380px 280px at 0% 100%,rgba(94,224,255,.16),transparent 70%)}
+#auth .aghost{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#auth .aghost .acd{position:absolute;width:290px;left:auto;right:auto;top:auto;background:#16213f;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);filter:blur(.7px);transition:opacity .4s}
+#auth .aghost .c1{left:46%;top:74px;transform:rotate(6deg);opacity:.15}
+#auth .aghost .c2{left:-96px;top:176px;transform:rotate(-5deg);opacity:.13}
+#auth .aghost .c3{left:48%;top:calc(100% - 190px);transform:rotate(-4deg);opacity:.13}
+#auth .aghost .c4{left:-110px;top:calc(100% - 300px);transform:rotate(5deg);opacity:.11}
+#auth .acm em{background:#ffd166;color:#1a1200}
+#auth .aw{padding-top:max(22px,env(safe-area-inset-top))}
+#auth .atop{position:relative;min-height:40px;margin:2px 0 6px}
+#auth .abk{display:none;align-items:center;justify-content:center;width:40px;height:40px;margin-left:-10px;color:#7cc4ff;background:none}
+#auth .astep{display:none;color:#9db0d4;font-size:14px;font-weight:600}
+#auth .aprog{display:none;gap:6px;margin:6px 0 22px}#auth .aprog i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.14)}
+#auth.am-s1 .aprog i:first-child,#auth.am-s2 .aprog i{background:linear-gradient(90deg,#5ee0ff,#3d8bff)}
+#auth .ahero{display:flex;justify-content:center;margin:26px 0 18px}#auth .ahero img{border-radius:24px;box-shadow:0 18px 40px rgba(47,134,255,.35)}
+#auth.am-s1 .ahero,#auth.am-s2 .ahero,#auth.rec .ahero{display:none}
+#auth.am-forgot .ahero{margin:14px 0 12px}#auth.am-forgot .ahero img{width:68px;height:68px;border-radius:20px}
+#auth.am-s1 .abk,#auth.am-s2 .abk,#auth.am-forgot .abk{display:flex}
+#auth.am-s1 .al,#auth.am-s2 .al{display:none}#auth.am-forgot .al{display:none}
+#auth.am-s1 .aon,#auth.am-s2 .aon{display:none}#auth.am-forgot .aon{display:none}
+#auth.am-s1 .astep,#auth.am-s2 .astep{display:block}
+#auth.am-s1 .aprog,#auth.am-s2 .aprog{display:flex}
+#authForm h1{font-size:34px;line-height:1.06;margin:0 0 10px}
+#auth .asub{color:#9db0d4;margin:0 0 20px;line-height:1.4}
+#auth .af{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+#auth .af:focus-within{box-shadow:inset 0 0 0 1.5px #5aa7ff,0 0 0 3px rgba(61,139,255,.2);background:rgba(255,255,255,.08)}
+#auth .af .ai,#auth .aeye{color:#7cc4ff}
+#auth .albl{font-size:13.5px;color:#9db0d4;font-weight:600;margin:4px 0 8px}
+#auth .three{display:grid;grid-template-columns:.8fr 1.35fr 1fr;gap:10px}
+#auth .af.sel{padding:0 8px 0 14px}
+#auth .af select{flex:1;min-width:0;width:100%;height:100%;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:17px;font-weight:500;-webkit-appearance:none;appearance:none;padding:0;color-scheme:dark}
+#auth .af select option{color:#000}
+#auth .af.sel:after{content:"";width:8px;height:8px;border-right:2px solid #7cc4ff;border-bottom:2px solid #7cc4ff;transform:rotate(45deg);margin:-4px 4px 0 0;flex:none}
+#auth .ahint{color:#8fa0c4;font-size:13px;line-height:1.4;margin:6px 4px 14px}
+#auth .ameter{display:none;grid-template-columns:repeat(4,1fr);gap:6px;margin:2px 4px 0}#auth .ameter i{height:5px;border-radius:3px;background:rgba(255,255,255,.14);transition:background .2s}
+#auth .ameter.l1 i:nth-child(-n+1){background:#ff6b6b}#auth .ameter.l2 i:nth-child(-n+2){background:#ffd166}#auth .ameter.l3 i:nth-child(-n+3){background:#38d9a0}#auth .ameter.l4 i{background:#38d9a0}
+#auth #aPwHint.ok{color:#38d9a0}
+#auth .afg{color:#7cc4ff}
+#auth .abtn{background:linear-gradient(100deg,#5ee0ff,#3d8bff 45%,#2d6cf0);color:#04102e;font-weight:800;box-shadow:0 14px 30px rgba(47,134,255,.4)}
+#auth .aswitch{color:#9db0d4}#auth .aswitch button{color:#7cc4ff;text-decoration:none}
+#auth #authMsg .msg.ok{background:rgba(56,217,160,.14);color:#aef3d8;box-shadow:inset 0 0 0 1px rgba(56,217,160,.4)}
+#auth #authMsg .msg.err{background:rgba(255,107,107,.14);color:#ffc4c4}
+/* affichage selon l'étape */
+#auth.am-login #signupOnly,#auth.am-forgot #signupOnly,#auth.am-s2 #signupOnly,#auth.rec #signupOnly{display:none}
+#auth.am-s1 #fMailW,#auth.am-s1 .pw,#auth.am-s1 .afgw,#auth.am-s1 #aPwHint{display:none}
+#auth.am-s2 .afgw,#auth.am-s2 .aswitch{display:none}
+#auth.am-s2 .ameter{display:grid}
+#auth.am-forgot .pw,#auth.am-forgot .afgw,#auth.am-forgot #aPwHint{display:none}
+#auth.am-login #aPwHint,#auth.rec #aPwHint{display:none}
+#auth.rec .ameter{display:grid}
+#auth.rec #authForm h1{font-size:34px}
+#auth.rec #aStack{display:block}
 </style>
 </head>
 <body>
 
 <!-- AUTH -->
-<div id="auth" class="hidden">
+<div id="auth" class="hidden am-login">
+ <div class="aghost" id="aStack" aria-hidden="true">
+  <div class="acd c1"><span class="aav" style="background:#4a7fc9">TP</span><div class="aat"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
+  <div class="acd c2"><span class="aav" style="background:#2fa37a">CR</span><div class="aat"><b>Camille</b><span>Photo reçue</span></div><small>08:12</small></div>
+  <div class="acd c3"><span class="aav" style="background:#e0568b">ML</span><div class="aat"><b>Marie</b><span>Parfait, jeudi 14h 👍</span></div><div class="acm"><small>09:06</small><em>2</em></div></div>
+  <div class="acd c4"><span class="aav" style="background:#4a7fc9">TP</span><div class="aat"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
+ </div>
  <div class="aw">
-  <div class="atop"><div class="al"><i class="hlogo"></i><b>PolyTalk</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span></div>
-  <div class="astack" id="aStack" aria-hidden="true">
-   <div class="acd c1"><span class="aav" style="background:#4aa3df">TP</span><div class="aat"><b>Thomas</b><span>On se call demain ?</span></div><small>Hier</small></div>
-   <div class="acd c2"><span class="aav" style="background:#34b46c">CR</span><div class="aat"><b>Camille</b><span>Photo reçue</span></div><small>08:12</small></div>
-   <div class="acd c3"><span class="aav" style="background:#e8648b">ML</span><div class="aat"><b>Marie</b><span>Parfait, jeudi 14h 👍</span></div><div class="acm"><small>09:06</small><em>2</em></div></div>
-  </div>
-  <form id="authForm" autocomplete="on">
+  <div class="atop"><button type="button" id="aBack" class="abk" aria-label="Retour"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="al"><i class="hlogo"></i><b>PolyTalk</b></div><span class="aon" id="aOn"><i></i><em>En ligne</em></span><span class="astep" id="aStep"></span></div>
+  <div class="aprog" id="aProg"><i></i><i></i></div>
+  <div class="ahero"><img src="icon-192.png?v=4" alt="" width="84" height="84"></div>
+  <form id="authForm" autocomplete="on" novalidate>
    <h1 id="authH">Retrouve tes discussions.</h1>
-   <p class="asub hidden" id="authSub"></p>
-   <div id="signupOnly" class="hidden">
+   <p class="asub" id="authSub">Connecte-toi pour reprendre là où tu t’es arrêté.</p>
+   <div id="signupOnly">
     <div class="two">
      <label class="af"><input id="fFirst" maxlength="40" autocomplete="given-name" placeholder="Prénom"></label>
      <label class="af"><input id="fLast" maxlength="40" autocomplete="family-name" placeholder="Nom"></label>
     </div>
-    <label class="af"><span class="afl">Né(e) le</span><input id="fBirth" type="date" min="1900-01-01" autocomplete="bday"></label>
+    <div class="albl">Date de naissance</div>
+    <div class="three">
+     <label class="af sel"><select id="bDay" aria-label="Jour" autocomplete="bday-day"></select></label>
+     <label class="af sel"><select id="bMonth" aria-label="Mois" autocomplete="bday-month"></select></label>
+     <label class="af sel"><select id="bYear" aria-label="Année" autocomplete="bday-year"></select></label>
+    </div>
+    <input id="fBirth" type="hidden">
+    <p class="ahint">Visible par toi seul. Sert à vérifier ton âge.</p>
    </div>
-   <label class="af" id="fMailW"><i class="ai" data-ic="mail"></i><input id="fMail" type="email" required autocomplete="email" placeholder="E-mail"></label>
-   <label class="af pw"><i class="ai" data-ic="lock"></i><input id="fPass" type="password" required minlength="6" autocomplete="current-password" placeholder="Mot de passe"><button type="button" class="aeye" tabindex="-1" aria-label="Afficher ou masquer le mot de passe" data-ic="eye"></button></label>
+   <label class="af" id="fMailW"><i class="ai" data-ic="mail"></i><input id="fMail" type="email" autocomplete="email" placeholder="E-mail" inputmode="email" autocapitalize="off"></label>
+   <label class="af pw"><i class="ai" data-ic="lock"></i><input id="fPass" type="password" autocomplete="current-password" placeholder="Mot de passe"><button type="button" class="aeye" tabindex="-1" aria-label="Afficher ou masquer le mot de passe" data-ic="eye"></button></label>
+   <div class="ameter" id="aMeter"><i></i><i></i><i></i><i></i></div><p class="ahint" id="aPwHint">8 caractères minimum, plus c’est long, mieux c’est.</p>
    <div class="afgw"><button type="button" id="fgBtn" class="afg">Mot de passe oublié ?</button></div>
    <button class="abtn" id="authBtn" type="submit">Se connecter</button>
    <div id="authMsg"></div>
@@ -1020,50 +1087,80 @@ const avTxt=(name,p)=>safePath(p)?'':SIL;
 const colorOf=(id,c)=>(/^#[0-9a-f]{6}$/i.test(c||'')?c:null)||COLORS[[...String(id)].reduce((a,ch)=>a+ch.charCodeAt(0),0)%COLORS.length];
 
 /* ---------- AUTH ---------- */
-function setAuthMode(signup){
-  S.signup=signup;
-  const au=$('auth');au.classList.toggle('up',signup);au.classList.remove('rec');S.rec=false;
-  $('signupOnly').classList.toggle('hidden',!signup);
-  $('fMail').required=true;
-  $('authH').textContent=signup?'Crée ton compte.':'Retrouve tes discussions.';
-  $('authBtn').textContent=signup?'Créer mon compte':'Se connecter';
-  $('swTxt').textContent=signup?'Déjà un compte ?':'Pas encore de compte ?';
-  $('swBtn').textContent=signup?'Se connecter':'Créer un compte';
-  $('fPass').autocomplete=signup?'new-password':'current-password';
+const AM={
+ login:{h:'Retrouve tes discussions.',sub:'Connecte-toi pour reprendre là où tu t’es arrêté.',btn:'Se connecter',swt:'Pas encore de compte ?',swb:'Créer un compte',step:''},
+ s1:{h:'Fais connaissance.',sub:'Ton prénom et ton nom, pour que tes amis te retrouvent.',btn:'Continuer',swt:'Déjà un compte ?',swb:'Se connecter',step:'1 sur 2'},
+ s2:{h:'Sécurise ton compte.',sub:'Ton e-mail sert à te connecter et à retrouver ton mot de passe.',btn:'Créer mon compte',swt:'',swb:'',step:'2 sur 2'},
+ forgot:{h:'Mot de passe oublié ?',sub:'Entre ton e-mail, on t’envoie un lien pour en choisir un nouveau.',btn:'Envoyer le lien',swt:'',swb:'Retour à la connexion',step:''}
+};
+function setAm(m){
+  S.am=m;S.signup=(m==='s1'||m==='s2');S.rec=false;
+  const au=$('auth');au.classList.remove('rec','am-login','am-s1','am-s2','am-forgot');au.classList.add('am-'+m);
+  const a=AM[m];
+  $('authH').textContent=a.h;$('authSub').textContent=a.sub;$('authSub').classList.remove('hidden');
+  $('authBtn').textContent=a.btn;$('swTxt').textContent=a.swt;$('swBtn').textContent=a.swb;$('aStep').textContent=a.step;
+  $('fPass').autocomplete=S.signup?'new-password':'current-password';
   $('fPass').placeholder='Mot de passe';
   $('authMsg').innerHTML='';
+  pwMeter();
 }
+const setAuthMode=signup=>setAm(signup?'s1':'login');
 function showRecovery(){
-  S.rec=true;S.signup=false;
-  const au=$('auth');au.classList.remove('up');au.classList.add('rec');
+  S.rec=true;S.signup=false;S.am='rec';
+  const au=$('auth');au.classList.remove('up','am-login','am-s1','am-s2','am-forgot');au.classList.add('rec');
   $('app').classList.add('hidden');au.classList.remove('hidden');
-  $('signupOnly').classList.add('hidden');$('fMail').required=false;
-  $('authH').textContent='Nouveau mot de passe.';
+  $('authH').textContent='Nouveau mot de passe.';$('authSub').textContent='';$('authSub').classList.add('hidden');
   $('authBtn').textContent='Enregistrer';
   $('fPass').value='';$('fPass').autocomplete='new-password';$('fPass').placeholder='Nouveau mot de passe';
-  $('authMsg').innerHTML='';
+  $('authMsg').innerHTML='';pwMeter();
 }
+/* date de naissance : jour / mois / année */
+(()=>{
+  const d=$('bDay'),m=$('bMonth'),y=$('bYear');
+  const opt=(v,t)=>`<option value="${v}">${t}</option>`;
+  d.innerHTML=opt('','Jour')+Array.from({length:31},(_,i)=>opt(i+1,i+1)).join('');
+  m.innerHTML=opt('','Mois')+['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'].map((n,i)=>opt(i+1,n)).join('');
+  const Y=new Date().getFullYear();
+  y.innerHTML=opt('','Année')+Array.from({length:Y-1899},(_,i)=>opt(Y-i,Y-i)).join('');
+  const upd=()=>{const dd=+d.value,mm=+m.value,yy=+y.value;let v='';
+    if(dd&&mm&&yy){const t=new Date(yy,mm-1,dd);if(t.getFullYear()===yy&&t.getMonth()===mm-1&&t.getDate()===dd)v=`${yy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`}
+    $('fBirth').value=v};
+  [d,m,y].forEach(e=>{e.onchange=upd;e.style.color='';});
+})();
+/* solidité du mot de passe */
+function pwMeter(){
+  const p=$('fPass').value,el=$('aMeter'),h=$('aPwHint');
+  let sc=0;if(p.length>=8)sc++;if(p.length>=11)sc++;if(/[a-z]/.test(p)&&/[A-Z]/.test(p))sc++;if(/\d/.test(p)&&/[^A-Za-z0-9]/.test(p))sc++;
+  if(p.length<8)sc=Math.min(sc,p.length?1:0);
+  el.className='ameter'+(sc?' l'+sc:'');
+  if(!p){h.textContent='8 caractères minimum, plus c’est long, mieux c’est.';h.classList.remove('ok')}
+  else if(p.length<8){h.textContent='Encore '+(8-p.length)+' caractère'+(8-p.length>1?'s':'')+' minimum.';h.classList.remove('ok')}
+  else if(sc>=3){h.textContent='Solide.';h.classList.add('ok')}
+  else{h.textContent='Correct. Plus c’est long, mieux c’est.';h.classList.remove('ok')}
+}
+$('fPass').addEventListener('input',pwMeter);
+$('authForm').addEventListener('input',()=>{const m=document.querySelector('#authMsg .msg.err');if(m)$('authMsg').innerHTML=''});
+$('aBack').onclick=()=>setAm(S.am==='s2'?'s1':'login');
 /* icônes + connexion réseau + mot de passe oublié */
 document.querySelectorAll('#auth [data-ic]').forEach(e=>{e.innerHTML=ICONS[e.dataset.ic].startsWith('<')?`<svg class="ico" viewBox="0 0 24 24">${ICONS[e.dataset.ic]}</svg>`:''});
 document.querySelector('#auth .aeye').onclick=e=>{const b=e.currentTarget,i=$('fPass');i.type=i.type==='password'?'text':'password';b.classList.toggle('on',i.type==='text')};
 function netPill(){const on=navigator.onLine!==false;$('aOn').classList.toggle('off',!on);$('aOn').querySelector('em').textContent=on?'En ligne':'Hors ligne'}
 const offBar=()=>$('offb').classList.toggle('hidden',navigator.onLine!==false);
 addEventListener('online',()=>{netPill();offBar()});addEventListener('offline',()=>{netPill();offBar()});netPill();offBar();
-$('fgBtn').onclick=async()=>{
-  const email=$('fMail').value.trim();
-  if(!email){authMsg('Entre ton e-mail ci-dessus, puis touche « Mot de passe oublié ? ».','err');$('fMail').focus();return}
-  $('fgBtn').disabled=true;
-  try{
-    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
-    if(error)authMsg(/rate|seconds/i.test(error.message)?'Patiente une minute avant de redemander un e-mail.':error.message,'err');
-    else authMsg('Si un compte existe pour cette adresse, un e-mail pour changer ton mot de passe vient d’être envoyé.','ok');
-  }finally{$('fgBtn').disabled=false}
-};
-$('swBtn').onclick=()=>setAuthMode(!S.signup);
+$('fgBtn').onclick=()=>{setAm('forgot');$('fMail').focus()};
+$('swBtn').onclick=()=>setAm(S.am==='login'?'s1':'login');
 const authMsg=(t,k)=>$('authMsg').innerHTML=`<div class="msg ${k}">${esc(t)}</div>`;
 $('authForm').onsubmit=async e=>{
   e.preventDefault();
-  const email=$('fMail').value.trim(),password=$('fPass').value;
+  const m=S.am,email=$('fMail').value.trim(),password=$('fPass').value;
+  if(m==='s1'){
+    const first_name=$('fFirst').value.trim(),last_name=$('fLast').value.trim(),birth_date=$('fBirth').value;
+    if(!first_name){authMsg('Indique ton prénom.','err');$('fFirst').focus();return}
+    if(!last_name){authMsg('Indique ton nom.','err');$('fLast').focus();return}
+    const bd=new Date(birth_date+'T00:00:00');
+    if(!birth_date||isNaN(bd)||bd>new Date()||bd<new Date('1900-01-01T00:00:00')){authMsg('Indique ta date de naissance complète : jour, mois et année.','err');return}
+    setAm('s2');$('fMail').focus();return;
+  }
   $('authBtn').disabled=true;$('authMsg').innerHTML='';
   try{
     if(S.rec){
@@ -1075,17 +1172,22 @@ $('authForm').onsubmit=async e=>{
       if(data?.user)boot(data.user);
       return;
     }
-    if(S.signup){
+    if(m==='forgot'){
+      if(!email){authMsg('Entre ton e-mail.','err');$('fMail').focus();return}
+      const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+      if(error)authMsg(/rate|seconds/i.test(error.message)?'Patiente une minute avant de redemander un e-mail.':error.message,'err');
+      else authMsg('Si un compte existe pour cette adresse, un e-mail pour changer ton mot de passe vient d’être envoyé. Vérifie ta boîte mail.','ok');
+      return;
+    }
+    if(m==='s2'){
       const first_name=$('fFirst').value.trim(),last_name=$('fLast').value.trim(),birth_date=$('fBirth').value;
-      if(!first_name){authMsg('Indique ton prénom.','err');return}
-      if(password.length<8){authMsg('Mot de passe : 8 caractères minimum.','err');return}
-      if(!last_name){authMsg('Indique ton nom.','err');return}
-      const bd=new Date(birth_date+'T00:00:00');
-      if(!birth_date||isNaN(bd)||bd>new Date()||bd<new Date('1900-01-01T00:00:00')){authMsg('Indique une date de naissance valide.','err');return}
+      if(!email){authMsg('Entre ton e-mail.','err');$('fMail').focus();return}
+      if(password.length<8){authMsg('Mot de passe : 8 caractères minimum.','err');$('fPass').focus();return}
       const {data,error}=await sb.auth.signUp({email,password,options:{data:{first_name,last_name,birth_date}}});
       if(error){authMsg(/already registered/i.test(error.message)?'Cette adresse e-mail est déjà utilisée.':error.message,'err');return}
-      if(!data.session){setAuthMode(false);authMsg('Compte créé. Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.','ok')}
+      if(!data.session){setAm('login');authMsg('Compte créé. Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.','ok')}
     }else{
+      if(!email||!password){authMsg('Entre ton e-mail et ton mot de passe.','err');return}
       const {error}=await sb.auth.signInWithPassword({email,password});
       if(error)authMsg(error.message==='Invalid login credentials'?'E-mail ou mot de passe incorrect.':error.message,'err');
     }
@@ -2524,7 +2626,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-11.105';
+const APP_VERSION='2026-11-11.106';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
