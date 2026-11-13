@@ -209,6 +209,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .av.on::after{content:'';position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2fbf71;border:2px solid var(--card)}
 .ch .s.live{color:#1f9d5c}
 .m{position:relative}.m:not(.del){cursor:pointer}
+.conv .p .dr{color:#ff7d6e;font-weight:600}
 .m a.lk{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .m a.lpw{display:none;margin:8px -6px -2px;border-radius:14px;overflow:hidden;background:rgba(127,127,127,.16);color:inherit;text-decoration:none;white-space:normal}
 .m a.lpw.ok{display:block}
@@ -1487,6 +1488,22 @@ function fmtDay(d){
   return x.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 }
 function renderAll(){renderList();renderChat()}
+/* ---------- BROUILLONS : le message commencé est gardé par discussion ---------- */
+let DR=null,DRk='';
+const drKey=()=>'polytalk_drafts_'+(S.me?S.me.id:'');
+function drLoad(){if(DR&&DRk===drKey())return DR;DRk=drKey();try{DR=JSON.parse(localStorage.getItem(drKey())||'{}')||{}}catch(e){DR={}}return DR}
+const draftOf=cid=>{const v=drLoad()[cid];return v&&v.t&&!/^\s*$/.test(v.t)?v.t:''};
+function setDraft(cid,t){
+  if(!cid||!S.me)return;const d=drLoad(),had=!!d[cid];
+  if(t&&!/^\s*$/.test(t))d[cid]={t:String(t).slice(0,4000),ts:Date.now()};else delete d[cid];
+  const ks=Object.keys(d);if(ks.length>80){ks.sort((a,b)=>d[a].ts-d[b].ts).slice(0,ks.length-80).forEach(k=>delete d[k])}
+  try{localStorage.setItem(drKey(),JSON.stringify(d))}catch(e){}
+  return had!==!!d[cid];
+}
+function saveDraftNow(){
+  if(!S.cur||S.edit)return;
+  if(setDraft(S.cur,txt.value))renderList();
+}
 function renderList(){
   try{S.convs.slice(0,30).forEach(c=>ensureTyping(c.id))}catch(_){}
   const vis=S.convs.filter(c=>!(c.cleared&&!c.last));
@@ -1506,6 +1523,7 @@ function renderList(){
   }
   $('convs').innerHTML=list.map(c=>{
     const lastOk=c.last&&!msgGone(c.last)?c.last:null;
+    const dft=(!S.typ[c.id]&&c.id!==S.cur)?draftOf(c.id):'';
     const prev=lastOk?((lastOk.sender_id===S.me.id?'Toi : ':'')+prevText(lastOk)):'Aucun message';
     const rd=lastOk&&isRead(c,lastOk);
     const tk=lastOk&&!lastOk.deleted_at&&lastOk.sender_id===S.me.id?`<span class="ltk${rd?' rd':''}">${ico(lastOk.pending?'clock':(rd||isDeliv(c,lastOk))?'ticks':'tick','mini')}</span>`:'';
@@ -1514,7 +1532,7 @@ function renderList(){
       <div class="av${statusOn()&&c.other&&S.online.has(c.other.id)?' on'+(S.away.has(c.other.id)?' away':''):''}" style="background:${avBg(c.color,c.other?.avatar_path)}">${avTxt(c.name,c.other?.avatar_path)}${(()=>{const a=c.other?leftAgo(c.other.id):null;return a!=null?`<i class="ago">${fmtAgo(a)}</i>`:''})()}</div>
       <div class="cm"><div class="t"><b>${esc(c.name)}</b><span>${c.pinned?ico('pin','mini'):''}${c.muted?ico('bellOff','mini'):''}${lastOk?fmtList(lastOk.created_at):''}</span></div>
       ${(()=>{const sn=c.other?subText(c,false):'';return sn?`<div class="sn${sn==='En ligne'?' live':''}">${esc(sn)}</div>`:''})()}
-      <div class="p"><i>${S.typ[c.id]?(S.typ[c.id].k==='r'?`<span class="tl r">${ico('mic','mini')}enregistre un vocal…</span>`:`<span class="tl">écrit<b class="td"><u></u><u></u><u></u></b></span>`):''}${S.typ[c.id]?'':tk}${S.typ[c.id]?'':lastOk&&!lastOk.deleted_at&&lastOk.att_path?(lastOk.sender_id===S.me.id?'Toi : ':'')+ico(isVox(lastOk)?'mic':(lastOk.att_type||'').startsWith('image/')?'image':'file','mini')+esc(isVox(lastOk)?'Message vocal':(lastOk.att_type||'').startsWith('image/')?'Photo':(lastOk.att_name||'Fichier'))+(lastOk.content?' '+esc(lastOk.content):''):esc(prev)}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button></div>`;
+      <div class="p"><i>${dft?`<span class="dr">Brouillon :</span> ${esc(dft.slice(0,80))}`:''}${dft?'':`${S.typ[c.id]?(S.typ[c.id].k==='r'?`<span class="tl r">${ico('mic','mini')}enregistre un vocal…</span>`:`<span class="tl">écrit<b class="td"><u></u><u></u><u></u></b></span>`):''}${S.typ[c.id]?'':tk}${S.typ[c.id]?'':lastOk&&!lastOk.deleted_at&&lastOk.att_path?(lastOk.sender_id===S.me.id?'Toi : ':'')+ico(isVox(lastOk)?'mic':(lastOk.att_type||'').startsWith('image/')?'image':'file','mini')+esc(isVox(lastOk)?'Message vocal':(lastOk.att_type||'').startsWith('image/')?'Photo':(lastOk.att_name||'Fichier'))+(lastOk.content?' '+esc(lastOk.content):''):esc(prev)}`}</i>${c.unread?`<span class="bd">${c.unread>99?'99+':c.unread}</span>`:''}</div></div></button></div>`;
   }).join('');
 }
 // ---- Balayage d'une ligne (écran tactile) : Épingler / Sourdine / Supprimer
@@ -1655,7 +1673,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 });
 
 async function openConv(id){
-  if(S.cur!==id){if(S.sq){S.sq=null;$('sbar').classList.add('hidden')}S.reply=null;S.att=null;if(S.edit){S.edit=null;txt.value=''}}
+  if(S.cur!==id){if(S.sq){S.sq=null;$('sbar').classList.add('hidden')}S.reply=null;S.att=null;{const ed=S.edit;S.edit=null;if(S.cur&&!ed)setDraft(S.cur,txt.value)}txt.value=draftOf(id);try{fit()}catch(e){}}
   if(innerWidth<=900&&!$('app').classList.contains('inchat'))pushPM('chat');
   S.cur=id;$('app').classList.add('inchat');
   renderAll();
@@ -1997,7 +2015,7 @@ function renderBar(){
 }
 $('bar').onclick=e=>{
   const x=e.target.closest('[data-x]');if(!x)return;const k=x.dataset.x;
-  if(k==='edit'){S.edit=null;txt.value=''}else if(k==='reply')S.reply=null;else S.att=null;
+  if(k==='edit'){S.edit=null;txt.value=draftOf(S.cur)}else if(k==='reply')S.reply=null;else S.att=null;
   renderBar();
 };
 async function delMsg(m){
@@ -2193,12 +2211,12 @@ const fit=()=>{txt.style.height='auto';txt.style.height=Math.min(txt.scrollHeigh
   setInterval(()=>{if(S.cur&&!document.hidden)upd()},1500);
 })();
 let lastTypeSent=0;
-txt.oninput=()=>{fit();if(txt.value&&!S.edit&&Date.now()-lastTypeSent>2500){lastTypeSent=Date.now();sendTyping('t')}};
+txt.oninput=()=>{fit();saveDraftNow();if(txt.value&&!S.edit&&Date.now()-lastTypeSent>2500){lastTypeSent=Date.now();sendTyping('t')}};
 txt.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('comp').requestSubmit()}};
 async function doEdit(content){
   const id=S.edit.id,m=(S.msgs[S.cur]||[]).find(x=>x.id===id);
   if(!content)return;
-  S.edit=null;txt.value='';renderBar();
+  S.edit=null;txt.value=draftOf(S.cur);renderBar();
   if(!m||m.content===content)return;
   const old=m.content,oldE=m.edited_at;m.content=content;m.edited_at=new Date().toISOString();
   renderMsgs(false);
@@ -2211,7 +2229,7 @@ $('comp').onsubmit=async e=>{
   if(S.edit){await doEdit(content);return}
   if((!content&&!S.att)||!S.cur)return;
   const cid=S.cur,reply=S.reply,att=S.att;
-  txt.value='';S.reply=null;S.att=null;renderBar();
+  txt.value='';setDraft(cid,'');S.reply=null;S.att=null;renderBar();
   const tmp={id:att?'tmp-'+Date.now():crypto.randomUUID(),conversation_id:cid,sender_id:S.me.id,content,created_at:new Date().toISOString(),pending:true,reply_to:reply?reply.id:null};
   if(att)Object.assign(tmp,{att_path:'local',att_name:att.name,att_type:att.type,att_size:att.blob.size,localUrl:(att.isImg||att.isVox)?URL.createObjectURL(att.blob):null});
   (S.msgs[cid]??=[]).push(tmp);renderMsgs(true);
@@ -2784,7 +2802,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.118';
+const APP_VERSION='2026-11-13.119';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
