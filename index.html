@@ -213,7 +213,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .dgx b{display:block;font-size:15px}.dgx span:not(.dgi){display:block;font-size:12.5px;opacity:.75;margin-top:1px;line-height:1.35}
 .dgi{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
 .dgx.ok .dgi{background:rgba(95,214,140,.16);color:#3fc57a}.dgx.warn .dgi{background:rgba(255,180,84,.16);color:#f0a030}.dgx.no .dgi{background:rgba(255,125,140,.16);color:#f0566b}.dgx.wait .dgi{background:rgba(143,155,192,.16);color:#8f9bc0}
-.dgback{display:inline-flex;align-items:center;gap:4px;margin:0;padding:4px 0;width:auto!important;background:none!important;box-shadow:none!important;border:0!important;color:var(--p)!important;font-weight:600;font-size:14px}.dgh{font-size:19px;font-weight:700;margin:6px 0 2px}.dglink{display:block;margin:12px auto 0;color:var(--p);font-weight:600;font-size:14px}
+.dgback{display:inline-flex;align-items:center;gap:4px;margin-top:0}.dglink{display:block;margin:12px auto 0;color:var(--p);font-weight:600;font-size:14px}
 .conv .p .dr{color:#ff7d6e;font-weight:600}
 .shpv{margin:4px 0 10px;padding:10px 12px;border-radius:14px;background:rgba(127,127,127,.14);font-size:13.5px;display:flex;flex-direction:column;gap:4px}.shpv span{display:flex;gap:6px;align-items:center;font-weight:600}.shpv em{font-style:normal;opacity:.8;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .m a.lk{color:inherit;text-decoration:underline;text-underline-offset:2px}
@@ -2858,7 +2858,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.124';
+const APP_VERSION='2026-11-13.125';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -3172,7 +3172,7 @@ async function openSettings(tab){
     const row=(id,st,t,sub)=>`<div class="dgx ${st}" id="${id}"><span class="dgi">${ico(IC[st],'mini')}</span><div><b>${esc(t)}</b><span>${esc(sub)}</span></div></div>`;
     const set=(id,st,t,sub)=>{const e=document.getElementById(id);if(e)e.outerHTML=row(id,st,t,sub)};
     const ids=['dgA','dgB','dgC','dgD','dgE'];
-    b.innerHTML=`<button type="button" class="sbtn ghost dgback" id="dgBack">${ico('back','mini')}Retour</button><div class="dgh">Diagnostic</div><div class="hint2" style="margin:2px 0 14px">Vérifie que les alertes peuvent arriver sur cet appareil.</div>
+    b.innerHTML=`<button type="button" class="sbtn ghost dgback" id="dgBack">${ico('back','mini')}Notifications</button><div class="hint2" style="margin:10px 0 6px">Vérifie que les alertes peuvent arriver sur cet appareil.</div>
       <div id="dgList">${ids.map(i=>row(i,'wait','Vérification…','')).join('')}</div>
       <button class="sbtn" id="dgRun" style="margin-top:16px;width:100%">Relancer le test</button>
       ${droid?`<button type="button" class="dglink" id="dgBat">Comment régler la batterie</button><div class="hint2 hidden" id="dgBatT">Réglages du téléphone, Applications, PolyTalk (ou Chrome), Batterie, puis « Sans restriction ». Retire aussi PolyTalk de la liste des applis en veille.</div>`:''}`;
