@@ -209,10 +209,10 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .av.on::after{content:'';position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2fbf71;border:2px solid var(--card)}
 .ch .s.live{color:#1f9d5c}
 .m{position:relative}.m:not(.del){cursor:pointer}
-.dgr{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;background:var(--card2,rgba(127,127,127,.1));margin-bottom:8px}
-.dgr b{display:block;font-size:15px}.dgr span:not(.dgi){display:block;font-size:12.5px;opacity:.75;margin-top:1px;line-height:1.35}
+.dgx{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;background:var(--card2,rgba(127,127,127,.1));margin-bottom:8px}
+.dgx b{display:block;font-size:15px}.dgx span:not(.dgi){display:block;font-size:12.5px;opacity:.75;margin-top:1px;line-height:1.35}
 .dgi{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
-.dgr.ok .dgi{background:rgba(95,214,140,.16);color:#3fc57a}.dgr.warn .dgi{background:rgba(255,180,84,.16);color:#f0a030}.dgr.no .dgi{background:rgba(255,125,140,.16);color:#f0566b}.dgr.wait .dgi{background:rgba(143,155,192,.16);color:#8f9bc0}
+.dgx.ok .dgi{background:rgba(95,214,140,.16);color:#3fc57a}.dgx.warn .dgi{background:rgba(255,180,84,.16);color:#f0a030}.dgx.no .dgi{background:rgba(255,125,140,.16);color:#f0566b}.dgx.wait .dgi{background:rgba(143,155,192,.16);color:#8f9bc0}
 .dgback{display:inline-flex;align-items:center;gap:4px;margin-top:0}.dglink{display:block;margin:12px auto 0;color:var(--p);font-weight:600;font-size:14px}
 .conv .p .dr{color:#ff7d6e;font-weight:600}
 .shpv{margin:4px 0 10px;padding:10px 12px;border-radius:14px;background:rgba(127,127,127,.14);font-size:13.5px;display:flex;flex-direction:column;gap:4px}.shpv span{display:flex;gap:6px;align-items:center;font-weight:600}.shpv em{font-style:normal;opacity:.8;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -2858,7 +2858,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.122';
+const APP_VERSION='2026-11-13.123';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -3169,7 +3169,7 @@ async function openSettings(tab){
   const diagView=async b=>{
     const droid=/android/i.test(navigator.userAgent);
     const IC={ok:'tick',warn:'info',no:'close',wait:'clock'};
-    const row=(id,st,t,sub)=>`<div class="dgr ${st}" id="${id}"><span class="dgi">${ico(IC[st],'mini')}</span><div><b>${esc(t)}</b><span>${esc(sub)}</span></div></div>`;
+    const row=(id,st,t,sub)=>`<div class="dgx ${st}" id="${id}"><span class="dgi">${ico(IC[st],'mini')}</span><div><b>${esc(t)}</b><span>${esc(sub)}</span></div></div>`;
     const set=(id,st,t,sub)=>{const e=document.getElementById(id);if(e)e.outerHTML=row(id,st,t,sub)};
     const ids=['dgA','dgB','dgC','dgD','dgE'];
     b.innerHTML=`<button type="button" class="sbtn ghost dgback" id="dgBack">${ico('back','mini')}Notifications</button><div class="hint2" style="margin:10px 0 6px">Vérifie que les alertes peuvent arriver sur cet appareil.</div>
