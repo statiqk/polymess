@@ -8,12 +8,28 @@ self.addEventListener('install',e=>{
   e.waitUntil(caches.open(SHELL).then(c=>Promise.allSettled([c.add(new Request(PAGE,{cache:'reload'})),...STATIC.map(u=>c.add(u))])));
 });
 self.addEventListener('activate',e=>e.waitUntil((async()=>{
-  for(const k of await caches.keys())if(k!==SHELL)await caches.delete(k);
+  for(const k of await caches.keys())if(k!==SHELL&&k!=='pm-share')await caches.delete(k);
   await self.clients.claim();
 })()));
 const putCopy=(key,res)=>{try{if(!res||!(res.ok||res.type==='opaque'))return Promise.resolve();const cp=res.clone();return caches.open(SHELL).then(c=>c.put(key,cp)).catch(()=>{})}catch(_){return Promise.resolve()}};
 self.addEventListener('fetch',e=>{
-  const req=e.request;if(req.method!=='GET')return;
+  const req=e.request;
+  // Partager vers PolyTalk : le contenu reçu est gardé un instant, puis l'appli s'ouvre pour choisir la discussion
+  if(req.method==='POST'&&new URL(req.url).pathname.endsWith('/share-target')){
+    e.respondWith((async()=>{
+      try{
+        const fd=await req.formData(),c=await caches.open('pm-share');
+        for(const k of await c.keys())await c.delete(k);
+        const f=fd.getAll('media').find(x=>x&&x.size);
+        const meta={title:String(fd.get('title')||''),text:String(fd.get('text')||''),url:String(fd.get('url')||'')};
+        await c.put(new URL('share-meta',self.registration.scope).href,new Response(JSON.stringify(meta),{headers:{'content-type':'application/json'}}));
+        if(f)await c.put(new URL('share-file',self.registration.scope).href,new Response(f,{headers:{'content-type':f.type||'application/octet-stream','x-name':encodeURIComponent(f.name||'fichier')}}));
+      }catch(_){}
+      return Response.redirect(new URL('./?share=1',self.registration.scope).href,303);
+    })());
+    return;
+  }
+  if(req.method!=='GET')return;
   const u=new URL(req.url);
   if(u.origin===location.origin){
     if(u.pathname.endsWith('/version.json')||u.pathname.endsWith('/sw.js'))return; // toujours depuis le réseau

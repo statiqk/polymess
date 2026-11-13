@@ -210,6 +210,7 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .ch .s.live{color:#1f9d5c}
 .m{position:relative}.m:not(.del){cursor:pointer}
 .conv .p .dr{color:#ff7d6e;font-weight:600}
+.shpv{margin:4px 0 10px;padding:10px 12px;border-radius:14px;background:rgba(127,127,127,.14);font-size:13.5px;display:flex;flex-direction:column;gap:4px}.shpv span{display:flex;gap:6px;align-items:center;font-weight:600}.shpv em{font-style:normal;opacity:.8;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .m a.lk{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .m a.lpw{display:none;margin:8px -6px -2px;border-radius:14px;overflow:hidden;background:rgba(127,127,127,.16);color:inherit;text-decoration:none;white-space:normal}
 .m a.lpw.ok{display:block}
@@ -1329,8 +1330,56 @@ async function boot(user){
   const wanted=new URLSearchParams(location.search).get('c');
   if(wanted&&S.convs.some(c=>c.id===wanted)){openConv(wanted);if(new URLSearchParams(location.search).get('reply'))setTimeout(()=>txt.focus(),400)}
   if(new URLSearchParams(location.search).get('req'))setTimeout(openRequests,300);
+  if(new URLSearchParams(location.search).get('share'))setTimeout(shareIncoming,350);
   if(location.search)history.replaceState(history.state,'',location.pathname);
   renderInv();
+}
+
+
+/* ---------- PARTAGER VERS POLYTALK (Android : menu Partager du téléphone) ---------- */
+async function shareIncoming(){
+  let meta=null,file=null;
+  try{
+    const c=await caches.open('pm-share');
+    const mr=await c.match(new URL('share-meta',location.href).href);
+    if(mr)meta=await mr.json();
+    const fr=await c.match(new URL('share-file',location.href).href);
+    if(fr){const b=await fr.blob();file=new File([b],decodeURIComponent(fr.headers.get('x-name')||'fichier'),{type:b.type||fr.headers.get('content-type')||''})}
+    for(const k of await c.keys())await c.delete(k);
+  }catch(e){return}
+  if(!meta&&!file)return;
+  const text=[meta&&meta.text,meta&&meta.url].filter(Boolean).join('\n')||(meta&&meta.title)||'';
+  let att=null;
+  if(file){
+    if(!OKT.test(file.type)){flash('Ce type de fichier n’est pas pris en charge (images, PDF, Word, Excel, PowerPoint, texte, zip).','err')}
+    else{
+      let blob=file,type=file.type,name=file.name;const isImg=type.startsWith('image/');
+      if(isImg&&type!=='image/gif'){try{const r=await shrink(file);if(r.size<file.size||type==='image/heic'){blob=r;type='image/jpeg';name=name.replace(/\.\w+$/,'')+'.jpg'}}catch(e){}}
+      if(blob.size>10*1024*1024)flash('Fichier trop lourd (10 Mo maximum).','err');
+      else att={blob,type,name,isImg};
+    }
+  }
+  if(!text&&!att)return;
+  openSharePicker(text,att);
+}
+function openSharePicker(text,att){
+  const host=$('modalHost'),mob=isMob();
+  const list=S.convs.filter(c=>c.other).slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||new Date(b.last?.created_at||0)-new Date(a.last?.created_at||0));
+  const what=att?(att.isImg?'Photo':att.name):'';
+  const prev=`<div class="shpv">${att?`<span>${ico(att.isImg?'image':'file','mini')}${esc(what)}</span>`:''}${text?`<em>${esc(text.slice(0,140))}</em>`:''}</div>`;
+  const rows=list.length?list.map(c=>`<button class="pick" data-id="${esc(c.id)}"><div class="av" style="background:${avBg(esc(colorOf(c.other.id,c.other.color)),c.other.avatar_path)}">${avTxt(c.name,c.other.avatar_path)}</div><div class="pt"><b>${esc(c.name)}</b></div></button>`).join(''):`<div class="nempty"><b>Aucune discussion</b><span>Ajoute d’abord un ami pour lui envoyer ce contenu.</span></div>`;
+  host.innerHTML=mob
+   ?`<div class="ov full" id="ov"><div class="modal set mp"><div class="mtop"><button type="button" class="mbk txt" id="mx">${ico('back')}<em>Annuler</em></button></div><h2 class="mh2">Envoyer à…</h2>${prev}<div class="res" id="res">${rows}</div></div></div>`
+   :`<div class="ov" id="ov"><div class="modal"><h3>Envoyer à… <button class="x" id="mx" aria-label="Fermer">${ico('close')}</button></h3>${prev}<div class="res" id="res">${rows}</div></div></div>`;
+  const close=()=>{host.innerHTML=''};
+  $('mx').onclick=close;$('ov').onclick=e=>{if(e.target.id==='ov')close()};
+  $('res').onclick=async e=>{
+    const b=e.target.closest('.pick');if(!b)return;
+    close();await openConv(b.dataset.id);
+    const cur=txt.value;txt.value=cur?(cur+'\n'+text):text;
+    if(att){S.att=att;S.reply=null}
+    renderBar();fit();txt.focus();
+  };
 }
 
 async function loadConvs(){
@@ -1481,11 +1530,13 @@ function fmtList(d){
   return x.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
 }
 function fmtDay(d){
-  const x=new Date(d),n=new Date();
-  if(x.toDateString()===n.toDateString())return 'Aujourd’hui';
-  const y=new Date(n);y.setDate(n.getDate()-1);
-  if(x.toDateString()===y.toDateString())return 'Hier';
-  return x.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  const x=new Date(d),n=new Date(),sod=t=>new Date(t.getFullYear(),t.getMonth(),t.getDate());
+  const diff=Math.round((sod(n)-sod(x))/864e5);
+  if(diff===0)return 'Aujourd’hui';
+  if(diff===1)return 'Hier';
+  if(diff>1&&diff<7){const w=x.toLocaleDateString('fr-FR',{weekday:'long'});return w.charAt(0).toUpperCase()+w.slice(1)}
+  const o={day:'numeric',month:'long'};if(x.getFullYear()!==n.getFullYear())o.year='numeric';
+  return x.toLocaleDateString('fr-FR',o);
 }
 function renderAll(){renderList();renderChat()}
 /* ---------- BROUILLONS : le message commencé est gardé par discussion ---------- */
@@ -2802,7 +2853,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.119';
+const APP_VERSION='2026-11-13.120';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
