@@ -209,6 +209,11 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .av.on::after{content:'';position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2fbf71;border:2px solid var(--card)}
 .ch .s.live{color:#1f9d5c}
 .m{position:relative}.m:not(.del){cursor:pointer}
+.dgr{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;background:var(--card2,rgba(127,127,127,.1));margin-bottom:8px}
+.dgr b{display:block;font-size:15px}.dgr span:not(.dgi){display:block;font-size:12.5px;opacity:.75;margin-top:1px;line-height:1.35}
+.dgi{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.dgr.ok .dgi{background:rgba(95,214,140,.16);color:#3fc57a}.dgr.warn .dgi{background:rgba(255,180,84,.16);color:#f0a030}.dgr.no .dgi{background:rgba(255,125,140,.16);color:#f0566b}.dgr.wait .dgi{background:rgba(143,155,192,.16);color:#8f9bc0}
+.dgback{display:inline-flex;align-items:center;gap:4px;margin-top:0}.dglink{display:block;margin:12px auto 0;color:var(--p);font-weight:600;font-size:14px}
 .conv .p .dr{color:#ff7d6e;font-weight:600}
 .shpv{margin:4px 0 10px;padding:10px 12px;border-radius:14px;background:rgba(127,127,127,.14);font-size:13.5px;display:flex;flex-direction:column;gap:4px}.shpv span{display:flex;gap:6px;align-items:center;font-weight:600}.shpv em{font-style:normal;opacity:.8;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .m a.lk{color:inherit;text-decoration:underline;text-underline-offset:2px}
@@ -2853,7 +2858,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.121';
+const APP_VERSION='2026-11-13.122';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -3160,6 +3165,62 @@ async function openSettings(tab){
   const TABICO={profil:'user',compte:'mail',notif:'bell',privacy:'shield',theme:'moon',about:'info'};
   const tabs=[['profil','Profil'],['compte','Compte'],['notif','Notifications'],['privacy','Confidentialité'],['theme','Apparence'],['about','À propos']];
   const note=(id,t,k)=>{$(id).innerHTML=t?`<div class="msg ${k}">${esc(t)}</div>`:''};
+  // Diagnostic des notifications : vérifie chaque maillon et dit quoi corriger
+  const diagView=async b=>{
+    const droid=/android/i.test(navigator.userAgent);
+    const IC={ok:'tick',warn:'info',no:'close',wait:'clock'};
+    const row=(id,st,t,sub)=>`<div class="dgr ${st}" id="${id}"><span class="dgi">${ico(IC[st],'mini')}</span><div><b>${esc(t)}</b><span>${esc(sub)}</span></div></div>`;
+    const set=(id,st,t,sub)=>{const e=document.getElementById(id);if(e)e.outerHTML=row(id,st,t,sub)};
+    const ids=['dgA','dgB','dgC','dgD','dgE'];
+    b.innerHTML=`<button type="button" class="sbtn ghost dgback" id="dgBack">${ico('back','mini')}Notifications</button><div class="hint2" style="margin:10px 0 6px">Vérifie que les alertes peuvent arriver sur cet appareil.</div>
+      <div id="dgList">${ids.map(i=>row(i,'wait','Vérification…','')).join('')}</div>
+      <button class="sbtn" id="dgRun" style="margin-top:16px;width:100%">Relancer le test</button>
+      ${droid?`<button type="button" class="dglink" id="dgBat">Comment régler la batterie</button><div class="hint2 hidden" id="dgBatT">Réglages du téléphone, Applications, PolyTalk (ou Chrome), Batterie, puis « Sans restriction ». Retire aussi PolyTalk de la liste des applis en veille.</div>`:''}`;
+    $('dgBack').onclick=()=>views.notif(b);
+    const bt=$('dgBat');if(bt)bt.onclick=()=>$('dgBatT').classList.toggle('hidden');
+    const run=async()=>{
+      ids.forEach(i=>set(i,'wait','Vérification…',''));
+      // A. autorisation
+      let granted=false;
+      if(!('Notification' in window))set('dgA','no','Notifications non prises en charge','Ce navigateur ne sait pas afficher d’alertes.');
+      else if(isIOS()&&!isStandalone())set('dgA','no','Appli non installée','Sur iPhone, ajoute PolyTalk à l’écran d’accueil (Réglages, À propos).');
+      else if(Notification.permission==='denied')set('dgA','no','Notifications bloquées','Autorise-les pour PolyTalk dans les réglages du téléphone ou du navigateur.');
+      else if(Notification.permission!=='granted'||!prefs.notif)set('dgA','warn','Notifications pas encore activées','Active « Notifications du navigateur » dans l’écran précédent.');
+      else{granted=true;set('dgA','ok','Notifications autorisées','Le téléphone accepte les alertes de PolyTalk.')}
+      // B. abonnement de l'appareil
+      let sub=null;
+      try{if(pushSupported()){const reg=await navigator.serviceWorker.ready;sub=await reg.pushManager.getSubscription()}}catch(e){}
+      if(!pushSupported())set('dgB','no','Appareil non compatible','Ce navigateur ne gère pas les alertes appli fermée.');
+      else if(!sub)set('dgB','no','Appareil non enregistré','Désactive puis réactive les notifications du navigateur.');
+      else{let h='';try{h=new URL(sub.endpoint).host}catch(e){}const kind=/apple/.test(h)?'iPhone':/google|fcm/.test(h)?'Android ou Chrome':'ce navigateur';set('dgB','ok','Appareil enregistré','Abonné pour '+kind+'.')}
+      // C. serveur : une alerte de test part vraiment
+      let sentOk=false;
+      if(sub){
+        const t0=Date.now();
+        try{
+          const r=await fetch(SB_URL+'/functions/v1/push',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'test',endpoint:sub.endpoint})}).then(x=>x.json());
+          const dt=((Date.now()-t0)/1000).toFixed(1).replace('.',',');
+          if(r&&r.sent){sentOk=true;set('dgC','ok','Serveur joint','Alerte de test envoyée en '+dt+' s.')}
+          else if(r&&r.error==='inconnu')set('dgC','no','Appareil inconnu du serveur','Désactive puis réactive les notifications du navigateur.');
+          else set('dgC','no','Alerte refusée','Le serveur n’a pas pu joindre cet appareil. Désactive puis réactive les notifications.');
+        }catch(e){set('dgC','no','Serveur injoignable','Vérifie ta connexion internet, puis relance le test.')}
+      }else set('dgC','wait','Serveur non testé','Il faut d’abord un appareil enregistré.');
+      // D. batterie (Android) ou installation (iPhone)
+      if(droid)set('dgD','warn','Économie de batterie','Ne peut pas être vérifiée d’ici. Si les alertes arrivent en retard, autorise PolyTalk en arrière-plan.');
+      else if(isIOS())set('dgD',isStandalone()?'ok':'warn','Installée sur l’écran d’accueil',isStandalone()?'Les alertes iPhone fonctionnent.':'Nécessaire pour recevoir des alertes sur iPhone.');
+      else set('dgD','ok','Ordinateur','Aucune restriction de batterie à régler.');
+      // E. dernière réception confirmée par l'appareil
+      const lastDeliv=async()=>{const {data}=await sb.from('conversation_members').select('last_delivered_at').eq('user_id',S.me.id).not('last_delivered_at','is',null).order('last_delivered_at',{ascending:false}).limit(1);return data&&data[0]?new Date(data[0].last_delivered_at).getTime():0};
+      if(sentOk)await new Promise(r=>setTimeout(r,3500));
+      let ld=0;try{ld=await lastDeliv()}catch(e){}
+      if(!document.getElementById('dgE'))return;
+      if(!statusOn())set('dgE','wait','Confirmations désactivées','« Visible en ligne » est coupé : la réception n’est pas enregistrée.');
+      else if(!ld)set('dgE','warn','Aucune réception confirmée','Rien n’a encore été confirmé par cet appareil.');
+      else{const ago=Date.now()-ld;set('dgE',ago<86400000?'ok':'warn','Dernière réception confirmée',ago<60000?'À l’instant.':'Il y a '+fmtAgo(ago)+'.')}
+    };
+    $('dgRun').onclick=async()=>{$('dgRun').disabled=true;await run();const r=$('dgRun');if(r)r.disabled=false};
+    run();
+  };
   const validDate=v=>{const d=new Date(v+'T00:00:00');return !!v&&!isNaN(d)&&d<=new Date()&&d>=new Date('1900-01-01T00:00:00')};
   const views={
     profil(b){
@@ -3270,7 +3331,8 @@ async function openSettings(tab){
        <div class="tg"><div><b>Afficher l’aperçu des messages</b><div class="hint2">Si tu le désactives, l’alerte indique seulement « Nouveau message », sans le texte ni la photo.</div></div><button type="button" class="sw2 ${S.me.notify_preview!==false?'on':''}" id="tPrev" aria-label="Aperçu"></button></div>
        <div class="tg"><div><b>Demandes d’amis</b><div class="hint2">Une alerte quand quelqu’un t’ajoute ou accepte ta demande.</div></div><button type="button" class="sw2 ${S.me.notify_friends!==false?'on':''}" id="tFr" aria-label="Demandes d’amis"></button></div>
        <div class="tg"><div><b>Réactions à mes messages</b><div class="hint2">Une alerte quand quelqu’un réagit avec un emoji à l’un de tes messages.</div></div><button type="button" class="sw2 ${S.me.notify_reactions!==false?'on':''}" id="tReact" aria-label="Réactions"></button></div>
-       <button class="sbtn ghost" id="tTest" style="margin-top:14px">Envoyer une notification de test</button><div id="nm"></div>`;
+       <button class="sbtn ghost" id="tDiag" style="margin-top:14px">Diagnostic des notifications</button><button class="sbtn ghost" id="tTest" style="margin-top:8px">Envoyer une notification de test</button><div id="nm"></div>`;
+      $('tDiag').onclick=()=>diagView(b);
       $('tReact').onclick=async()=>{const v=S.me.notify_reactions===false;S.me.notify_reactions=v;$('tReact').classList.toggle('on',v);const {error}=await sb.from('profiles').update({notify_reactions:v}).eq('id',S.me.id);if(error){S.me.notify_reactions=!v;$('tReact').classList.toggle('on',!v);note('nm','Impossible : '+error.message,'err')}};
       const flag=(id,col)=>{$(id).onclick=async()=>{const v=S.me[col]===false;S.me[col]=v;$(id).classList.toggle('on',v);const {error}=await sb.from('profiles').update({[col]:v}).eq('id',S.me.id);if(error){S.me[col]=!v;$(id).classList.toggle('on',!v);note('nm','Enregistrement impossible : '+error.message,'err')}}};
       flag('tPrev','notify_preview');flag('tFr','notify_friends');
