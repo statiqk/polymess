@@ -2573,6 +2573,7 @@ function openNew(){
     let hits=[];
     if(mails.length){const {data,error}=await sb.rpc('match_contacts',{emails:mails});if(error){logErr('contacts',error);flash(errMsg(error),'err');return}hits=data||[]}
     const byMail=new Map(hits.map(h=>[h.email,h]));
+    if(S.me.notify_contacts!==false&&mails.length){sb.rpc('contacts_remember',{emails:mails.filter(m=>!byMail.has(m))}).then(()=>{},e=>logErr('contacts',e))}
     const on=[],off=[];
     list.forEach(c=>{const h=c.emails.map(m=>byMail.get(m)).find(Boolean);if(h){if(!on.find(x=>x.id===h.id))on.push(h)}else off.push(c)});
     q='';$('uq').value='';found=[];
@@ -2580,7 +2581,9 @@ function openNew(){
     cdraw=()=>{
     $('res').innerHTML=`<div class="nhint" style="margin-top:2px">${list.length} contact${list.length>1?'s':''} sélectionné${list.length>1?'s':''}, non conservé${list.length>1?'s':''} par PolyTalk.</div>`
       +(on.length?`<div class="h5">Déjà sur PolyTalk · ${on.length}</div>`+on.map(p=>frow(p,'Dans tes contacts')).join(''):'')
-      +(off.length?`<div class="h5">Pas encore sur PolyTalk · ${off.length}</div>`+off.map(orow).join(''):'');
+      +(off.length?`<div class="h5">Pas encore sur PolyTalk · ${off.length}</div>`+off.map(orow).join(''):'')
+      +(off.length?`<div class="tg cwt"><div><b>${ico('bell','mini')}Me prévenir à leur arrivée</b><div class="hint2">On garde une empreinte illisible de leur e-mail pour t’avertir. Tu peux tout effacer dans Confidentialité.</div></div><button type="button" class="sw2 ${S.me.notify_contacts!==false?'on':''}" id="cwSw" aria-label="Me prévenir à leur arrivée"></button></div>`:'');
+      const sw=$('cwSw');if(sw)sw.onclick=async()=>{const v=S.me.notify_contacts===false;S.me.notify_contacts=v;sw.classList.toggle('on',v);const {error}=await sb.from('profiles').update({notify_contacts:v}).eq('id',S.me.id);if(error){S.me.notify_contacts=!v;sw.classList.toggle('on',!v);flash('Enregistrement impossible.')}else if(v){sb.rpc('contacts_remember',{emails:off.flatMap(c=>c.emails)}).then(()=>{},()=>{})}};
     $('res').querySelectorAll('.fbtn[data-i]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();const c=off[+b.dataset.i];const body=encodeURIComponent('Rejoins-moi sur PolyTalk, ma messagerie. Crée ton compte ici : '+SHARE_URL);
       if(c.tel)location.href='sms:'+c.tel.replace(/\s+/g,'')+'?&body='+body;else if(c.emails[0])location.href='mailto:'+c.emails[0]+'?subject='+encodeURIComponent('Rejoins-moi sur PolyTalk')+'&body='+body;else inviteFriend()});
     };
@@ -2739,7 +2742,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.116';
+const APP_VERSION='2026-11-13.117';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -3183,7 +3186,15 @@ async function openSettings(tab){
       b.innerHTML=`<div class="tg"><div><b>Statut en ligne</b><div class="hint2">Montre quand tu es en ligne, absent ou ta dernière connexion. Si tu le désactives, tu ne vois pas non plus celui des autres.</div></div><button type="button" class="sw2 ${statusOn()?'on':''}" id="tPres" aria-label="Statut en ligne"></button></div>
        <div class="privok">${ico('shield')}<div><b>Visible par tes amis uniquement</b><span>Les personnes qui ne sont pas tes amis ne voient jamais si tu es en ligne ni ta dernière connexion.</span></div></div>
        <div class="legp"><div class="h5">Les 3 états</div><div class="lgr"><i class="lgd g"></i><b>En ligne</b><span>appli utilisée</span></div><div class="lgr"><i class="lgd o"></i><b>Absent</b><span>5 min sans toucher l’écran</span></div><div class="lgr"><i class="lgd x"></i><b>Hors ligne</b><span>2 min après avoir quitté l’appli</span></div></div>
-       <div class="hint2" style="margin-top:12px">Les confirmations de lecture (doubles coches) restent actives dans les conversations.</div>`;
+       <div class="hint2" style="margin-top:12px">Les confirmations de lecture (doubles coches) restent actives dans les conversations.</div>
+       <div class="h5" style="margin-top:18px">Contacts du téléphone</div>
+       <div class="tg"><div><b>Prévenir à leur arrivée</b><div class="hint2">Une alerte quand l’un des contacts que tu as choisis crée un compte.</div></div><button type="button" class="sw2 ${S.me.notify_contacts!==false?'on':''}" id="tCw" aria-label="Prévenir à leur arrivée"></button></div>
+       <div class="hint2" id="cwN" style="margin-top:8px"></div><button class="sbtn ghost" id="cwForget" style="margin-top:10px;display:none">Tout oublier</button>
+       <div class="hint2" style="margin-top:8px">Pour mettre la liste à jour, choisis à nouveau tes contacts : le navigateur ne permet pas de synchroniser le répertoire en continu.</div>`;
+      const cwUp=async()=>{const {data}=await sb.rpc('contacts_count');const n=+data||0;$('cwN').textContent=n?`${n} contact${n>1?'s':''} mémorisé${n>1?'s':''}, illisible${n>1?'s':''} par PolyTalk.`:'Aucun contact mémorisé.';$('cwForget').style.display=n?'':'none'};
+      cwUp();
+      $('cwForget').onclick=async()=>{await sb.rpc('contacts_forget');cwUp()};
+      $('tCw').onclick=async()=>{const v=S.me.notify_contacts===false;S.me.notify_contacts=v;$('tCw').classList.toggle('on',v);const {error}=await sb.from('profiles').update({notify_contacts:v}).eq('id',S.me.id);if(error){S.me.notify_contacts=!v;$('tCw').classList.toggle('on',!v)}};
       $('tPres').onclick=()=>{prefs.presence=!statusOn();savePrefs();$('tPres').classList.toggle('on',statusOn());startPresence();updateSub();renderList()};
     },
     theme(b){
