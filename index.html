@@ -209,6 +209,17 @@ input,textarea{font:inherit;color:inherit;border:none;outline:none;background:no
 .av.on::after{content:'';position:absolute;right:0;bottom:0;width:12px;height:12px;border-radius:50%;background:#2fbf71;border:2px solid var(--card)}
 .ch .s.live{color:#1f9d5c}
 .m{position:relative}.m:not(.del){cursor:pointer}
+.tbg{position:fixed;inset:0;z-index:120;background:rgba(5,12,20,.72)}
+#tour .tcd{position:fixed;z-index:121;left:50%;top:50%;transform:translate(-50%,-50%);width:min(380px,calc(100% - 32px));background:var(--card);border-radius:28px;padding:30px 24px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+html[data-theme=dark] #tour .tcd{background:#1c293a}
+#tour .tic{width:64px;height:64px;border-radius:20px;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}#tour .tic .ico{width:32px;height:32px}
+#tour h2{font-size:21px;margin-bottom:8px}#tour .ttx{font-size:14.5px;line-height:1.45;color:var(--mut)}
+#tour .tskip{position:absolute;right:16px;top:14px;border:0;background:none;color:var(--mut);font:inherit;font-size:13.5px;font-weight:600}
+#tour .tdots{display:flex;gap:6px;justify-content:center;margin:20px 0 16px}#tour .tdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}#tour .tdots i.on{width:20px;border-radius:4px;background:var(--p)}
+#tour .tgo{width:100%;border:0;border-radius:24px;padding:13px;font:inherit;font-weight:700;font-size:15px;color:#fff;background:var(--p)}
+#tour .tlt{width:100%;border:0;background:none;padding:12px 0 0;font:inherit;font-weight:600;font-size:14px;color:var(--mut)}
+#tour .tsteps{text-align:left;display:grid;gap:10px}#tour .tsteps div{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:14px}#tour .tsteps span{flex:none;width:22px;height:22px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}#tour .tsteps .sh{width:17px;height:17px;vertical-align:-3px}
+.newsep{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 2px 8px;padding:7px 8px 7px 14px;border-radius:14px;background:rgba(79,143,240,.14);color:var(--p);font-size:13px;font-weight:700}.newsep button{display:inline-flex;align-items:center;gap:3px;border:0;background:var(--p);color:#fff;border-radius:12px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:700}.newsep button .ico{width:13px;height:13px}
 .dgx{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;background:var(--card2,rgba(127,127,127,.1));margin-bottom:8px}
 .dgx b{display:block;font-size:15px}.dgx span:not(.dgi){display:block;font-size:12.5px;opacity:.75;margin-top:1px;line-height:1.35}
 .dgi{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
@@ -1336,8 +1347,10 @@ async function boot(user){
   if(wanted&&S.convs.some(c=>c.id===wanted)){openConv(wanted);if(new URLSearchParams(location.search).get('reply'))setTimeout(()=>txt.focus(),400)}
   if(new URLSearchParams(location.search).get('req'))setTimeout(openRequests,300);
   if(new URLSearchParams(location.search).get('share'))setTimeout(shareIncoming,350);
+  const had=!!location.search;
   if(location.search)history.replaceState(history.state,'',location.pathname);
   renderInv();
+  if(!had)setTimeout(maybeTour,700);
 }
 
 
@@ -1729,6 +1742,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 });
 
 async function openConv(id){
+  S.unrd={};{const c0=S.convs.find(x=>x.id===id);if(c0&&c0.unread>0){S.unrd[id]={since:c0.last_read_at,n:c0.unread,lock:true};setTimeout(()=>{if(S.unrd&&S.unrd[id])S.unrd[id].lock=false},1500)}}
   if(S.cur!==id){if(S.sq){S.sq=null;$('sbar').classList.add('hidden')}S.reply=null;S.att=null;{const ed=S.edit;S.edit=null;if(S.cur&&!ed)setDraft(S.cur,txt.value)}txt.value=draftOf(id);try{fit()}catch(e){}}
   if(innerWidth<=900&&!$('app').classList.contains('inchat'))pushPM('chat');
   S.cur=id;$('app').classList.add('inchat');
@@ -1874,11 +1888,13 @@ function renderMsgs(scroll){
   const near=el.scrollHeight-el.scrollTop-el.clientHeight<120;
   const byId=new Map(list.map(m=>[m.id,m]));
   const rx={};(S.react[c.id]||[]).forEach(r=>{(rx[r.message_id]??=[]).push(r)});
-  let html='',lastDay='',lastSender='';
+  let html='',lastDay='',lastSender='',sepDone=false;
+  const un=S.unrd&&S.unrd[c.id];
   const hs=S.sq?new Set(S.sq.ids):null;
   for(let i=0;i<list.length;i++){
     const m=list[i];
     const day=new Date(m.created_at).toDateString();
+    if(un&&!sepDone&&m.sender_id!==S.me.id&&!m.deleted_at&&m.created_at>un.since){sepDone=true;const n=list.filter(x=>x.sender_id!==S.me.id&&!x.deleted_at&&x.created_at>un.since).length;html+=`<div class="newsep" id="newsep"><span>${n} nouveau${n>1?'x':''} message${n>1?'s':''}</span><button type="button" data-jb="1">Aller au dernier ${ico('down','mini')}</button></div>`}
     if(day!==lastDay){html+=`<div class="day">${esc(fmtDay(m.created_at))}</div>`;lastDay=day;lastSender=''}
     else if(i&&new Date(m.created_at)-new Date(list[i-1].created_at)>=1800000){html+=`<div class="tsep">${fmtTime(m.created_at)}</div>`;lastSender=''}
     const nx=list[i+1],cont=nx&&nx.sender_id===m.sender_id&&!nx.deleted_at&&new Date(nx.created_at).toDateString()===day&&(new Date(nx.created_at)-new Date(m.created_at))<300000;
@@ -1910,7 +1926,9 @@ function renderMsgs(scroll){
   el.innerHTML=html||(S.msgs[c.id]?`<div class="empty">${ico('wave','big')}<br>Dis bonjour</div>`:'');
   if(c._mc!==undefined&&(list.filter(x=>x.att_path&&x.att_path!=='local'&&!x.deleted_at&&!attExpired(x)).length!==c._mc))renderInfo(c);
   stick=near||scroll===true;
-  if(scroll&&(near||scroll===true))el.scrollTop=el.scrollHeight;
+  const sp=$('newsep');
+  if(scroll===true&&un&&un.lock&&sp){stick=false;el.scrollTop=Math.max(0,sp.offsetTop-70)}
+  else if(scroll&&(near||scroll===true))el.scrollTop=el.scrollHeight;
   hydrateImgs();paintTypB();lpFill();
 }
 $('msgs').addEventListener('load',e=>{if(e.target.tagName==='IMG'&&stick)$('msgs').scrollTop=$('msgs').scrollHeight},true);
@@ -1918,6 +1936,7 @@ $('msgs').addEventListener('scroll',()=>{closeMenu()},{passive:true});
 
 /* ---------- ACTIONS SUR LES MESSAGES ---------- */
 $('msgs').onclick=async e=>{
+  if(e.target.closest('[data-jb]')){const me=$('msgs');if(S.unrd&&S.cur&&S.unrd[S.cur])S.unrd[S.cur].lock=false;me.scrollTo({top:me.scrollHeight,behavior:'smooth'});return}
   const rx=e.target.closest('.rx');if(rx){toggleReact(rx.dataset.id,rx.dataset.e);return}
   const q=e.target.closest('.q');if(q){goTo(q.dataset.go);return}
   const sv=e.target.closest('.sv');if(sv){e.stopPropagation();saveFile(sv.dataset.path,sv.dataset.name);return}
@@ -2858,7 +2877,7 @@ function openRequests(){
 }
 
 /* ---------- MISE À JOUR AUTOMATIQUE ---------- */
-const APP_VERSION='2026-11-13.125';
+const APP_VERSION='2026-11-13.126';
 let updShown=false;
 async function checkUpdate(manual){
   if(location.protocol==='file:')return 'local';
@@ -2963,6 +2982,7 @@ async function exportData(){
   return out.messages_envoyes.length;
 }
 async function aboutPage(k,host){
+  if(k==='tour'){openTour();return}
   const say=(t,c)=>{$('am2').innerHTML=t?`<div class="msg ${c}">${esc(t)}</div>`:''};
   if(k==='help'){
     infoPage('Aide et contact',`<div class="faq">${FAQ.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div><button class="sbtn ghost" id="hRep" style="width:100%;margin-top:14px">Signaler un problème</button>`,()=>{$('hRep').onclick=()=>aboutPage('report',host)});
@@ -3381,7 +3401,7 @@ async function openSettings(tab){
       const vtxt='Version '+(parseInt(vn,10)||vn||'')+' · '+new Date(vd+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
       const iosNew=isIOS()&&!isStandalone();
       const inst=isStandalone()?'<div class="hint2">PolyTalk est déjà installée sur cet appareil.</div>':installEv?'<button class="sbtn ghost" id="aInst" style="width:100%">Installer PolyTalk</button>':iosNew?`<div class="steps"><div><span class="n">1</span>Touche ${ico('share','sh')} <b>Partager</b> dans Safari</div><div><span class="n">2</span>Choisis ${ico('addsq','sh')} <b>Sur l’écran d’accueil</b></div><div><span class="n">3</span>Touche <b>Ajouter</b></div></div>`:'<div class="hint2">Dans ton navigateur, utilise « Installer l’application » (menu ⋮ ou icône dans la barre d’adresse).</div>';
-      const links=[['info','Aide et contact','help'],['flag','Signaler un problème','report'],['shield','Confidentialité des données','privacy'],['file','Mentions légales','legal'],['download','Exporter mes données','export']];
+      const links=[['info','Aide et contact','help'],['flag','Signaler un problème','report'],['book','Revoir la présentation','tour'],['shield','Confidentialité des données','privacy'],['file','Mentions légales','legal'],['download','Exporter mes données','export']];
       b.innerHTML=`<div style="text-align:center;padding:14px 0 18px"><div class="logo" style="margin:0 auto 10px">P</div><b style="font-size:20px">PolyTalk</b><div class="hint2">${esc(vtxt)}</div></div>
        <div class="mgrp" style="margin-bottom:12px"><button type="button" class="mlr inv" id="aInv"><span class="mib">${ico('share')}</span><b>Inviter un ami<small>Envoie le lien de PolyTalk</small></b>${ico('down','chv')}</button></div>
        <button class="sbtn ghost" id="aChk" style="width:100%">Vérifier les mises à jour</button><div id="am"></div>
@@ -3514,6 +3534,47 @@ function renderInv(){
     const r=await enableNotifs();
     if(r.fatal){$('niErr').textContent=r.msg;try{localStorage.setItem(INV_KEY,String(Date.now()+7*864e5))}catch(e){}}
   };
+}
+
+
+/* ---------- PRÉSENTATION AU PREMIER LANCEMENT ---------- */
+const tourKey=()=>'pm_tour_'+(S.me&&S.me.id);
+function maybeTour(){
+  if(!S.me||$('tour'))return;
+  let seen='';try{seen=localStorage.getItem(tourKey())||''}catch(e){}
+  if(seen)return;
+  const age=S.me.created_at?Date.now()-new Date(S.me.created_at).getTime():0;
+  if(S.me.created_at?age>3*864e5:S.convs.length>0){try{localStorage.setItem(tourKey(),'skip')}catch(e){}return}
+  openTour();
+}
+function openTour(){
+  if($('tour'))return;
+  const canNotif=()=>'Notification' in window&&Notification.permission==='default'&&!prefs.notif&&(pushSupported()||(isIOS()&&!isStandalone()));
+  const steps=[{k:'hi'},{k:'friend'}];
+  if(canNotif())steps.push({k:'notif'});
+  if(!isStandalone()&&(isIOS()||installEv))steps.push({k:'inst'});
+  let i=0;
+  const d=document.createElement('div');d.id='tour';document.body.appendChild(d);
+  const done=()=>{try{localStorage.setItem(tourKey(),'1')}catch(e){}d.remove();renderInv()};
+  const next=()=>{if(i>=steps.length-1){done();return}i++;draw()};
+  const draw=()=>{
+    const st=steps[i],last=i===steps.length-1;
+    let ic='chat',h='',t='',go='Suivant',alt='';
+    if(st.k==='hi'){ic='chat';h='Bienvenue sur PolyTalk';t='Une messagerie simple et privée. Tes messages sont éphémères : ils disparaissent tout seuls au bout du délai que tu choisis.'}
+    else if(st.k==='friend'){ic='users';h='Ajoute ton premier ami';t='Cherche une personne par son prénom et son nom pour lui envoyer une demande. Sur Android, tu peux aussi retrouver tes contacts du téléphone.';go='Ajouter un ami';alt='Plus tard'}
+    else if(st.k==='notif'){ic='bell';h='Ne rate aucun message';const ios=isIOS()&&!isStandalone();t=ios?'Sur iPhone, ajoute d’abord PolyTalk à l’écran d’accueil (étape suivante), puis active les alertes dans Réglages.':'Reçois une alerte à chaque nouveau message, même quand l’appli est fermée.';go=ios?'Suivant':'Activer les alertes';alt=ios?'':'Plus tard'}
+    else{ic='addsq';h='Installe PolyTalk';t=isIOS()?`<div class="tsteps"><div><span>1</span>Touche ${ico('share','sh')} <b>Partager</b> dans Safari</div><div><span>2</span>Choisis ${ico('addsq','sh')} <b>Sur l’écran d’accueil</b></div><div><span>3</span>Touche <b>Ajouter</b>, puis ouvre PolyTalk depuis l’icône</div></div>`:'Ajoute PolyTalk à ton écran d’accueil pour l’ouvrir comme une vraie appli.';go=isIOS()?'Terminer':'Installer';alt=isIOS()?'':'Plus tard'}
+    d.innerHTML=`<div class="tbg"></div><div class="tcd" role="dialog" aria-modal="true" aria-label="${esc(h)}"><button type="button" class="tskip" id="tSk">${last?'':'Passer'}</button><div class="tic">${ico(ic)}</div><h2>${esc(h)}</h2><div class="ttx">${t}</div><div class="tdots">${steps.map((_,n)=>`<i class="${n===i?'on':''}"></i>`).join('')}</div><button type="button" class="tgo" id="tGo">${esc(go)}</button>${alt?`<button type="button" class="tlt" id="tAlt">${esc(alt)}</button>`:''}</div>`;
+    $('tSk').onclick=done;
+    const al=$('tAlt');if(al)al.onclick=next;
+    $('tGo').onclick=async()=>{
+      if(st.k==='friend'){done();setTimeout(openNew,150);return}
+      if(st.k==='notif'&&!(isIOS()&&!isStandalone())){const r=await enableNotifs();if(r&&r.fatal)flash(r.msg||'Alertes impossibles pour le moment.','err');next();return}
+      if(st.k==='inst'&&installEv){try{installEv.prompt();await installEv.userChoice}catch(e){}installEv=null}
+      next();
+    };
+  };
+  draw();
 }
 
 // Web Push : abonner / désabonner cet appareil
